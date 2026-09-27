@@ -60,9 +60,9 @@ export function HeroSection({ onExploreWorld, onWatchTrailer }) {
             variant="crimson"
             size="lg"
             onClick={onWatchTrailer}
-            icon="▶"
+            icon="🔒"
           >
-            WATCH TRAILER
+            TRAILER [DISEGEL]
           </PixelButton>
 
           <PixelButton

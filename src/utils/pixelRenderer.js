@@ -61,96 +61,133 @@ function drawKnightProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing)
   const headY = py - 4 * s;
 
   // Flowing Crimson Cape
-  ctx.fillStyle = '#991b1b';
+  ctx.fillStyle = '#7f1d1d';
   ctx.beginPath();
   if (facing === 'left') {
     ctx.moveTo(px + pw - 4 * s, py + 8 * s);
-    ctx.quadraticCurveTo(px + pw + 12 * s + wave, py + ph / 2, px + pw + 8 * s + wave * 0.5, py + ph + 6 * s);
+    ctx.quadraticCurveTo(px + pw + 13 * s + wave, py + ph / 2, px + pw + 9 * s + wave * 0.5, py + ph + 6 * s);
     ctx.lineTo(px + pw - 6 * s, py + ph + 3 * s);
   } else {
     ctx.moveTo(px + 4 * s, py + 8 * s);
-    ctx.quadraticCurveTo(px - 12 * s - wave, py + ph / 2, px - 8 * s - wave * 0.5, py + ph + 6 * s);
+    ctx.quadraticCurveTo(px - 13 * s - wave, py + ph / 2, px - 9 * s - wave * 0.5, py + ph + 6 * s);
     ctx.lineTo(px + 6 * s, py + ph + 3 * s);
   }
   ctx.closePath();
   ctx.fill();
+
+  // Cape highlight & golden trim
   ctx.strokeStyle = '#f59e0b';
-  ctx.lineWidth = 1 * s;
+  ctx.lineWidth = 1.2 * s;
   ctx.stroke();
 
-  // Boots
-  ctx.fillStyle = '#1e293b';
+  // Armored Sabatons (Boots)
+  ctx.fillStyle = '#0f172a';
   ctx.fillRect(px + 3 * s, py + ph - 6 * s, 6 * s, 6 * s);
   ctx.fillRect(px + pw - 9 * s, py + ph - 6 * s, 6 * s, 6 * s);
   ctx.fillStyle = '#475569';
   ctx.fillRect(px + 4 * s, py + ph - 6 * s, 4 * s, 3 * s);
   ctx.fillRect(px + pw - 8 * s, py + ph - 6 * s, 4 * s, 3 * s);
-
-  // Steel Armor
-  ctx.fillStyle = '#334155';
-  ctx.fillRect(px + 2 * s, py + 6 * s, pw - 4 * s, ph - 11 * s);
-  ctx.fillStyle = '#64748b';
-  ctx.fillRect(px + 4 * s, py + 7 * s, pw - 8 * s, ph - 13 * s);
   ctx.fillStyle = '#94a3b8';
-  ctx.fillRect(px + 6 * s, py + 8 * s, pw - 12 * s, 4 * s);
+  ctx.fillRect(px + 4 * s, py + ph - 3 * s, 4 * s, 1.5 * s);
+  ctx.fillRect(px + pw - 8 * s, py + ph - 3 * s, 4 * s, 1.5 * s);
 
-  // Gold belt buckle
-  ctx.fillStyle = '#f59e0b';
-  ctx.fillRect(px + pw / 2 - 3 * s, py + ph - 8 * s, 6 * s, 3 * s);
-  ctx.fillStyle = '#fde68a';
-  ctx.fillRect(px + pw / 2 - 1 * s, py + ph - 7 * s, 2 * s, 1 * s);
-
-  // Left Arm & Shield (when facing right)
+  // Steel Cuirass (Breastplate)
   ctx.fillStyle = '#1e293b';
-  const sx = facing === 'left' ? px + pw - 4 * s : px - 4 * s;
-  const sy = py + 7 * s;
-  ctx.fillRect(sx, sy, 5 * s, 10 * s);
-  ctx.fillStyle = '#38bdf8';
-  ctx.fillRect(sx + 1 * s, sy + 1 * s, 3 * s, 8 * s);
-  ctx.fillStyle = '#ffd700';
-  ctx.fillRect(sx + 2 * s, sy + 4 * s, 1 * s, 2 * s);
+  ctx.fillRect(px + 2 * s, py + 6 * s, pw - 4 * s, ph - 11 * s);
+  ctx.fillStyle = '#334155';
+  ctx.fillRect(px + 4 * s, py + 7 * s, pw - 8 * s, ph - 13 * s);
+  ctx.fillStyle = '#64748b';
+  ctx.fillRect(px + 5 * s, py + 8 * s, pw - 10 * s, 5 * s);
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillRect(px + 6 * s, py + 8 * s, pw - 12 * s, 2 * s);
 
-  // Helmet Dome
+  // Golden Inlaid Chest Crest
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillRect(px + pw / 2 - 2 * s, py + 9 * s, 4 * s, 5 * s);
+  ctx.fillRect(px + pw / 2 - 4 * s, py + 10 * s, 8 * s, 2 * s);
+  ctx.fillStyle = '#fde047';
+  ctx.fillRect(px + pw / 2 - 1 * s, py + 10 * s, 2 * s, 2 * s);
+
+  // Shoulder Pauldrons
+  ctx.fillStyle = '#475569';
+  ctx.fillRect(px - 1 * s, py + 6 * s, 4 * s, 5 * s);
+  ctx.fillRect(px + pw - 3 * s, py + 6 * s, 4 * s, 5 * s);
+  ctx.fillStyle = '#f59e0b'; // Pauldron gold rims
+  ctx.fillRect(px - 1 * s, py + 5 * s, 4 * s, 1.5 * s);
+  ctx.fillRect(px + pw - 3 * s, py + 5 * s, 4 * s, 1.5 * s);
+
+  // Gold belt & buckle
+  ctx.fillStyle = '#78350f';
+  ctx.fillRect(px + 2 * s, py + ph - 9 * s, pw - 4 * s, 3 * s);
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillRect(px + pw / 2 - 3 * s, py + ph - 9 * s, 6 * s, 3 * s);
+  ctx.fillStyle = '#fde68a';
+  ctx.fillRect(px + pw / 2 - 1 * s, py + ph - 8 * s, 2 * s, 1 * s);
+
+  // Left Arm & Kite Shield
+  const sx = facing === 'left' ? px + pw - 4 * s : px - 5 * s;
+  const sy = py + 7 * s;
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(sx, sy, 6 * s, 11 * s);
+  ctx.fillStyle = '#1e293b';
+  ctx.fillRect(sx + 1 * s, sy + 1 * s, 4 * s, 9 * s);
+  ctx.fillStyle = '#38bdf8';
+  ctx.fillRect(sx + 2 * s, sy + 2 * s, 2 * s, 7 * s);
+  ctx.fillStyle = '#f59e0b'; // Shield crest
+  ctx.fillRect(sx + 1 * s, sy + 4 * s, 4 * s, 2 * s);
+
+  // Crusader Helmet Dome
   ctx.fillStyle = '#dc2626'; // Red Plume
   ctx.beginPath();
-  ctx.ellipse(px + pw / 2, headY - 3 * s, 3 * s, 5 * s, -0.2, 0, Math.PI * 2);
+  ctx.ellipse(px + pw / 2, headY - 4 * s, 3.5 * s, 6 * s, -0.2, 0, Math.PI * 2);
   ctx.fill();
 
-  ctx.fillStyle = '#475569';
+  ctx.fillStyle = '#334155';
   ctx.fillRect(px + 2 * s, headY, pw - 4 * s, 11 * s);
-  ctx.fillStyle = '#cbd5e1';
+  ctx.fillStyle = '#64748b';
   ctx.fillRect(px + 3 * s, headY, pw - 6 * s, 3 * s);
-  ctx.fillStyle = '#0f172a'; // Visor
+  ctx.fillStyle = '#cbd5e1';
+  ctx.fillRect(px + 4 * s, headY, pw - 8 * s, 1.5 * s);
+  ctx.fillStyle = '#0a0d14'; // Visor slit background
   ctx.fillRect(px + 3 * s, headY + 5 * s, pw - 6 * s, 4 * s);
 
-  // Glowing Cyan Eye Slits
+  // Glowing Cyan Eye Slits with Bloom
+  const eyeX = facing === 'left' ? px + 4 * s : px + 10 * s;
+  ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+  ctx.fillRect(eyeX - 1 * s, headY + 5 * s, 6 * s, 4 * s);
   ctx.fillStyle = '#00e5ff';
-  if (facing === 'left') {
-    ctx.fillRect(px + 4 * s, headY + 6 * s, 4 * s, 2 * s);
-  } else {
-    ctx.fillRect(px + 10 * s, headY + 6 * s, 4 * s, 2 * s);
-  }
+  ctx.fillRect(eyeX, headY + 6 * s, 4 * s, 2 * s);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(eyeX + 1 * s, headY + 6.5 * s, 2 * s, 1 * s);
 
   // Sword Blade
   ctx.save();
   const swordX = facing === 'left' ? px + 2 * s : px + pw - 2 * s;
   const swordY = py + 12 * s;
   ctx.translate(swordX, swordY);
-  const swordRot = isAttacking ? (facing === 'left' ? -1.1 : 1.1) : (facing === 'left' ? -0.4 : 0.4);
+  const swordRot = isAttacking ? (facing === 'left' ? -1.2 : 1.2) : (facing === 'left' ? -0.4 : 0.4);
   ctx.rotate(swordRot);
 
-  // Blade steel
+  // Blade steel with edge gleam
   ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(0, -2 * s, 24 * s, 4 * s);
-  ctx.fillStyle = '#38bdf8';
-  ctx.fillRect(2 * s, -1 * s, 18 * s, 2 * s);
+  ctx.fillRect(0, -2.5 * s, 25 * s, 5 * s);
+  ctx.fillStyle = '#94a3b8';
+  ctx.fillRect(1 * s, -1.5 * s, 22 * s, 3 * s);
+  ctx.fillStyle = '#00e5ff'; // Runic fuller
+  ctx.fillRect(3 * s, -1 * s, 17 * s, 2 * s);
+  ctx.fillStyle = '#ffffff'; // Pulsing rune core
+  const runePulseX = (Math.sin(time * 4) * 0.5 + 0.5) * 12 * s + 3 * s;
+  ctx.fillRect(runePulseX, -0.5 * s, 3 * s, 1 * s);
+
   // Crossguard & Pommel
-  ctx.fillStyle = '#fbbf24';
-  ctx.fillRect(-2 * s, -5 * s, 3 * s, 10 * s);
-  ctx.fillStyle = '#78350f';
+  ctx.fillStyle = '#f59e0b';
+  ctx.fillRect(-2 * s, -6 * s, 3.5 * s, 12 * s);
+  ctx.fillStyle = '#ef4444'; // Ruby center
+  ctx.fillRect(-1 * s, -1.5 * s, 2 * s, 3 * s);
+  ctx.fillStyle = '#78350f'; // Grip
   ctx.fillRect(-6 * s, -1.5 * s, 4 * s, 3 * s);
-  ctx.fillStyle = '#ef4444';
-  ctx.fillRect(-8 * s, -2 * s, 2 * s, 4 * s);
+  ctx.fillStyle = '#cbd5e1'; // Pommel
+  ctx.fillRect(-8 * s, -2.5 * s, 2.5 * s, 5 * s);
 
   ctx.restore();
 }

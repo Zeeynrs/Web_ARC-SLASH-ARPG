@@ -13,7 +13,7 @@ export function Navbar({ onOpenSettings, soundState, onTriggerSecret }) {
     { label: 'BOSSES', href: '#bosses' },
     { label: 'ARSENAL', href: '#arsenal' },
     { label: 'NEWS', href: '#news' },
-    { label: 'TRAILER', href: '#trailer' }
+    { label: 'TRAILER 🔒', href: '#trailer' }
   ];
 
   const handleLogoClick = () => {
