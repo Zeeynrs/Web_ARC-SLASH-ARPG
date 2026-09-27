@@ -1,0 +1,220 @@
+@import "tailwindcss";
+
+@theme {
+  --font-press-start: 'Press Start 2P', monospace;
+  --font-outfit: 'Outfit', sans-serif;
+  --font-vt323: 'VT323', monospace;
+
+  --color-abyss: #080a0f;
+  --color-abyss-card: #0d121c;
+  --color-stone-surface: #111622;
+  --color-stone-elevated: #182030;
+  --color-stone-panel: #141c2b;
+  --color-iron-border: #2c394b;
+  --color-iron-highlight: #3b4b66;
+  --color-gold-primary: #f59e0b;
+  --color-gold-bright: #ffd700;
+  --color-vitality: #ef4444;
+  --color-mana: #0284c7;
+  --color-mana-light: #38bdf8;
+  --color-emerald: #10b981;
+  --color-sculk: #06b6d4;
+  --color-sculk-dark: #083344;
+}
+
+/* Base resets & typography */
+html {
+  scroll-behavior: smooth;
+  color-scheme: dark;
+}
+
+body {
+  background-color: #080a0f;
+  background-image: 
+    radial-gradient(ellipse at 50% 15%, #151d2c 0%, #080a0f 70%),
+    radial-gradient(circle at 10% 40%, rgba(2, 132, 199, 0.05) 0%, transparent 40%),
+    radial-gradient(circle at 90% 75%, rgba(239, 68, 68, 0.04) 0%, transparent 40%);
+  background-attachment: fixed;
+  color: #f8fafc;
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Cursor Global Suppression - completely hides default system pointer */
+html.has-custom-cursor,
+html.has-custom-cursor *,
+body.has-custom-cursor,
+body.has-custom-cursor * {
+  cursor: none !important;
+}
+
+/* Pixel Art Rendering Enforcement */
+.pixelated {
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -webkit-crisp-edges;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+/* Custom 16-Bit Pixel Borders & Chassis */
+.pixel-box {
+  background: #111622;
+  border: 2px solid #2c394b;
+  box-shadow: 
+    inset 2px 2px 0 0 rgba(255, 255, 255, 0.07),
+    inset -2px -2px 0 0 rgba(0, 0, 0, 0.5),
+    0 4px 16px rgba(0, 0, 0, 0.6);
+  position: relative;
+}
+
+.pixel-box-gold {
+  background: #111622;
+  border: 2px solid #b45309;
+  box-shadow: 
+    inset 2px 2px 0 0 #fde68a,
+    inset -2px -2px 0 0 #78350f,
+    0 4px 20px rgba(245, 158, 11, 0.2);
+}
+
+.pixel-box-sculk {
+  background: #081420;
+  border: 2px solid #0891b2;
+  box-shadow: 
+    inset 2px 2px 0 0 #67e8f9,
+    inset -2px -2px 0 0 #083344,
+    0 0 25px rgba(6, 182, 212, 0.25);
+}
+
+/* Retro Pixel Button Frame */
+.pixel-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Press Start 2P', monospace;
+  text-transform: uppercase;
+  position: relative;
+  transition: transform 0.08s ease, filter 0.12s ease;
+  user-select: none;
+  cursor: pointer;
+  border: none;
+  box-shadow: 
+    0 -3px 0 0 #000 inset,
+    0 3px 0 0 rgba(255, 255, 255, 0.15) inset,
+    -3px 0 0 0 rgba(255, 255, 255, 0.1) inset,
+    3px 0 0 0 #000 inset,
+    0 4px 0 0 #05070a;
+}
+
+.pixel-btn:hover {
+  filter: brightness(1.15);
+  transform: translateY(-2px);
+}
+
+.pixel-btn:active {
+  transform: translateY(2px);
+  box-shadow: 
+    0 -1px 0 0 #000 inset,
+    0 1px 0 0 rgba(255, 255, 255, 0.1) inset,
+    0 2px 0 0 #05070a;
+}
+
+/* Pixel Cut Corners */
+.pixel-corners {
+  clip-path: polygon(
+    0 6px, 6px 6px, 6px 0,
+    calc(100% - 6px) 0, calc(100% - 6px) 6px, 100% 6px,
+    100% calc(100% - 6px), calc(100% - 6px) calc(100% - 6px), calc(100% - 6px) 100%,
+    6px 100%, 6px calc(100% - 6px), 0 calc(100% - 6px)
+  );
+}
+
+.pixel-corners-lg {
+  clip-path: polygon(
+    0 10px, 10px 10px, 10px 0,
+    calc(100% - 10px) 0, calc(100% - 10px) 10px, 100% 10px,
+    100% calc(100% - 10px), calc(100% - 10px) calc(100% - 10px), calc(100% - 10px) 100%,
+    10px 100%, 10px calc(100% - 10px), 0 calc(100% - 10px)
+  );
+}
+
+/* CRT Scanlines and phosphor flicker */
+.crt-overlay {
+  pointer-events: none;
+  background: linear-gradient(
+    rgba(18, 16, 16, 0) 50%, 
+    rgba(0, 0, 0, 0.25) 50%
+  );
+  background-size: 100% 4px;
+  z-index: 999;
+}
+
+/* Custom Scrollbar - Retro Dungeon Stone & Gold */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #080a0f;
+  border-left: 2px solid #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a384e;
+  border: 2px solid #111622;
+  box-shadow: inset 1px 1px 0 #475569;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #f59e0b;
+  box-shadow: inset 1px 1px 0 #fde68a;
+}
+
+/* Pulsing Dungeon Glow */
+@keyframes dungeonPulse {
+  0%, 100% { opacity: 0.6; filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.4)); }
+  50% { opacity: 1; filter: drop-shadow(0 0 14px rgba(245, 158, 11, 0.8)); }
+}
+
+@keyframes sculkPulse {
+  0%, 100% { filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.3)); }
+  50% { filter: drop-shadow(0 0 20px rgba(34, 211, 238, 0.8)); }
+}
+
+.animate-dungeon-pulse {
+  animation: dungeonPulse 2.8s infinite ease-in-out;
+}
+
+.animate-sculk-pulse {
+  animation: sculkPulse 3.2s infinite ease-in-out;
+}
+
+/* Screen shake effect */
+@keyframes screenShake {
+  0% { transform: translate(1px, 1px) rotate(0deg); }
+  20% { transform: translate(-2px, -2px) rotate(-0.5deg); }
+  40% { transform: translate(-2px, 1px) rotate(0.5deg); }
+  60% { transform: translate(2px, 1px) rotate(0deg); }
+  80% { transform: translate(1px, -1px) rotate(0.5deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+
+.screen-shake {
+  animation: screenShake 0.3s ease;
+}
+
+/* Font classes */
+.font-pixel {
+  font-family: 'Press Start 2P', monospace;
+}
+
+.font-outfit {
+  font-family: 'Outfit', sans-serif;
+}
+
+.font-vt323 {
+  font-family: 'VT323', monospace;
+}
