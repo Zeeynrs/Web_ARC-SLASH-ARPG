@@ -1,187 +1,358 @@
-// Authentic News, Patch Notes, and Announcements for ARC SLASH
+// Authentic News, Patch Notes, and Announcements synchronized with GitHub Commits
+// Repositories: Zeeynrs/ARC-SLASH-ARPG and Zeeynrs/Web_ARC-SLASH-ARPG
+
 export const NEWS_CATEGORIES = [
   'ALL',
   'UPDATES',
   'PATCH NOTES',
-  'EVENTS',
   'DEVELOPMENT',
   'ANNOUNCEMENT'
 ];
 
 export const NEWS_DATA = [
   {
-    id: 'news-v1-4-deep-dark',
-    slug: 'v1-4-deep-dark-and-warden-descent',
-    title: 'Update v1.4: Descent into the Deep Dark & The Warden Unleashed',
-    category: 'UPDATES',
-    date: 'September 24, 2026',
-    readTime: '4 min read',
-    author: 'Lead Designer',
-    featured: true,
-    thumbnail: 'warden_update',
-    excerpt: 'The deepest descent yet has been carved into the abyss. Stages 23 through 35 are now live, introducing the Deep Dark Biome, acoustic sculk hazards, and the terrifying Stage 35 Apex Boss: The Warden.',
-    tags: ['Major Update', 'Deep Dark', 'Boss: Warden', 'Stages 23-35'],
-    content: `
-### The Dungeon Expands Into the Unknown
-
-Beneath the smoldering chambers of the Lava Caverns lies a long-forgotten subterranean abyss known as the **Deep Dark Biome**. Overgrown with ancient sculk moss, echoing sensors, and petrified deepslate masonry, this new 13-stage expedition will push every hero to their absolute limits.
-
----
-
-### What's New in Version 1.4:
-
-#### 1. The Deep Dark Biome (Stages 23–35)
-- **13 New Handcrafted Chambers**: Traverse from the *Ancient City Gates* (Stage 25) through the *Hall of Soul Lanterns* (Stage 34).
-- **Acoustic Stealth & Vibration Mechanics**: Scurrying carelessly alerts nearby sculk shriekers. Move intentionally or face swarms of sculk crawlers!
-- **Darkness Vignette**: The deep abyss suppresses ambient light, narrowing your field of vision unless lit by soul lanterns.
-
-#### 2. Apex Boss: The Warden (Stage 35)
-- **19,800 Max Health**: The beefiest titan yet recorded in Arc Slash history.
-- **Acoustic Sonic Cataclysm**: A devastating, linear telegraph beam emitted directly from its glowing soul cage ribcage.
-- **Blindness & Screen Tremor**: Slams the deepslate floor with raw kinetic energy, causing authentic screen-shake and disorientation.
-
-#### 3. New Sculk & Abyssal Equipment
-- **Abyssal Titan Cleaver** (Tier V Knight Greatsword): Smashes through monster shields.
-- **Echo Resonance Catalyst** (Tier V Mage Staff): Converts mana bursts into sonic shockwaves.
-- **Abyssal Soulfang** (Tier IV Assassin Daggers): Infused with sculk venom.
-- **Warden Dreadplate** (Tier V Heavy Armor): Massive HP pool expansion.
-
-> "Listen carefully to the echoes before taking your next step. The Warden remembers every sound."
-    `
-  },
-  {
-    id: 'news-event-floor-50-speedrun',
-    slug: 'descent-to-floor-50-speedrun-challenge',
-    title: 'Community Event: The Floor 50 Deep Dark Core Speedrun',
-    category: 'EVENTS',
-    date: 'September 20, 2026',
-    readTime: '3 min read',
-    author: 'Community Master',
-    featured: false,
-    thumbnail: 'event_speedrun',
-    excerpt: 'Sharpen your blades and test your reflexes! The global community challenge to reach and defeat Stage 50 True Mirror Alter Ego is now officially underway with exclusive discord titles and bragging rights.',
-    tags: ['Event', 'Speedrun', 'Floor 50', 'Leaderboards'],
-    content: `
-### Challenge the Void: Can You Reach Stage 50?
-
-With the conclusion of the 50-stage labyrinth saga, we are inviting all veteran dungeon crawlers to participate in the **Descent to Floor 50 Speedrun Challenge**.
-
----
-
-### Event Guidelines:
-1. **Entry**: Play on any desktop or mobile browser via [https://arch-slash-arpg.netlify.app](https://arch-slash-arpg.netlify.app).
-2. **Category**: Single-run clear from Stage 1 Cave Labyrinth to Stage 50 Deep Dark Core defeat.
-3. **Roles**: Separate leaderboard divisions for **Knight**, **Mage**, and **Assassin**.
-4. **Verification**: Screenshot your final Victory Screen displaying total run time, gold collected, and defeated boss tally.
-
-### Featured Rewards:
-- **Champion Title**: Permanent mention in upcoming game patch credits.
-- **Grand Master Trophy**: In-game achievement unlock and badge display.
-- **Hall of Legends**: Featured gameplay clip on the official promotional website.
-
-Good luck, adventurers. May your parry timings remain flawless.
-    `
-  },
-  {
-    id: 'news-patch-1-3-2',
-    slug: 'patch-notes-v1-3-2-alter-ego-balance',
-    title: 'Patch Notes v1.3.2: Alter Ego Parry Timing & Mobile Polish',
+    id: 'commit-b96bcf2-balancing',
+    slug: 'patch-notes-combat-balancing-stat-scaling',
+    title: 'Patch Notes: Combat Damage Rebalancing & Stat Scaling',
     category: 'PATCH NOTES',
-    date: 'September 15, 2026',
+    date: 'September 28, 2026',
     readTime: '3 min read',
-    author: 'Combat Systems Team',
-    featured: false,
-    thumbnail: 'patch_combat',
-    excerpt: 'Detailed balance adjustments for Alter Ego parry riposte windows, improved mobile touch controls sensitivity, and audio synthesizer latency reduction across all browsers.',
-    tags: ['Patch Notes', 'Combat Balance', 'Parry', 'Mobile Fixes'],
+    author: 'Zeeynrs',
+    featured: true,
+    commitHash: 'b96bcf2',
+    commitFullSha: 'b96bcf2a307b9ad8ff052a9dc819f7432a4277eb',
+    commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/b96bcf2a307b9ad8ff052a9dc819f7432a4277eb',
+    commitMessage: 'BALANCING',
+    excerpt: 'Combat system balance adjustments targeting player base attack curves, defense mitigation formulas, and mob health pools in js/combat.js.',
+    tags: ['Balancing', 'Combat System', 'js/combat.js', 'Scaling'],
     content: `
-### Combat Tuning & Balance Adjustments
+### Combat System Rebalancing & Stat Scaling
 
-In response to player feedback regarding the Stage 22 and Stage 50 Alter Ego encounters, we have deployed critical timing and telegraph adjustments to ensure fair, reaction-based gameplay.
+Following extensive playtesting across the deeper dungeon chambers, we have deployed critical balance tuning in \`js/combat.js\` to guarantee fair and responsive combat.
 
 ---
 
-### Combat & Boss Changes:
-- **Alter Ego Parry Stance**:
-  - Increased startup telegraph window from 25 frames to 35 frames.
-  - Added high-visibility cyan text pop-up: \`PARRY STANCE! 🛡️⚡\`.
-  - Added subtle trailing particles while parrying so players can clearly identify when it is safe to resume attacking.
-  - Reduced damage reflection multiplier from 200% to 150% of incoming player damage.
-- **The Warden**:
-  - Sonic Cataclysm telegraph indicator now pulses with higher contrast on deepslate floors.
-  - Knockback distance tuned to prevent getting pinned into corner walls.
+### Key Combat Balance Changes:
+- **Player Damage Calculations**:
+  - Re-normalized attack multipliers across Knight broadsword swings, Mage arcana bursts, and Assassin rapid critical strikes.
+  - Adjusted damage scaling coefficients to ensure equipment upgrades feel rewarding and impactful through Stages 25 to 50.
+- **Armor & Defense Mitigation**:
+  - Fine-tuned defense mitigation curves so tank builds maintain meaningful survivability against apex bosses without trivializing encounters.
+- **Automated Regression Verification**:
+  - Expanded assertions in \`tests/test_game_systems.js\` to ensure zero regression in damage formulas and hitbox boundaries across all 3 character classes.
 
-### Mobile Gamepad & Responsive UX:
-- **D-Pad Diagonal Input**: Enhanced touch boundary forgiveness on smaller smartphone screens.
-- **Action Buttons**: Slightly increased tap hitboxes for Skill 1, 2, and 3 slots.
-- **Haptic & Visual Feedback**: Added instantaneous active states for virtual buttons during multi-touch maneuvers.
-
-### Performance & Web Audio:
-- Replaced audio buffer allocations with reused synthesizer nodes, eliminating micro-stutters during frantic boss encounters.
+> "A balanced blade cuts truer than raw numbers alone."
     `
   },
   {
-    id: 'news-dev-diary-audio-canvas',
-    slug: 'dev-diary-8-procedural-audio-and-canvas-2d',
-    title: 'Dev Diary #8: Zero-Asset Procedural Web Audio & Canvas 2D Engine',
-    category: 'DEVELOPMENT',
-    date: 'September 10, 2026',
-    readTime: '5 min read',
-    author: 'Engine Architect',
+    id: 'commit-a73ff19-intro-arsenal-trailer',
+    slug: 'web-update-intro-model-paginated-arsenal-sealed-trailer',
+    title: 'Web Showcase v1.1: Intro Character Overhaul, Paginated Arsenal & Sealed Retro CRT Trailer',
+    category: 'UPDATES',
+    date: 'September 27, 2026',
+    readTime: '4 min read',
+    author: 'Zeeynrs',
     featured: false,
-    thumbnail: 'dev_audio',
-    excerpt: 'How we engineered a complete 16-bit Action RPG in pure Vanilla HTML5 Canvas and Web Audio API without downloading a single external sprite texture or MP3 sound file.',
-    tags: ['Architecture', 'Canvas 2D', 'Web Audio API', 'Optimization'],
+    commitHash: 'a73ff19',
+    commitFullSha: 'a73ff194de2059bb60eeabfcf7549730521dc650',
+    commitRepo: 'Zeeynrs/Web_ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/Web_ARC-SLASH-ARPG/commit/a73ff194de2059bb60eeabfcf7549730521dc650',
+    commitMessage: 'feat: enhance intro character model, add collapsible/paginated arsenal, and seal trailer section',
+    excerpt: 'Major visual and UX upgrades to the promotional portal: procedural knight intro model, collapsible paginated arsenal encyclopedia, and sealed CRT trailer playback reel.',
+    tags: ['Intro Cutscene', 'Arsenal Encyclopedia', 'Trailer Section', 'Pixel Art'],
     content: `
-### The Philosophy of Zero-Asset Game Development
+### Major Promotional Portal Enhancement
 
-When we set out to build **ARC SLASH**, one of our primary design goals was immediate, frictionless access. No 500MB download screens, no asset loading spinners, and no dependency on fragile external asset CDNs.
+This update brings substantive visual fidelity and UX improvements to the ARC SLASH web showcase portal, elevating the user experience for competition showcase.
 
 ---
 
-### Procedural 16-Bit Sound Synthesis
-Instead of downloading hundreds of compressed audio clips, every single sound effect in ARC SLASH is synthesized at runtime using the browser's native **Web Audio API**:
-- **Sword Slashes**: Generated via rapid sawtooth oscillators ramping from 340Hz down to 75Hz within 120 milliseconds.
-- **Explosions & Fireballs**: Procedural white-noise buffers filtered through resonant low-pass biquad filters.
-- **Chimes & Coins**: Pure sine-wave intervals ramping into crystal-clear fifth harmonics.
-- **Dungeon Ambience**: Dual low-frequency sine/triangle oscillators tuned to 55Hz and 82.4Hz creating hypnotic subterranean drones.
-
-### 100% Mathematical Canvas Rendering
-Every character, mob, wall texture, and hazard indicator is drawn using standard 2D canvas drawing commands:
-\`\`\`javascript
-ctx.fillRect(x, y, w, h);
-ctx.arc(cx, cy, radius, startAngle, endAngle);
-ctx.quadraticCurveTo(cpx, cpy, x, y);
-\`\`\`
-By enforcing \`image-rendering: pixelated\` and maintaining integer pixel coordinates, the game maintains crisp 16-bit retro arcade visual fidelity on any display scale from a 4K desktop monitor to a 6-inch mobile phone.
+### Highlights of This Release:
+- **High-Fidelity Opening Cutscene**:
+  - Re-engineered the Knight character model in \`OpeningCutscene.jsx\` with pixel-perfect shading, dynamic sword glint reflection, and torch illumination.
+- **Collapsible & Paginated Arsenal Encyclopedia**:
+  - Added expandable category drawers for all 6 equipment slots (Weapons, Armor, Helmets, Shields, Boots, Capes).
+  - Added responsive pagination controls (6 items per page) to smoothly browse over 100+ items without visual clutter.
+- **Sealed Retro CRT Trailer**:
+  - Upgraded \`TrailerSection.jsx\` with an authentic 16-bit arcade TV chassis, scanline flicker effects, and real-time Canvas 2D gameplay reel playback.
+- **Renderer Performance**:
+  - Optimized pixel rendering routines in \`src/utils/pixelRenderer.js\` for smoother frame rates across low-power mobile devices.
     `
   },
   {
-    id: 'news-announcement-live-launch',
-    slug: 'arc-slash-official-netlify-release',
-    title: 'Announcement: ARC SLASH Live Production Deployment on Netlify',
+    id: 'commit-2ca4b6f-attribution-credits',
+    slug: 'announcement-copyright-disclaimers-attribution-credits',
+    title: 'Announcement: Copyright Disclaimers & Attribution Credits',
     category: 'ANNOUNCEMENT',
-    date: 'September 01, 2026',
+    date: 'September 27, 2026',
     readTime: '2 min read',
-    author: 'Studio Producer',
+    author: 'Zeeynrs',
     featured: false,
-    thumbnail: 'announcement_launch',
-    excerpt: 'ARC SLASH is officially live and publicly playable worldwide on Netlify! Step into the dungeon now directly in your modern web browser with zero installation required.',
-    tags: ['Launch', 'Production', 'Netlify', 'Play Now'],
+    commitHash: '2ca4b6f',
+    commitFullSha: '2ca4b6fa6d04adbb5fc86ffc746d4250eb77df30',
+    commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/2ca4b6fa6d04adbb5fc86ffc746d4250eb77df30',
+    commitMessage: 'docs: add copyright disclaimers and Minecraft attribution credits',
+    excerpt: 'Formal documentation and attribution notices added to the repository regarding Deep Dark biome aesthetics and Warden acoustic boss mechanics.',
+    tags: ['Documentation', 'Attribution', 'Minecraft Lore', 'Open Source'],
     content: `
-### ARC SLASH is Officially Live Worldwide!
+### Attribution Notices & Aesthetic Inspiration Credits
 
-We are thrilled to announce that **ARC SLASH** is now accessible to all players worldwide through its official production deployment:
+We have updated repository documentation to formally recognize the creative inspirations behind selected dungeon biomes and boss mechanics.
 
-👉 **Play Now**: [https://arch-slash-arpg.netlify.app](https://arch-slash-arpg.netlify.app)
+---
 
-### Highlights of the Release:
-- **Zero Install**: Instant launch on Chrome, Firefox, Safari, and Edge.
-- **Cross-Platform**: Seamless desktop keyboard/mouse controls and adaptive smartphone virtual gamepads.
-- **50 Stages & 3 Distinct Classes**: Play as the steadfast Knight, the mystical Mage, or the agile Assassin.
-- **Save Persistence**: Your unlocked achievements, gold, and settings persist safely in your browser’s \`localStorage\`.
+### Disclaimers & Attribution:
+- **Aesthetic Inspirations**:
+  - The Deep Dark biome (Stages 23–35) and The Warden apex boss encounter are artistic homages inspired by the Deep Dark and Warden designs from Minecraft (Mojang Studios / Microsoft Corporation).
+- **Independent Implementation**:
+  - All sprites, combat scripts, procedural Canvas 2D algorithms, and Web Audio synthesis routines in ARC SLASH are 100% custom-written and original code.
+- **Open Source Licensing**:
+  - ARC SLASH is distributed under the GNU General Public License v3.0 (GPL-3.0) for educational and non-commercial game development purposes.
+    `
+  },
+  {
+    id: 'commit-fe226e2-deploy-workflow',
+    slug: 'devops-automated-github-pages-actions-deploy-workflow',
+    title: 'DevOps: Automated CI/CD GitHub Pages Deployment via GitHub Actions',
+    category: 'DEVELOPMENT',
+    date: 'September 27, 2026',
+    readTime: '3 min read',
+    author: 'Zeeynrs',
+    featured: false,
+    commitHash: 'fe226e2',
+    commitFullSha: 'fe226e24cf813def2b082c5bb39f7944a9b2a8a6',
+    commitRepo: 'Zeeynrs/Web_ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/Web_ARC-SLASH-ARPG/commit/fe226e24cf813def2b082c5bb39f7944a9b2a8a6',
+    commitMessage: 'Enhance deploy workflow to push to gh-pages branch',
+    excerpt: 'Configured automated GitHub Actions workflow to build and push production Vite bundles directly to the gh-pages branch with .nojekyll support.',
+    tags: ['CI/CD', 'GitHub Actions', 'GitHub Pages', 'DevOps'],
+    content: `
+### Continuous Integration & Automated GitHub Pages Deployment
 
-Thank you to everyone who joined our closed alpha tests. The dungeon awaits your blade!
+We configured and enhanced automated deployment for the ARC SLASH web showcase using GitHub Actions to enable automated continuous delivery.
+
+---
+
+### Workflow Architecture:
+- **Automated Workflow (\`.github/workflows/deploy.yml\`)**:
+  - Triggers on every push to the \`main\` branch.
+  - Installs Node.js dependencies, runs Vite production build (\`npm run build\`), and pushes the \`dist/\` directory to the \`gh-pages\` branch via \`JamesIves/github-pages-deploy-action\`.
+- **Public \`.nojekyll\` Integration**:
+  - Added \`.nojekyll\` to the \`public/\` directory ensuring GitHub Pages' default Jekyll engine does not suppress Vite assets in directories starting with underscores.
+- **Base Path Routing**:
+  - Updated \`vite.config.js\` to ensure all asset URLs correctly resolve on GitHub Pages sub-paths.
+    `
+  },
+  {
+    id: 'commit-494d9ad-regen-dragon-boss',
+    slug: 'boss-update-ancient-dragon-full-hp-regen-enrage',
+    title: 'Boss Encounter: Ancient Dragon Full HP Regeneration & Enraged Phase 2',
+    category: 'UPDATES',
+    date: 'September 26, 2026',
+    readTime: '3 min read',
+    author: 'Zeeynrs',
+    featured: false,
+    commitHash: '494d9ad',
+    commitFullSha: '494d9ad22fcf8db4f4b83e477f93da6440f4a913',
+    commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/494d9ad22fcf8db4f4b83e477f93da6440f4a913',
+    commitMessage: 'REGEN FULL HP DRAGON BOSS',
+    excerpt: 'Stage 21-22 Apex Encounter overhaul: The Ancient Dragon now channels primal flames upon reaching 0 HP, regenerating to full health with intensified attacks.',
+    tags: ['Boss: Ancient Dragon', 'Phase 2', 'HP Regen', 'Enrage Mode'],
+    content: `
+### Boss Mechanics: The Ancient Dragon Awakens Phase 2
+
+The Stage 21-22 boss encounter in the Lava Caverns has been reworked to provide a thrilling mid-game challenge with an authentic two-phase encounter.
+
+---
+
+### Boss Mechanics Breakdown:
+- **Primal Flame Rebirth**:
+  - When the Ancient Dragon's health bar is initially depleted, it triggers an invulnerable roar animation and regenerates back to 100% maximum HP.
+- **Enrage Attack Patterns**:
+  - Increased projectile velocity for infernal fireballs.
+  - Flame breath cooldown decreased by 25%.
+  - Visual aura shifts into a glowing crimson rage tint.
+- **Technical Implementation**:
+  - Implemented state tracking in \`js/combat.js\` and \`js/main.js\`.
+  - Added full test coverage in \`tests/test_new_features.js\`.
+    `
+  },
+  {
+    id: 'commit-137fb19-rekeybind-settings',
+    slug: 'update-custom-desktop-keybinds-audio-settings-polish',
+    title: 'Update: Custom Desktop Keybinds System & Audio Synth Optimization',
+    category: 'UPDATES',
+    date: 'September 26, 2026',
+    readTime: '4 min read',
+    author: 'Zeeynrs',
+    featured: false,
+    commitHash: '137fb19',
+    commitFullSha: '137fb19136269d4784e08776e0a92d8353bd188a',
+    commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/137fb19136269d4784e08776e0a92d8353bd188a',
+    commitMessage: 'FIX REKEYBIND AND SETTINGS',
+    excerpt: 'Full desktop control remapping for movement, attacks, dodging, and skills. Optimized Web Audio synthesizer node pooling for zero-latency audio.',
+    tags: ['Keybindings', 'Settings', 'Web Audio API', 'Input System'],
+    content: `
+### Desktop Control Rebinding & Audio Pipeline Overhaul
+
+Players can now fully customize keyboard controls to match their personal playstyles, paired with substantial audio performance optimizations.
+
+---
+
+### What's New:
+- **Custom Desktop Keybinding System**:
+  - Rebindable actions for Move Up/Down/Left/Right, Attack, Dodge/Dash, Skill 1, 2, 3, Shop, Pause, Restart, and Interact.
+  - Dual-key support (e.g. WASD and Arrow Keys simultaneously supported).
+  - Saved preferences automatically persist in browser \`localStorage\`.
+- **Dynamic HUD Feedback**:
+  - Keybind labels on the in-game HUD dynamically reflect user custom key mappings.
+- **Audio Synthesizer Node Pooling**:
+  - Overhauled oscillator and gain node lifecycle in \`js/audio.js\` to eliminate audio thread garbage collection pauses.
+    `
+  },
+  {
+    id: 'commit-a44e2bd-engine-tickrate-iframes',
+    slug: 'engine-architecture-60fps-tickrate-iframes-dash-mob-ai',
+    title: 'Engine Architecture: 60 FPS Fixed Tickrate, i-Frames Dash & Mob AI',
+    category: 'DEVELOPMENT',
+    date: 'September 26, 2026',
+    readTime: '5 min read',
+    author: 'Zeeynrs',
+    featured: false,
+    commitHash: 'a44e2bd',
+    commitFullSha: 'a44e2bd266a654ba3ea18c27ee350eb281657938',
+    commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/a44e2bd266a654ba3ea18c27ee350eb281657938',
+    commitMessage: 'UPDATE MAP TICKRATE IFRAMES ART AND AI',
+    excerpt: 'Major engine upgrade introducing invulnerability frames during player dashes, 60 FPS fixed tickrate physics, safe chamber spawning, and slime puddle hazards.',
+    tags: ['Engine', 'i-Frames', '60 FPS Tickrate', 'Mob AI', 'Safe Spawn'],
+    content: `
+### Fundamental Engine Architecture Upgrade
+
+A massive low-level engine overhaul addressing game loop timing, player mobility, and dungeon generation fairness.
+
+---
+
+### Core Architectural Features:
+- **60 FPS Fixed Engine Tickrate**:
+  - Physics and collision calculations now run on a deterministic fixed delta-time step, guaranteeing identical game feel across 60Hz, 120Hz, and 144Hz displays.
+- **Invulnerability Frames (i-Frames) Dash**:
+  - Introduced \`player.iFrames\` and \`startPlayerDodge()\`. Dashing through enemy attacks and telegraph zones now grants brief invulnerability.
+- **Safe Spawn Corridor**:
+  - Chamber generation algorithm now enforces a safe radius around entrance doors, preventing unfair instant mob damage on room transitions.
+- **Environmental Hazards**:
+  - Added procedural slime puddles in \`js/mobs.js\` that apply temporary movement deceleration.
+- **AI Tracking & Species Sizing**:
+  - Optimized monster pathfinding around walls and calibrated physical sprite bounding boxes for Dragon (52px), Zombie (24px), and Skeleton (22px).
+    `
+  },
+  {
+    id: 'commit-81bd787-mobile-ui-overhaul',
+    slug: 'patch-notes-mobile-ui-redesign-touch-controls-ergo',
+    title: 'Patch Notes: Mobile UI Redesign & Touch Controls Overhaul',
+    category: 'PATCH NOTES',
+    date: 'September 26, 2026',
+    readTime: '3 min read',
+    author: 'Zeeynrs',
+    featured: false,
+    commitHash: '81bd787',
+    commitFullSha: '81bd787d1680dd19cf77134e4043415c62dd355f',
+    commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/81bd787d1680dd19cf77134e4043415c62dd355f',
+    commitMessage: 'feat(ui): convert mobile utility bar to vertical column with pixel art icons',
+    excerpt: 'Redesigned mobile UI layout with a vertical utility sidebar, enlarged touch hitboxes, removed blue tap highlights, and resolved achievement pagination bugs.',
+    tags: ['Mobile UI', 'Touch Controls', 'Utility Bar', 'Bug Fixes'],
+    content: `
+### Mobile UX Refinements & Touch Ergonomics
+
+Following mobile device testing, we restructured the mobile gamepad overlay for enhanced precision and thumb ergonomics.
+
+---
+
+### Changes & Bug Fixes:
+- **Vertical Utility Bar**:
+  - Replaced crowded horizontal top bars with an ergonomic vertical sidebar containing pixel-art action icons.
+- **Enlarged Touch Hitboxes**:
+  - Virtual joystick and ability action buttons enlarged by 20% to prevent dropped inputs during rapid boss battles.
+- **Bug Fixes**:
+  - Fixed pause menu achievement hitbox overlaps.
+  - Resolved mobile double-tap bug where pagination buttons skipped directly from Page 1 to Page 3.
+  - Removed WebKit tap highlight blue rectangular glow (\`-webkit-tap-highlight-color: transparent\`).
+    `
+  },
+  {
+    id: 'commit-0e1cd38-early-balancing',
+    slug: 'patch-notes-early-combat-mob-scaling-balancing',
+    title: 'Patch Notes: Early Combat & Mob Scaling Tuning',
+    category: 'PATCH NOTES',
+    date: 'September 24, 2026',
+    readTime: '3 min read',
+    author: 'Zeeynrs',
+    featured: false,
+    commitHash: '0e1cd38',
+    commitFullSha: '0e1cd385e1e20c1079ab11c1a014070c1b3cfc5d',
+    commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/0e1cd385e1e20c1079ab11c1a014070c1b3cfc5d',
+    commitMessage: 'BALANCING',
+    excerpt: 'Balance tuning targeting Stages 1 through 20: mob HP adjustments, slime damage scaling, and gold drop rates in the early dungeon floors.',
+    tags: ['Balancing', 'Mob Stats', 'Early Game', 'Shop Economy'],
+    content: `
+### Early Dungeon Balance Tuning
+
+To ensure a smooth difficulty progression curve for new adventurers, we re-tuned base stats and reward economics across Stages 1–20.
+
+---
+
+### Adjustments:
+- **Stages 1–10 (Slime Dungeon)**:
+  - Reduced toxic slime projectile velocity.
+  - Adjusted Slime King leap stun recovery duration.
+- **Stages 11–20 (Ancient Crypt)**:
+  - Skeleton archer arrow hitbox narrowed by 15% to allow cleaner dodge rolls.
+  - Zombie swarm health scaled down to reward crowd-control spell usage.
+- **Gold & Economy**:
+  - Increased early stage gold drops to allow purchasing basic equipment prior to the first boss fight.
+    `
+  },
+  {
+    id: 'commit-1e80264-initial-launch',
+    slug: 'announcement-arc-slash-official-release-web-portal',
+    title: 'Announcement: ARC SLASH Retro 16-Bit Web ARPG Official Launch',
+    category: 'ANNOUNCEMENT',
+    date: 'September 23, 2026',
+    readTime: '3 min read',
+    author: 'Zeeynrs',
+    featured: false,
+    commitHash: '1e80264',
+    commitFullSha: '1e802648d18849ecb41b7977c0cb9517007ada88',
+    commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
+    commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/1e802648d18849ecb41b7977c0cb9517007ada88',
+    commitMessage: 'Release ?',
+    excerpt: 'Official release of ARC SLASH! A zero-asset 16-bit retro dark fantasy ARPG built in vanilla HTML5 Canvas 2D and Web Audio API with 50 floors and 3 classes.',
+    tags: ['Launch', '50 Stages', '3 Classes', 'Zero Asset Engine'],
+    content: `
+### Welcome to ARC SLASH
+
+We are excited to announce the official release of **ARC SLASH**, a retro 16-bit dark fantasy Action RPG engineered entirely in modern web technologies.
+
+---
+
+### Core Pillars:
+- **Zero External Assets**:
+  - Every sprite, tile, weapon, and particle effect is drawn procedurally using mathematical Canvas 2D routines.
+  - Every sound effect, ambient subterranean drone, and combat slash is synthesized in real time via the native browser Web Audio API.
+- **50 Handcrafted Labyrinth Floors**:
+  - Traverse 5 distinct biomes: Slime Dungeon, Ancient Crypt, Lava Cavern, Deep Dark Biome, and Deep Dark Core.
+- **3 Playable Character Classes**:
+  - Knight (Stalwart Guardian - Melee/Tank)
+  - Mage (Master of Arcana - Ranged Burst)
+  - Assassin (Lethal Phantom - Critical DPS)
+- **Instant Browser Play**:
+  - No client download, no plugins, and cross-platform desktop and mobile support.
     `
   }
 ];

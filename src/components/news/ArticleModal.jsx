@@ -22,16 +22,41 @@ export function ArticleModal({ article, onClose }) {
               <PixelBadge variant="gold" size="xs">
                 {article.category}
               </PixelBadge>
+
+              {article.commitHash && (
+                <a
+                  href={article.commitUrl || `https://github.com/${article.commitRepo || 'Zeeynrs/ARC-SLASH-ARPG'}/commit/${article.commitHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-2 py-0.5 bg-[#111827] border border-[#38bdf8]/40 hover:border-[#38bdf8] font-pixel text-[8px] text-[#38bdf8] transition-colors flex items-center gap-1.5"
+                  title="View commit on GitHub"
+                >
+                  <svg className="w-2.5 h-2.5 inline-block opacity-80" viewBox="0 0 16 16" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.5 7.75a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm1.43.75a4.002 4.002 0 01-7.86 0H.75a.75.75 0 110-1.5h3.32a4.002 4.002 0 017.86 0h3.32a.75.75 0 110 1.5h-3.32z" />
+                  </svg>
+                  {article.commitHash} ({article.commitRepo}) ↗
+                </a>
+              )}
+
               <span className="font-pixel text-[8.5px] text-[#94a3b8]">
                 {article.date} • {article.readTime}
               </span>
             </div>
+
             <h2 className="font-pixel text-base sm:text-lg text-[#f8fafc] tracking-widest leading-snug">
               {article.title}
             </h2>
-            <span className="font-outfit text-xs text-[#38bdf8]">
-              By {article.author}
-            </span>
+
+            <div className="flex flex-wrap items-center gap-3 mt-1.5 font-outfit text-xs text-[#94a3b8]">
+              <span>
+                Committed by <strong className="text-[#38bdf8]">@{article.author}</strong>
+              </span>
+              {article.commitMessage && (
+                <span className="text-[#64748b] flex items-center gap-1">
+                  Message: <code className="text-[#cbd5e1] font-mono text-[11px] bg-[#1e293b] px-1.5 py-0.5 border border-[#334155]">{article.commitMessage}</code>
+                </span>
+              )}
+            </div>
           </div>
 
           <button
@@ -70,17 +95,32 @@ export function ArticleModal({ article, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="pt-4 border-t border-[#2c394b] flex items-center justify-between">
-          <PixelButton
-            variant="primary"
-            size="sm"
-            href="https://arch-slash-arpg.netlify.app"
-            target="_blank"
-            rel="noopener noreferrer"
-            icon="⚔️"
-          >
-            PLAY THIS UPDATE
-          </PixelButton>
+        <div className="pt-4 border-t border-[#2c394b] flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2 flex-wrap">
+            {article.commitUrl && (
+              <PixelButton
+                variant="mana"
+                size="sm"
+                href={article.commitUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                icon="↗"
+              >
+                VIEW COMMIT
+              </PixelButton>
+            )}
+
+            <PixelButton
+              variant="primary"
+              size="sm"
+              href="https://arch-slash-arpg.netlify.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              icon="⚔️"
+            >
+              PLAY THIS UPDATE
+            </PixelButton>
+          </div>
 
           <PixelButton variant="dark" size="sm" onClick={onClose}>
             CLOSE ARCHIVE

@@ -99,4 +99,3 @@ npm run preview
 ```
 
 Open `http://localhost:3000` (or the port specified by Vite) in your web browser.
->>>>>>> def4641 (Initial commit: Arc Slash ARPG website)

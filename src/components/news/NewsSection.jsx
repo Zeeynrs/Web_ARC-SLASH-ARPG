@@ -15,11 +15,15 @@ export function NewsSection() {
     return NEWS_DATA.filter((item) => {
       const matchCat =
         activeCategory === 'ALL' || item.category.toUpperCase() === activeCategory.toUpperCase();
+      const q = searchQuery.toLowerCase();
       const matchSearch =
         searchQuery === '' ||
-        item.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.excerpt.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.tags.some((t) => t.toLowerCase().includes(searchQuery.toLowerCase()));
+        item.title.toLowerCase().includes(q) ||
+        item.excerpt.toLowerCase().includes(q) ||
+        (item.commitHash && item.commitHash.toLowerCase().includes(q)) ||
+        (item.commitMessage && item.commitMessage.toLowerCase().includes(q)) ||
+        (item.commitRepo && item.commitRepo.toLowerCase().includes(q)) ||
+        item.tags.some((t) => t.toLowerCase().includes(q));
       return matchCat && matchSearch;
     });
   }, [activeCategory, searchQuery]);
@@ -34,8 +38,11 @@ export function NewsSection() {
       {/* Header */}
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-12">
         <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-[#111622] border border-[#f59e0b]/40">
-          <span className="font-pixel text-[9px] text-[#fde047] tracking-widest uppercase">
-            CHRONICLES & DISPATCHES
+          <span className="font-pixel text-[9px] text-[#fde047] tracking-widest uppercase flex items-center gap-1.5">
+            <svg className="w-3 h-3 inline-block text-[#38bdf8]" viewBox="0 0 16 16" fill="currentColor">
+              <path fillRule="evenodd" d="M10.5 7.75a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm1.43.75a4.002 4.002 0 01-7.86 0H.75a.75.75 0 110-1.5h3.32a4.002 4.002 0 017.86 0h3.32a.75.75 0 110 1.5h-3.32z" />
+            </svg>
+            CHRONICLES & DISPATCHES • GITHUB COMMITS
           </span>
         </div>
 
@@ -43,15 +50,15 @@ export function NewsSection() {
           NEWS & PATCH NOTES
         </h2>
 
-        <p className="font-outfit text-sm sm:text-base text-[#94a3b8] max-w-xl">
-          Stay updated on the ongoing expansion of the dungeon. Review patch balance adjustments, community speedrun leaderboards, and developer logs.
+        <p className="font-outfit text-sm sm:text-base text-[#94a3b8] max-w-2xl leading-relaxed">
+          Official development dispatches, combat patch notes, and engine architectural updates synchronized directly with GitHub repository commits (<code className="text-[#38bdf8] font-mono text-xs">Zeeynrs/ARC-SLASH-ARPG</code> & <code className="text-[#38bdf8] font-mono text-xs">Web_ARC-SLASH-ARPG</code>).
         </p>
       </div>
 
       {/* Filter Tabs & Search Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 mb-8">
         {/* Category Filters */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-thin">
           {NEWS_CATEGORIES.map((cat) => (
             <button
               key={cat}
@@ -76,10 +83,10 @@ export function NewsSection() {
         <div className="relative">
           <input
             type="text"
-            placeholder="SEARCH ARCHIVES..."
+            placeholder="SEARCH (MSG, SHA, TAG)..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full sm:w-64 px-3 py-1.5 bg-[#0d121c] border border-[#2c394b] font-pixel text-[9px] text-[#f8fafc] placeholder-[#64748b] focus:border-[#f59e0b] focus:outline-none"
+            className="w-full sm:w-72 px-3 py-1.5 bg-[#0d121c] border border-[#2c394b] font-pixel text-[9px] text-[#f8fafc] placeholder-[#64748b] focus:border-[#f59e0b] focus:outline-none"
           />
         </div>
       </div>
@@ -95,15 +102,27 @@ export function NewsSection() {
             onClick={() => handleOpenArticle(article)}
           >
             <div>
-              {/* Category & Date */}
+              {/* Category, Commit Hash & Date */}
               <div className="flex items-center justify-between gap-2 mb-3">
-                <PixelBadge
-                  variant={article.featured ? 'gold' : 'mana'}
-                  size="xs"
-                >
-                  {article.category}
-                </PixelBadge>
-                <span className="font-pixel text-[8px] text-[#94a3b8]">
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  <PixelBadge
+                    variant={article.featured ? 'gold' : 'mana'}
+                    size="xs"
+                  >
+                    {article.category}
+                  </PixelBadge>
+
+                  {article.commitHash && (
+                    <span className="px-1.5 py-0.5 bg-[#0b101b] border border-[#3b4b66]/60 font-pixel text-[7.5px] text-[#38bdf8] flex items-center gap-1">
+                      <svg className="w-2 h-2 inline-block opacity-75" viewBox="0 0 16 16" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.5 7.75a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0zm1.43.75a4.002 4.002 0 01-7.86 0H.75a.75.75 0 110-1.5h3.32a4.002 4.002 0 017.86 0h3.32a.75.75 0 110 1.5h-3.32z" />
+                      </svg>
+                      {article.commitHash}
+                    </span>
+                  )}
+                </div>
+
+                <span className="font-pixel text-[8px] text-[#94a3b8] whitespace-nowrap">
                   {article.date}
                 </span>
               </div>
@@ -119,7 +138,7 @@ export function NewsSection() {
               </p>
             </div>
 
-            {/* Read More Link */}
+            {/* Read More Link & Commit Meta */}
             <div className="pt-3 border-t border-[#1e293b] flex items-center justify-between font-pixel text-[8.5px]">
               <span className="text-[#38bdf8]">{article.readTime}</span>
               <span className="text-[#f59e0b] group-hover:translate-x-1 transition-transform">
@@ -129,6 +148,14 @@ export function NewsSection() {
           </PixelCard>
         ))}
       </div>
+
+      {/* Empty State */}
+      {filteredNews.length === 0 && (
+        <div className="p-12 text-center border-2 border-dashed border-[#2c394b] bg-[#0c101a] my-6">
+          <p className="font-pixel text-xs text-[#94a3b8] mb-2">NO DISPATCHES FOUND</p>
+          <p className="font-outfit text-xs text-[#64748b]">Try clearing your search query or switching category filters.</p>
+        </div>
+      )}
 
       {/* Article Modal */}
       {selectedArticle && (
