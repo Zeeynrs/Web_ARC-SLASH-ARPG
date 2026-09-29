@@ -426,3 +426,177 @@ export function stopAmbientDungeon() {
     isAmbientPlaying = false;
   }
 }
+
+// 13. Cinematic Torch ignite whoosh
+export function playTorchIgnite() {
+  if (!sfxEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const master = getMasterNode(ctx);
+
+  // Noise swoosh
+  const bufferSize = ctx.sampleRate * 0.4;
+  const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  for (let i = 0; i < bufferSize; i++) data[i] = Math.random() * 2 - 1;
+
+  const noise = ctx.createBufferSource();
+  noise.buffer = buffer;
+
+  const filter = ctx.createBiquadFilter();
+  filter.type = 'bandpass';
+  filter.frequency.setValueAtTime(180, now);
+  filter.frequency.exponentialRampToValueAtTime(800, now + 0.12);
+  filter.frequency.exponentialRampToValueAtTime(220, now + 0.38);
+
+  const gain = ctx.createGain();
+  gain.gain.setValueAtTime(0.01, now);
+  gain.gain.linearRampToValueAtTime(0.35, now + 0.1);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+
+  noise.connect(filter);
+  filter.connect(gain);
+  gain.connect(master);
+  noise.start(now);
+}
+
+// 14. Metallic Sword Draw / Unsheathe ring
+export function playSwordDraw() {
+  if (!sfxEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const master = getMasterNode(ctx);
+
+  // High metallic ringing resonance
+  const freqs = [1420, 2180, 2840];
+  freqs.forEach((f, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(f, now);
+    osc.frequency.exponentialRampToValueAtTime(f * 1.08, now + 0.05);
+
+    gain.gain.setValueAtTime(0.18 / (idx + 1), now);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.45);
+
+    osc.connect(gain);
+    gain.connect(master);
+    osc.start(now);
+    osc.stop(now + 0.45);
+  });
+}
+
+// 15. Cinematic Title Brass Braam / Dramatic Sting
+export function playDramaticSting() {
+  if (!sfxEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const master = getMasterNode(ctx);
+
+  // Sub bass saw braam
+  const osc1 = ctx.createOscillator();
+  const osc2 = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+
+  osc1.type = 'sawtooth';
+  osc2.type = 'sawtooth';
+  osc1.frequency.setValueAtTime(65.41, now); // C2
+  osc2.frequency.setValueAtTime(65.41 * 1.5, now); // G2 fifth
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(140, now);
+  filter.frequency.exponentialRampToValueAtTime(650, now + 0.15);
+  filter.frequency.exponentialRampToValueAtTime(90, now + 1.2);
+
+  gain.gain.setValueAtTime(0.01, now);
+  gain.gain.linearRampToValueAtTime(0.42, now + 0.08);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 1.2);
+
+  osc1.connect(filter);
+  osc2.connect(filter);
+  filter.connect(gain);
+  gain.connect(master);
+
+  osc1.start(now);
+  osc2.start(now);
+  osc1.stop(now + 1.2);
+  osc2.stop(now + 1.2);
+}
+
+// 16. Eerie Abyss Warden Growl
+export function playMonsterGrowl() {
+  if (!sfxEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const master = getMasterNode(ctx);
+
+  const osc = ctx.createOscillator();
+  const filter = ctx.createBiquadFilter();
+  const gain = ctx.createGain();
+
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(80, now);
+  osc.frequency.exponentialRampToValueAtTime(32, now + 0.6);
+
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(350, now);
+  filter.frequency.exponentialRampToValueAtTime(110, now + 0.6);
+
+  gain.gain.setValueAtTime(0.05, now);
+  gain.gain.linearRampToValueAtTime(0.38, now + 0.12);
+  gain.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+
+  osc.connect(filter);
+  filter.connect(gain);
+  gain.connect(master);
+
+  osc.start(now);
+  osc.stop(now + 0.6);
+}
+
+// 17. Dynamic Combo Hit with ascending pitch
+export function playComboHit(combo = 1) {
+  if (!sfxEnabled) return;
+  const ctx = getAudioContext();
+  if (!ctx) return;
+  const now = ctx.currentTime;
+  const master = getMasterNode(ctx);
+
+  const pitchMultiplier = 1 + Math.min(combo, 12) * 0.06;
+
+  // Slash saw
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.type = 'sawtooth';
+  osc.frequency.setValueAtTime(360 * pitchMultiplier, now);
+  osc.frequency.exponentialRampToValueAtTime(85, now + 0.1);
+
+  gain.gain.setValueAtTime(0.28, now);
+  gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+
+  osc.connect(gain);
+  gain.connect(master);
+  osc.start(now);
+  osc.stop(now + 0.1);
+
+  // Impact thump
+  const thump = ctx.createOscillator();
+  const thumpGain = ctx.createGain();
+  thump.type = 'triangle';
+  thump.frequency.setValueAtTime(160 * pitchMultiplier, now);
+  thump.frequency.exponentialRampToValueAtTime(40, now + 0.08);
+
+  thumpGain.gain.setValueAtTime(0.32, now);
+  thumpGain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+
+  thump.connect(thumpGain);
+  thumpGain.connect(master);
+  thump.start(now);
+  thump.stop(now + 0.08);
+}
+

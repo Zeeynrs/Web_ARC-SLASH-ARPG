@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { PixelButton } from '../ui/PixelButton';
 import { playUiClick, playUiHover, playCoin } from '../../utils/audioSynth';
 
-export function Navbar({ onOpenSettings, soundState, onTriggerSecret }) {
+export function Navbar({ onOpenSettings, soundState, onTriggerSecret, onReplayIntro }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
 
@@ -86,8 +86,25 @@ export function Navbar({ onOpenSettings, soundState, onTriggerSecret }) {
           ))}
         </nav>
 
-        {/* Right Action Utilities (Audio, Settings, Play Now) */}
-        <div className="hidden sm:flex items-center gap-3">
+        {/* Right Action Utilities (Audio, Settings, Prologue, Play Now) */}
+        <div className="hidden sm:flex items-center gap-2.5">
+          {/* Replay Cinematic Prologue Button */}
+          {onReplayIntro && (
+            <button
+              type="button"
+              onClick={() => {
+                playUiClick();
+                onReplayIntro();
+              }}
+              onMouseEnter={playUiHover}
+              className="px-2.5 h-9 hidden md:flex items-center gap-1.5 bg-[#182030] border border-[#f59e0b]/50 text-[#fde047] font-pixel text-[8.5px] hover:bg-[#b45309] hover:text-white transition-all cursor-pointer shadow-[0_0_8px_rgba(245,158,11,0.2)]"
+              title="Watch Cinematic Intro"
+            >
+              <span>🎬</span>
+              <span className="hidden xl:inline">PROLOGUE</span>
+            </button>
+          )}
+
           {/* Quick Sound Toggle */}
           <button
             type="button"
@@ -194,6 +211,19 @@ export function Navbar({ onOpenSettings, soundState, onTriggerSecret }) {
               ⚙️ SETTINGS
             </button>
           </div>
+
+          {onReplayIntro && (
+            <button
+              type="button"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                onReplayIntro();
+              }}
+              className="w-full py-2 bg-[#182030] border border-[#f59e0b]/60 text-xs font-pixel text-[#fde047] flex items-center justify-center gap-2"
+            >
+              <span>🎬 WATCH PROLOGUE CUTSCENE</span>
+            </button>
+          )}
 
           <PixelButton
             variant="primary"

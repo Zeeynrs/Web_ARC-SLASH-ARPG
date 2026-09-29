@@ -82,6 +82,7 @@ export function App() {
             onOpenSettings={() => setSettingsOpen(true)}
             soundState={sound}
             onTriggerSecret={(type) => setSecretTrigger(type)}
+            onReplayIntro={handleReplayIntro}
           />
 
           {/* Vertical Depth Meter */}
