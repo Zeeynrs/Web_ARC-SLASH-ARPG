@@ -60,12 +60,12 @@ export function Footer({ onTriggerSecret }) {
               <PixelButton
                 variant="primary"
                 size="md"
-                href="https://arch-slash-arpg.netlify.app"
+                href="https://game.parallel-dungeons.site"
                 target="_blank"
                 rel="noopener noreferrer"
                 icon="⚔️"
               >
-                PLAY NOW ON NETLIFY
+                PLAY NOW
               </PixelButton>
             </div>
           </div>
@@ -132,7 +132,7 @@ export function Footer({ onTriggerSecret }) {
           </div>
           <div className="flex items-center gap-4 font-pixel text-[8px]">
             <a
-              href="https://arch-slash-arpg.netlify.app"
+              href="https://game.parallel-dungeons.site"
               target="_blank"
               rel="noopener noreferrer"
               className="text-[#94a3b8] hover:text-[#f59e0b]"

@@ -116,7 +116,7 @@ export function DungeonModal({ dungeon, onClose }) {
           <PixelButton
             variant="primary"
             size="sm"
-            href="https://arch-slash-arpg.netlify.app"
+            href="https://game.parallel-dungeons.site"
             target="_blank"
             rel="noopener noreferrer"
             icon="⚔️"

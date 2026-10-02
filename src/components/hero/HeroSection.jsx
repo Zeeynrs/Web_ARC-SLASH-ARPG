@@ -47,7 +47,7 @@ export function HeroSection({ onExploreWorld, onWatchTrailer }) {
           <PixelButton
             variant="primary"
             size="lg"
-            href="https://arch-slash-arpg.netlify.app"
+            href="https://game.parallel-dungeons.site"
             target="_blank"
             rel="noopener noreferrer"
             icon="⚔️"

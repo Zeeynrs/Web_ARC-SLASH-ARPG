@@ -5,7 +5,7 @@
 > Created for the Web Development Competition with the theme:  
 > **"Immersive Gaming Experience Through Web Technology"**
 
-🎮 **Live Game URL**: [https://arch-slash-arpg.netlify.app](https://arch-slash-arpg.netlify.app)
+🎮 **Live Game URL**: [https://game.parallel-dungeons.site](https://game.parallel-dungeons.site)
 
 ---
 

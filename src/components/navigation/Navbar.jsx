@@ -138,7 +138,7 @@ export function Navbar({ onOpenSettings, soundState, onTriggerSecret, onReplayIn
           <PixelButton
             variant="primary"
             size="sm"
-            href="https://arch-slash-arpg.netlify.app"
+            href="https://game.parallel-dungeons.site"
             target="_blank"
             rel="noopener noreferrer"
             icon="⚔️"
@@ -152,7 +152,7 @@ export function Navbar({ onOpenSettings, soundState, onTriggerSecret, onReplayIn
           <PixelButton
             variant="primary"
             size="sm"
-            href="https://arch-slash-arpg.netlify.app"
+            href="https://game.parallel-dungeons.site"
             target="_blank"
             rel="noopener noreferrer"
             className="text-[8px] px-2 py-1"
@@ -228,13 +228,13 @@ export function Navbar({ onOpenSettings, soundState, onTriggerSecret, onReplayIn
           <PixelButton
             variant="primary"
             size="md"
-            href="https://arch-slash-arpg.netlify.app"
+            href="https://game.parallel-dungeons.site"
             target="_blank"
             rel="noopener noreferrer"
             className="w-full"
             icon="⚔️"
           >
-            PLAY NOW (NETLIFY)
+            PLAY NOW
           </PixelButton>
         </div>
       )}
