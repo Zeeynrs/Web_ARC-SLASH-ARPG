@@ -65,7 +65,7 @@ export function EasterEggSystem({ secretTrigger, onClearSecret }) {
       setActiveSecret({
         title: 'THE ARCHITECTS OF THE VOID',
         badge: 'COMMUNITY DISCOVERY',
-        message: 'You discovered the hidden sigil in the ARC SLASH emblem. The development team salutes your thorough exploration of the labyrinth!',
+        message: 'You discovered the hidden sigil in the Parallel Dungeons emblem. The development team salutes your thorough exploration of the labyrinth!',
         reward: '💰 +500 VIRTUAL GOLD COINS'
       });
       if (onClearSecret) onClearSecret();

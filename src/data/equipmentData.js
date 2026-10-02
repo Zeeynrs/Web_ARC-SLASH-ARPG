@@ -1,4 +1,4 @@
-// Authentic Equipment Database from ARC SLASH Game Source
+// Authentic Equipment Database from Parallel Dungeons Game Source
 export const EQUIPMENT_CATEGORIES = [
   { id: 'all', label: 'All Gear', icon: '🎒' },
   { id: 'weapon', label: 'Weapons', icon: '⚔️' },

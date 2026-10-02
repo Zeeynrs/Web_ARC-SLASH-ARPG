@@ -44,7 +44,7 @@ export function Navbar({ onOpenSettings, soundState, onTriggerSecret, onReplayIn
           href="#hero"
           onClick={handleLogoClick}
           className="flex items-center gap-3 cursor-pointer group"
-          title="ARC SLASH - Click for secrets!"
+          title="Parallel Dungeons - Click for secrets!"
         >
           {/* Pixel Sword Logo Icon */}
           <div className="w-8 h-8 flex items-center justify-center bg-[#182030] border border-[#f59e0b] shadow-[0_0_10px_rgba(245,158,11,0.3)] group-hover:scale-105 transition-transform">
@@ -61,8 +61,8 @@ export function Navbar({ onOpenSettings, soundState, onTriggerSecret, onReplayIn
           </div>
 
           <div className="flex flex-col">
-            <span className="font-pixel text-sm sm:text-base text-[#f8fafc] tracking-widest group-hover:text-[#fde047] transition-colors">
-              ARC SLASH
+            <span className="font-pixel text-xs sm:text-sm md:text-base text-[#f8fafc] tracking-wider sm:tracking-widest group-hover:text-[#fde047] transition-colors whitespace-nowrap">
+              PARALLEL DUNGEONS
             </span>
             <span className="font-pixel text-[7px] text-[#f59e0b] tracking-wider -mt-0.5">
               DARK FANTASY ARPG

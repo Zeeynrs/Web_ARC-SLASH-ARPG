@@ -44,7 +44,7 @@ export function Footer({ onTriggerSecret }) {
               </div>
               <div>
                 <span className="font-pixel text-base text-[#f8fafc] tracking-widest block">
-                  ARC SLASH
+                  PARALLEL DUNGEONS
                 </span>
                 <span className="font-pixel text-[8px] text-[#f59e0b] tracking-wider">
                   DARK FANTASY ACTION RPG
@@ -128,7 +128,7 @@ export function Footer({ onTriggerSecret }) {
         {/* Bottom Legal & Attribution */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 font-outfit text-xs text-[#64748b]">
           <div>
-            © 2026 ARC SLASH Development Team. Open-Source under GNU GPL-3.0 License.
+            © 2026 Parallel Dungeons Development Team. Open-Source under GNU GPL-3.0 License.
           </div>
           <div className="flex items-center gap-4 font-pixel text-[8px]">
             <a

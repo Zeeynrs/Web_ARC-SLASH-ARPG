@@ -64,7 +64,7 @@ Following extensive playtesting across the deeper dungeon chambers, we have depl
     content: `
 ### Major Promotional Portal Enhancement
 
-This update brings substantive visual fidelity and UX improvements to the ARC SLASH web showcase portal, elevating the user experience for competition showcase.
+This update brings substantive visual fidelity and UX improvements to the Parallel Dungeons web showcase portal, elevating the user experience for competition showcase.
 
 ---
 
@@ -107,9 +107,9 @@ We have updated repository documentation to formally recognize the creative insp
 - **Aesthetic Inspirations**:
   - The Deep Dark biome (Stages 23–35) and The Warden apex boss encounter are artistic homages inspired by the Deep Dark and Warden designs from Minecraft (Mojang Studios / Microsoft Corporation).
 - **Independent Implementation**:
-  - All sprites, combat scripts, procedural Canvas 2D algorithms, and Web Audio synthesis routines in ARC SLASH are 100% custom-written and original code.
+  - All sprites, combat scripts, procedural Canvas 2D algorithms, and Web Audio synthesis routines in Parallel Dungeons are 100% custom-written and original code.
 - **Open Source Licensing**:
-  - ARC SLASH is distributed under the GNU General Public License v3.0 (GPL-3.0) for educational and non-commercial game development purposes.
+  - Parallel Dungeons is distributed under the GNU General Public License v3.0 (GPL-3.0) for educational and non-commercial game development purposes.
     `
   },
   {
@@ -131,7 +131,7 @@ We have updated repository documentation to formally recognize the creative insp
     content: `
 ### Continuous Integration & Automated GitHub Pages Deployment
 
-We configured and enhanced automated deployment for the ARC SLASH web showcase using GitHub Actions to enable automated continuous delivery.
+We configured and enhanced automated deployment for the Parallel Dungeons web showcase using GitHub Actions to enable automated continuous delivery.
 
 ---
 
@@ -320,8 +320,8 @@ To ensure a smooth difficulty progression curve for new adventurers, we re-tuned
   },
   {
     id: 'commit-1e80264-initial-launch',
-    slug: 'announcement-arc-slash-official-release-web-portal',
-    title: 'Announcement: ARC SLASH Retro 16-Bit Web ARPG Official Launch',
+    slug: 'announcement-parallel-dungeons-official-release-web-portal',
+    title: 'Announcement: Parallel Dungeons Retro 16-Bit Web ARPG Official Launch',
     category: 'ANNOUNCEMENT',
     date: 'September 23, 2026',
     readTime: '3 min read',
@@ -331,13 +331,13 @@ To ensure a smooth difficulty progression curve for new adventurers, we re-tuned
     commitFullSha: '1e802648d18849ecb41b7977c0cb9517007ada88',
     commitRepo: 'Zeeynrs/ARC-SLASH-ARPG',
     commitUrl: 'https://github.com/Zeeynrs/ARC-SLASH-ARPG/commit/1e802648d18849ecb41b7977c0cb9517007ada88',
-    commitMessage: 'Release ?',
-    excerpt: 'Official release of ARC SLASH! A zero-asset 16-bit retro dark fantasy ARPG built in vanilla HTML5 Canvas 2D and Web Audio API with 50 floors and 3 classes.',
+    commitMessage: 'Release 🎮',
+    excerpt: 'Official release of Parallel Dungeons! A zero-asset 16-bit retro dark fantasy ARPG built in vanilla HTML5 Canvas 2D and Web Audio API with 50 floors and 3 classes.',
     tags: ['Launch', '50 Stages', '3 Classes', 'Zero Asset Engine'],
     content: `
-### Welcome to ARC SLASH
+### Welcome to Parallel Dungeons
 
-We are excited to announce the official release of **ARC SLASH**, a retro 16-bit dark fantasy Action RPG engineered entirely in modern web technologies.
+We are excited to announce the official release of **Parallel Dungeons**, a retro 16-bit dark fantasy Action RPG engineered entirely in modern web technologies.
 
 ---
 

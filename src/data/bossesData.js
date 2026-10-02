@@ -1,4 +1,4 @@
-// Authentic Boss Codex from ARC SLASH Game Source
+// Authentic Boss Codex from Parallel Dungeons Game Source
 export const BOSSES_DATA = [
   {
     id: 'warden',

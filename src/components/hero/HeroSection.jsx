@@ -29,8 +29,8 @@ export function HeroSection({ onExploreWorld, onWatchTrailer }) {
         </div>
 
         {/* Hero Title */}
-        <h1 className="font-pixel text-4xl sm:text-6xl md:text-7xl text-[#f8fafc] tracking-widest leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] mb-4">
-          ARC SLASH
+        <h1 className="font-pixel text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#f8fafc] tracking-wider sm:tracking-widest leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] mb-4">
+          PARALLEL DUNGEONS
         </h1>
 
         {/* Subtitle / Fantasy Hook */}

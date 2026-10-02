@@ -263,7 +263,7 @@ export function TrailerSection() {
         </h2>
 
         <p className="font-outfit text-sm sm:text-base text-[#94a3b8] max-w-xl">
-          Bilik rekaman trailer resmi saat ini disegel oleh rantai sihir kuno dan sedang dalam tahap pengembangan aktif oleh tim pengembang Arc Slash. Rekaman penuh akan dibuka pada pembaruan rilis mendatang.
+          Bilik rekaman trailer resmi saat ini disegel oleh rantai sihir kuno dan sedang dalam tahap pengembangan aktif oleh tim pengembang Parallel Dungeons. Rekaman penuh akan dibuka pada pembaruan rilis mendatang.
         </p>
       </div>
 

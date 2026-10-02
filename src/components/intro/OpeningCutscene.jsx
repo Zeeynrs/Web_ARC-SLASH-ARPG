@@ -23,7 +23,7 @@ const SCENE_CHAPTERS = [
   { num: 2, label: 'II. THE EMBER', start: 4.5, end: 9.5, timeStr: '00:05' },
   { num: 3, label: 'III. THE WARDEN', start: 9.5, end: 15.0, timeStr: '00:10' },
   { num: 4, label: 'IV. THE STRIKE', start: 15.0, end: 22.0, timeStr: '00:15' },
-  { num: 5, label: 'V. ARC SLASH', start: 22.0, end: 28.5, timeStr: '00:22' }
+  { num: 5, label: 'V. PARALLEL DUNGEONS', start: 22.0, end: 28.5, timeStr: '00:22' }
 ];
 
 const TOTAL_CUTSCENE_DURATION = 28.5; // in seconds
@@ -220,7 +220,7 @@ export function OpeningCutscene({ onComplete }) {
     setIsFadingOut(true);
     startAmbientDungeon();
     try {
-      localStorage.setItem('arcSlashIntroSeen', 'true');
+      localStorage.setItem('parallelDungeonsIntroSeen', 'true');
     } catch (e) {}
     setTimeout(() => {
       onComplete();
@@ -233,7 +233,7 @@ export function OpeningCutscene({ onComplete }) {
     setIsFadingOut(true);
     startAmbientDungeon();
     try {
-      localStorage.setItem('arcSlashIntroSeen', 'true');
+      localStorage.setItem('parallelDungeonsIntroSeen', 'true');
     } catch (e) {}
     setTimeout(() => {
       onComplete();
@@ -1401,7 +1401,7 @@ export function OpeningCutscene({ onComplete }) {
         <div className="flex items-center gap-2.5">
           <span className="w-2.5 h-2.5 bg-[#f59e0b] rotate-45 animate-pulse" />
           <span className="font-pixel text-[8.5px] sm:text-[10px] text-[#e2e8f0] tracking-widest uppercase">
-            ARC-CINEMATICS // PROLOGUE
+            PARALLEL-CINEMATICS // PROLOGUE
           </span>
           <span className="inline-block px-1.5 py-0.5 bg-[#0f172a] text-[#38bdf8] font-mono text-[9px] border border-[#3b4b66]">
             AUTO-PLAY
@@ -1551,7 +1551,7 @@ export function OpeningCutscene({ onComplete }) {
           </div>
         )}
 
-        {/* SCENE 5: ARC SLASH GRAND TITLE (PURE CINEMATIC FINALE) */}
+        {/* SCENE 5: PARALLEL DUNGEONS GRAND TITLE (PURE CINEMATIC FINALE) */}
         {scene >= 5 && (
           <div className="flex flex-col items-center animate-fade-in pointer-events-none w-full max-w-2xl text-center">
             {/* Crest & Title Header */}
@@ -1563,8 +1563,8 @@ export function OpeningCutscene({ onComplete }) {
               <span className="w-2 h-2 bg-[#f59e0b] rotate-45" />
             </div>
 
-            <h1 className="font-pixel text-4xl sm:text-6xl md:text-7xl text-[#f8fafc] tracking-widest my-2 drop-shadow-[0_0_40px_rgba(245,158,11,0.8)] animate-pulse">
-              ARC SLASH
+            <h1 className="font-pixel text-3xl sm:text-5xl md:text-6xl text-[#f8fafc] tracking-wider sm:tracking-widest my-2 drop-shadow-[0_0_40px_rgba(245,158,11,0.8)] animate-pulse">
+              PARALLEL DUNGEONS
             </h1>
 
             <div className="flex items-center gap-3 my-2">
@@ -1629,7 +1629,7 @@ export function OpeningCutscene({ onComplete }) {
           <div className="flex items-center gap-2 text-[#94a3b8]">
             <span className="w-1.5 h-1.5 bg-[#f59e0b] rotate-45" />
             <span>
-              {SCENE_CHAPTERS.find((ch) => ch.num === scene)?.label || 'ARC SLASH'}
+              {SCENE_CHAPTERS.find((ch) => ch.num === scene)?.label || 'PARALLEL DUNGEONS'}
             </span>
           </div>
 

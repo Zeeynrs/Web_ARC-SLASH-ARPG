@@ -1,6 +1,6 @@
-# ⚔️ ARC SLASH — Immersive Pixel-Art Promotional Website
+# ⚔️ PARALLEL DUNGEONS — Immersive Pixel-Art Promotional Website
 
-> **Official Promotional Showcase, Lore Codex, News & Interactive Experience Website** for the retro 16-bit dark fantasy ARPG game **ARC SLASH**.
+> **Official Promotional Showcase, Lore Codex, News & Interactive Experience Website** for the retro 16-bit dark fantasy ARPG game **Parallel Dungeons**.
 > 
 > Created for the Web Development Competition with the theme:  
 > **"Immersive Gaming Experience Through Web Technology"**
@@ -16,7 +16,7 @@
 - **Scene 2 (The Torch)**: Flickering pixel-art torch igniting the darkness with procedural fire embers and smoke particles.
 - **Scene 3 (The Corridor)**: Parallax 3D perspective dungeon hallway with cobblestone masonry and floating dust.
 - **Scene 4 (The Silhouette)**: The Knight advancing toward the screen with light reflecting off the broadsword.
-- **Scene 5 (Title Reveal)**: High-impact ARC SLASH logo reveal and dark fantasy typography.
+- **Scene 5 (Title Reveal)**: High-impact PARALLEL DUNGEONS logo reveal and dark fantasy typography.
 - **Scene 6 (Interactive Gate)**: `[ ENTER THE DUNGEON ]` button with tactile hover audio, screen flash, and descent transition.
 - **Skip & Replay**: Instant `[ SKIP ]` button with `localStorage` persistence and in-menu `[ REPLAY INTRO ]` feature.
 
@@ -66,7 +66,7 @@
 
 ### 9. 🕹️ Easter Eggs & In-Universe Settings
 - **Konami Code** (`↑ ↑ ↓ ↓ ← → ← → B A`) awakens divine arcade power with secret trophy modal!
-- **Emblem Secrets**: Repeatedly clicking the ARC SLASH logo unlocks secret dialogue.
+- **Emblem Secrets**: Repeatedly clicking the Parallel Dungeons logo unlocks secret dialogue.
 - **Hidden Wall Torch**: Interactive torch in footer.
 - **Settings Modal**: Audio controls, volume slider, CRT scanlines toggle, screen shake toggle, custom cursor, and reduced motion accessibility.
 

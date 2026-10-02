@@ -1,4 +1,4 @@
-// Authentic Dungeon Biomes and Stage Progression from ARC SLASH
+// Authentic Dungeon Biomes and Stage Progression from Parallel Dungeons
 export const DUNGEONS_DATA = [
   {
     id: 'slime_dungeon',
@@ -139,7 +139,7 @@ export const DUNGEONS_DATA = [
       stage: 'Stage 50',
       title: 'The Final Climax',
       hp: 28800,
-      desc: 'The ultimate boss of Arc Slash. S-Tier AI with instant parry ripostes, void cataclysms, multi-shadow illusions, and enrage phase.'
+      desc: 'The ultimate boss of Parallel Dungeons. S-Tier AI with instant parry ripostes, void cataclysms, multi-shadow illusions, and enrage phase.'
     },
     traps: 'Mirror hall illusions, void vortex pulls, dimensional rift collapse.'
   }

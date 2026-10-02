@@ -1,5 +1,5 @@
-// Procedural Web Audio API Sound Synthesizer for ARC SLASH
-// Inspired by original ARC-SLASH audio engine, expanded with dungeon ambience & UI feedback
+// Procedural Web Audio API Sound Synthesizer for Parallel Dungeons
+// Inspired by original Parallel Dungeons audio engine, expanded with dungeon ambience & UI feedback
 
 let audioCtx = null;
 let sfxEnabled = true;
@@ -14,13 +14,13 @@ let isAmbientPlaying = false;
 // Load persisted settings
 try {
   if (typeof localStorage !== 'undefined') {
-    const savedSfx = localStorage.getItem('arc_slash_sfx');
+    const savedSfx = localStorage.getItem('parallel_dungeons_sfx') || localStorage.getItem('arc_slash_sfx');
     if (savedSfx !== null) sfxEnabled = savedSfx === 'true';
 
-    const savedMusic = localStorage.getItem('arc_slash_music');
+    const savedMusic = localStorage.getItem('parallel_dungeons_music') || localStorage.getItem('arc_slash_music');
     if (savedMusic !== null) musicEnabled = savedMusic === 'true';
 
-    const savedVol = localStorage.getItem('arc_slash_master_volume');
+    const savedVol = localStorage.getItem('parallel_dungeons_master_volume') || localStorage.getItem('arc_slash_master_volume');
     if (savedVol !== null) {
       const v = parseFloat(savedVol);
       if (!isNaN(v) && v >= 0 && v <= 1) masterVolume = v;
@@ -46,7 +46,7 @@ function getAudioContext() {
 export function setSfxEnabled(val) {
   sfxEnabled = !!val;
   try {
-    localStorage.setItem('arc_slash_sfx', String(sfxEnabled));
+    localStorage.setItem('parallel_dungeons_sfx', String(sfxEnabled));
   } catch (e) {}
 }
 
@@ -57,7 +57,7 @@ export function getSfxEnabled() {
 export function setMusicEnabled(val) {
   musicEnabled = !!val;
   try {
-    localStorage.setItem('arc_slash_music', String(musicEnabled));
+    localStorage.setItem('parallel_dungeons_music', String(musicEnabled));
   } catch (e) {}
   if (!musicEnabled) {
     stopAmbientDungeon();
@@ -73,7 +73,7 @@ export function getMusicEnabled() {
 export function setMasterVolume(val) {
   masterVolume = Math.max(0, Math.min(1, Math.round(val * 100) / 100));
   try {
-    localStorage.setItem('arc_slash_master_volume', String(masterVolume));
+    localStorage.setItem('parallel_dungeons_master_volume', String(masterVolume));
   } catch (e) {}
   if (ambientGain && audioCtx) {
     try {

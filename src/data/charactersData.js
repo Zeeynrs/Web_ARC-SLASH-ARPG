@@ -1,4 +1,4 @@
-// Authentic Character Data from ARC SLASH Source Code
+// Authentic Character Data from Parallel Dungeons Source Code
 export const CHARACTERS_DATA = [
   {
     id: 'knight',

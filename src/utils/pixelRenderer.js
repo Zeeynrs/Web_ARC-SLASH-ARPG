@@ -1,5 +1,5 @@
-// Procedural 16-Bit Pixel Art Renderer for ARC SLASH
-// Faithful to the mathematical Canvas 2D routines in ARC-SLASH-ARPG
+// Procedural 16-Bit Pixel Art Renderer for Parallel Dungeons
+// Faithful to the mathematical Canvas 2D routines in Parallel Dungeons (ARC-SLASH-ARPG)
 
 /**
  * Draw a Hero (Knight, Mage, Assassin) with animated idle/attack states

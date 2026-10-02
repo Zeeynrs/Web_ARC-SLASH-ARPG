@@ -37,7 +37,7 @@ export function CharacterWiki() {
             <span className="text-2xl">{hero.icon}</span>
             <div>
               <h3 className="font-pixel text-base sm:text-lg text-[#f8fafc] tracking-widest uppercase">
-                ARC SLASH CODEX — HERO ARCHIVES
+                PARALLEL DUNGEONS CODEX — HERO ARCHIVES
               </h3>
               <span className="font-outfit text-xs text-[#94a3b8]">
                 Select a class to inspect statistics, active abilities, and combat gear

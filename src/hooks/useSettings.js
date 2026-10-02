@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 
-const SETTINGS_KEY = 'arc_slash_settings';
+const SETTINGS_KEY = 'parallel_dungeons_settings';
+const LEGACY_SETTINGS_KEY = 'arc_slash_settings';
 
 const DEFAULT_SETTINGS = {
   sfx: true,
@@ -16,7 +17,7 @@ export function useSettings() {
   const [settings, setSettings] = useState(() => {
     try {
       if (typeof localStorage !== 'undefined') {
-        const saved = localStorage.getItem(SETTINGS_KEY);
+        const saved = localStorage.getItem(SETTINGS_KEY) || localStorage.getItem(LEGACY_SETTINGS_KEY);
         if (saved) {
           return { ...DEFAULT_SETTINGS, ...JSON.parse(saved) };
         }

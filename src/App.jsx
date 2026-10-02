@@ -26,7 +26,8 @@ export function App() {
   const [showCutscene, setShowCutscene] = useState(() => {
     try {
       if (typeof localStorage !== 'undefined') {
-        return localStorage.getItem('arcSlashIntroSeen') !== 'true';
+        const seen = localStorage.getItem('parallelDungeonsIntroSeen') || localStorage.getItem('arcSlashIntroSeen');
+        return seen !== 'true';
       }
     } catch (e) {}
     return true;
@@ -51,7 +52,7 @@ export function App() {
   const handleCutsceneComplete = () => {
     setShowCutscene(false);
     try {
-      localStorage.setItem('arcSlashIntroSeen', 'true');
+      localStorage.setItem('parallelDungeonsIntroSeen', 'true');
     } catch (e) {}
   };
 
