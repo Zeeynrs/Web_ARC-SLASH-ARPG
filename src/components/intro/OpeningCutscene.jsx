@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { PixelButton } from '../ui/PixelButton';
 import {
   playSlash,
   playHit,
@@ -18,57 +17,21 @@ import {
   playComboHit
 } from '../../utils/audioSynth';
 
-// Class definitions with rich RPG lore and signature abilities
-const HERO_CLASSES = [
-  {
-    id: 'knight',
-    name: 'KNIGHT',
-    title: 'THE PALADIN VANGUARD',
-    icon: '⚔️',
-    color: '#f59e0b',
-    glowColor: 'rgba(245, 158, 11, 0.45)',
-    accent: '#fde047',
-    skill: 'ARC CLEAVE',
-    desc: 'Master of enchanted steel and divine barriers. Cleaves darkness with devastating arc waves.',
-    stats: { atk: 85, def: 95, spd: 60 }
-  },
-  {
-    id: 'mage',
-    name: 'MAGE',
-    title: 'THE VOID ARCANIST',
-    icon: '🔮',
-    color: '#c084fc',
-    glowColor: 'rgba(192, 132, 252, 0.45)',
-    accent: '#e9d5ff',
-    skill: 'VOID SINGULARITY',
-    desc: 'Wields unstable abyssal mana. Rips reality apart with cosmic rifts and arcane nova.',
-    stats: { atk: 100, def: 45, spd: 70 }
-  },
-  {
-    id: 'assassin',
-    name: 'ASSASSIN',
-    title: 'THE SHADOW PHANTOM',
-    icon: '🗡️',
-    color: '#34d399',
-    glowColor: 'rgba(52, 211, 153, 0.45)',
-    accent: '#6ee7b7',
-    skill: 'VENOM FLURRY',
-    desc: 'Silent executioner cloaked in night. Strikes vital runes with lethal poison daggers.',
-    stats: { atk: 92, def: 50, spd: 100 }
-  }
+// 5 Cinematic Chapters with their timeline boundaries (in seconds)
+const SCENE_CHAPTERS = [
+  { num: 1, label: 'I. THE ABYSS', start: 0, end: 4.5, timeStr: '00:00' },
+  { num: 2, label: 'II. THE EMBER', start: 4.5, end: 9.5, timeStr: '00:05' },
+  { num: 3, label: 'III. THE WARDEN', start: 9.5, end: 15.0, timeStr: '00:10' },
+  { num: 4, label: 'IV. THE STRIKE', start: 15.0, end: 22.0, timeStr: '00:15' },
+  { num: 5, label: 'V. ARC SLASH', start: 22.0, end: 28.5, timeStr: '00:22' }
 ];
 
-// 5 Cinematic Chapters
-const SCENE_CHAPTERS = [
-  { num: 1, label: 'I. THE ABYSS', time: '00:00' },
-  { num: 2, label: 'II. THE EMBER', time: '00:03' },
-  { num: 3, label: 'III. THE WARDEN', time: '00:07' },
-  { num: 4, label: 'IV. THE STRIKE', time: '00:11' },
-  { num: 5, label: 'V. ARC SLASH', time: '00:15' }
-];
+const TOTAL_CUTSCENE_DURATION = 28.5; // in seconds
 
 export function OpeningCutscene({ onComplete }) {
-  // Scene State: 1 (Abyss), 2 (Ember Torch), 3 (Warden Awakening), 4 (Champion Strike), 5 (Title & Enter)
+  // Timeline playback state
+  const [currentTime, setCurrentTime] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
   const [scene, setScene] = useState(1);
   const [isFadingOut, setIsFadingOut] = useState(false);
   const [audioUnlocked, setAudioUnlocked] = useState(false);
@@ -76,120 +39,81 @@ export function OpeningCutscene({ onComplete }) {
   const [isSlashing, setIsSlashing] = useState(false);
   const [combo, setCombo] = useState(0);
   const [screenShake, setScreenShake] = useState(0);
-  const [screenFlash, setScreenFlash] = useState(null); // 'gold', 'cyan', 'purple', 'crimson'
-  const [autoAdvance, setAutoAdvance] = useState(true);
+  const [screenFlash, setScreenFlash] = useState(null); // 'gold', 'emerald', 'purple', 'crimson'
+  const [grandSlashRevealed, setGrandSlashRevealed] = useState(false);
+
+  // Auto-launch countdown remaining for Scene 5
+  const [autoEnterRemaining, setAutoEnterRemaining] = useState(6);
 
   const canvasRef = useRef(null);
   const animationFrameRef = useRef(null);
-  const comboTimeoutRef = useRef(null);
+  const lastTimeRef = useRef(Date.now());
+  const currentTimeRef = useRef(0);
+  const isPlayingRef = useRef(true);
   const lastSlashTimeRef = useRef(0);
+  const comboTimeoutRef = useRef(null);
   const damagePopupsRef = useRef([]);
   const sparksRef = useRef([]);
+  const voidDebrisRef = useRef([]);
+  const minionStatesRef = useRef([
+    { id: 1, xOffset: 75, hp: 100, isDead: false, hitTimer: 0 },
+    { id: 2, xOffset: 125, hp: 100, isDead: false, hitTimer: 0 }
+  ]);
+  const audioUnlockedRef = useRef(false);
+  const lastTriggeredActionRef = useRef({});
 
-  // Unlock Web Audio context safely
+  // Safely unlock Web Audio context
   const unlockAudio = useCallback(() => {
+    if (audioUnlockedRef.current) return;
     try {
       startAmbientDungeon();
+      audioUnlockedRef.current = true;
       setAudioUnlocked(true);
     } catch (e) {
-      console.warn('Audio unlock caught:', e);
+      console.warn('Audio unlock warning:', e);
     }
   }, []);
 
-  // Trigger audio stings upon scene transitions
-  const playSceneAudio = useCallback((targetScene) => {
-    switch (targetScene) {
-      case 2:
-        playTorchIgnite();
-        break;
-      case 3:
-        playMonsterGrowl();
-        break;
-      case 4:
-        playSwordDraw();
-        break;
-      case 5:
-        playDramaticSting();
-        break;
-      default:
-        break;
-    }
-  }, []);
-
-  // Jump to specific scene
-  const goToScene = useCallback((targetScene) => {
-    setScene(targetScene);
-    playSceneAudio(targetScene);
-  }, [playSceneAudio]);
-
-  // Sequenced automatic scene transitions
+  // Listen for any initial interaction to unblock audio seamlessly
   useEffect(() => {
-    if (!autoAdvance) return;
-    const timers = [];
-
-    // Scene 1 -> 2 (at 3.5s)
-    timers.push(
-      setTimeout(() => {
-        setScene(2);
-        playTorchIgnite();
-      }, 3500)
-    );
-
-    // Scene 2 -> 3 (at 7.2s)
-    timers.push(
-      setTimeout(() => {
-        setScene(3);
-        playMonsterGrowl();
-      }, 7200)
-    );
-
-    // Scene 3 -> 4 (at 11.2s)
-    timers.push(
-      setTimeout(() => {
-        setScene(4);
-        playSwordDraw();
-      }, 11200)
-    );
-
-    // Scene 4 -> 5 (at 16.0s)
-    timers.push(
-      setTimeout(() => {
-        setScene(5);
-        playDramaticSting();
-      }, 16000)
-    );
-
-    return () => timers.forEach(clearTimeout);
-  }, [autoAdvance]);
+    const handleFirstInteraction = () => {
+      unlockAudio();
+    };
+    window.addEventListener('pointerdown', handleFirstInteraction, { once: true });
+    window.addEventListener('keydown', handleFirstInteraction, { once: true });
+    return () => {
+      window.removeEventListener('pointerdown', handleFirstInteraction);
+      window.removeEventListener('keydown', handleFirstInteraction);
+    };
+  }, [unlockAudio]);
 
   // Execute an interactive combat slash / spell strike
-  const triggerSlash = useCallback(() => {
+  const triggerSlash = useCallback((customDamage, customCrit) => {
     unlockAudio();
 
     const now = Date.now();
     lastSlashTimeRef.current = now;
     setIsSlashing(true);
-    setTimeout(() => setIsSlashing(false), 340);
+    setTimeout(() => setIsSlashing(false), 320);
 
     // Dynamic screen shake & flash
-    setScreenShake(8);
-    setTimeout(() => setScreenShake(0), 220);
+    setScreenShake(7);
+    setTimeout(() => setScreenShake(0), 200);
 
     // Increment combo
     setCombo((prev) => {
       const next = prev + 1;
       playComboHit(next);
 
-      // Reset combo after 2.4s of inactivity
       if (comboTimeoutRef.current) clearTimeout(comboTimeoutRef.current);
       comboTimeoutRef.current = setTimeout(() => {
         setCombo(0);
-      }, 2400);
+      }, 2500);
 
       return next;
     });
 
-    // Class specific sounds & flash colors
+    // Class-specific sound effects & flash color
     if (selectedClass === 'mage') {
       playExplosion();
       playSkill();
@@ -205,21 +129,28 @@ export function OpeningCutscene({ onComplete }) {
     }
     setTimeout(() => setScreenFlash(null), 120);
 
+    // Hit minions and spawn visual hit reactions
+    minionStatesRef.current.forEach((m) => {
+      m.hitTimer = Date.now();
+      m.hp = Math.max(0, m.hp - 35);
+      if (m.hp <= 0) m.isDead = true;
+    });
+
     // Generate floating RPG damage popups
-    const isCrit = Math.random() > 0.35;
-    let baseDmg = 1200 + Math.floor(Math.random() * 850);
-    if (selectedClass === 'mage') baseDmg = 2100 + Math.floor(Math.random() * 1400);
-    if (selectedClass === 'assassin') baseDmg = 1850 + Math.floor(Math.random() * 1900);
+    const isCrit = customCrit ?? Math.random() > 0.35;
+    let baseDmg = customDamage ?? (1200 + Math.floor(Math.random() * 850));
+    if (selectedClass === 'mage' && !customDamage) baseDmg = 2100 + Math.floor(Math.random() * 1400);
+    if (selectedClass === 'assassin' && !customDamage) baseDmg = 1850 + Math.floor(Math.random() * 1900);
     if (isCrit) baseDmg = Math.floor(baseDmg * 1.75);
 
     let prefix = '';
     if (isCrit) prefix = selectedClass === 'assassin' ? 'BACKSTAB! ' : 'CRITICAL! ';
-    if (combo >= 4 && combo % 3 === 0) prefix = 'ARC OVERLOAD! ';
+    if (combo >= 3 && combo % 2 === 0) prefix = 'ARC OVERLOAD! ';
 
     const canvas = canvasRef.current;
     const w = canvas ? canvas.width : window.innerWidth;
     const h = canvas ? canvas.height : window.innerHeight;
-    const spawnX = w / 2 + 55 + (Math.random() - 0.5) * 40;
+    const spawnX = w / 2 + 55 + (Math.random() - 0.5) * 50;
     const spawnY = h / 2 - 20 + (Math.random() - 0.5) * 40;
 
     damagePopupsRef.current.push({
@@ -234,29 +165,162 @@ export function OpeningCutscene({ onComplete }) {
 
     // Spawn 18 flying weapon sparks
     for (let i = 0; i < 18; i++) {
-      const angle = (Math.random() * Math.PI * 2);
+      const angle = Math.random() * Math.PI * 2;
       const spd = Math.random() * 7 + 3;
       sparksRef.current.push({
         x: spawnX,
         y: spawnY,
         vx: Math.cos(angle) * spd,
         vy: Math.sin(angle) * spd - 2,
-        size: Math.random() * 3 + 2,
-        color: Math.random() > 0.5 ? '#fde047' : selectedClass === 'mage' ? '#a855f7' : selectedClass === 'assassin' ? '#10b981' : '#38bdf8',
+        size: Math.random() * 3.5 + 2,
+        color:
+          Math.random() > 0.5
+            ? '#fde047'
+            : selectedClass === 'mage'
+            ? '#a855f7'
+            : selectedClass === 'assassin'
+            ? '#10b981'
+            : '#38bdf8',
+        life: 1.0
+      });
+    }
+
+    // Spawn 8 void debris particles
+    for (let i = 0; i < 8; i++) {
+      const angle = Math.random() * Math.PI * 2;
+      const spd = Math.random() * 4 + 1;
+      voidDebrisRef.current.push({
+        x: spawnX,
+        y: spawnY,
+        vx: Math.cos(angle) * spd,
+        vy: Math.sin(angle) * spd - 1,
+        size: Math.random() * 4 + 2,
+        color: '#475569',
         life: 1.0
       });
     }
   }, [selectedClass, combo, unlockAudio]);
 
-  // Cycle class with key
-  const cycleClass = useCallback(() => {
-    setSelectedClass((prev) => {
-      if (prev === 'knight') return 'mage';
-      if (prev === 'mage') return 'assassin';
-      return 'knight';
-    });
+  // Jump to specific scene chapter
+  const goToScene = useCallback(
+    (targetScene) => {
+      const ch = SCENE_CHAPTERS.find((c) => c.num === targetScene);
+      if (ch) {
+        currentTimeRef.current = ch.start;
+        setCurrentTime(ch.start);
+        setScene(targetScene);
+      }
+    },
+    []
+  );
+
+  // Finish cutscene and enter dungeon
+  const handleEnterDungeon = useCallback(() => {
+    playSlash();
+    setIsFadingOut(true);
+    startAmbientDungeon();
+    try {
+      localStorage.setItem('arcSlashIntroSeen', 'true');
+    } catch (e) {}
+    setTimeout(() => {
+      onComplete();
+    }, 850);
+  }, [onComplete]);
+
+  // Skip cutscene immediately
+  const handleSkip = useCallback(() => {
     playUiClick();
-  }, []);
+    setIsFadingOut(true);
+    startAmbientDungeon();
+    try {
+      localStorage.setItem('arcSlashIntroSeen', 'true');
+    } catch (e) {}
+    setTimeout(() => {
+      onComplete();
+    }, 380);
+  }, [onComplete]);
+
+  // Synchronize playing ref
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
+
+  // =========================================================================
+  // MASTER TIMELINE DIRECTOR (Autonomous playback & choreography)
+  // =========================================================================
+  useEffect(() => {
+    const directorInterval = setInterval(() => {
+      if (!isPlayingRef.current) return;
+
+      const newTime = currentTimeRef.current + 0.1;
+      currentTimeRef.current = newTime;
+      setCurrentTime(newTime);
+
+      // Determine active scene from timestamp
+      let activeSceneNum = 1;
+      for (const ch of SCENE_CHAPTERS) {
+        if (newTime >= ch.start && newTime < ch.end) {
+          activeSceneNum = ch.num;
+          break;
+        }
+      }
+      if (newTime >= 22.0) activeSceneNum = 5;
+
+      setScene(activeSceneNum);
+
+      // Trigger scene audio transitions once per boundary
+      if (newTime >= 4.5 && !lastTriggeredActionRef.current['scene_2_sound']) {
+        lastTriggeredActionRef.current['scene_2_sound'] = true;
+        playTorchIgnite();
+      }
+      if (newTime >= 9.5 && !lastTriggeredActionRef.current['scene_3_sound']) {
+        lastTriggeredActionRef.current['scene_3_sound'] = true;
+        playMonsterGrowl();
+        setTimeout(() => playBossRoar(), 400);
+      }
+      if (newTime >= 15.0 && !lastTriggeredActionRef.current['scene_4_sound']) {
+        lastTriggeredActionRef.current['scene_4_sound'] = true;
+        playSwordDraw();
+      }
+      if (newTime >= 22.0 && !lastTriggeredActionRef.current['scene_5_sound']) {
+        lastTriggeredActionRef.current['scene_5_sound'] = true;
+        playDramaticSting();
+        setGrandSlashRevealed(true);
+      }
+
+      // Autonomous Combat Strikes during Scene 4
+      if (newTime >= 16.2 && !lastTriggeredActionRef.current['auto_slash_1']) {
+        lastTriggeredActionRef.current['auto_slash_1'] = true;
+        triggerSlash(1450, false);
+      }
+      if (newTime >= 17.8 && !lastTriggeredActionRef.current['auto_slash_2']) {
+        lastTriggeredActionRef.current['auto_slash_2'] = true;
+        triggerSlash(2280, true);
+      }
+      if (newTime >= 19.4 && !lastTriggeredActionRef.current['auto_slash_3']) {
+        lastTriggeredActionRef.current['auto_slash_3'] = true;
+        triggerSlash(3950, true);
+      }
+      if (newTime >= 20.8 && !lastTriggeredActionRef.current['auto_slash_4']) {
+        lastTriggeredActionRef.current['auto_slash_4'] = true;
+        triggerSlash(5600, true);
+      }
+
+      // Auto-Enter Countdown in Scene 5
+      if (newTime >= 22.0) {
+        const remaining = Math.max(0, Math.ceil(TOTAL_CUTSCENE_DURATION - newTime));
+        setAutoEnterRemaining(remaining);
+      }
+
+      // Finish cutscene automatically at end of duration!
+      if (newTime >= TOTAL_CUTSCENE_DURATION) {
+        clearInterval(directorInterval);
+        handleEnterDungeon();
+      }
+    }, 100);
+
+    return () => clearInterval(directorInterval);
+  }, [triggerSlash, handleEnterDungeon]);
 
   // Global Keyboard shortcuts
   useEffect(() => {
@@ -266,7 +330,7 @@ export function OpeningCutscene({ onComplete }) {
         e.preventDefault();
         triggerSlash();
       }
-      // Enter: Enter Dungeon (Scene 5) or advance
+      // Enter: Enter Dungeon or advance
       else if (e.code === 'Enter') {
         e.preventDefault();
         if (scene >= 5) {
@@ -279,23 +343,24 @@ export function OpeningCutscene({ onComplete }) {
       else if (e.code === 'Escape') {
         handleSkip();
       }
-      // Q or E or C: Switch Hero Class
-      else if (e.code === 'KeyQ' || e.code === 'KeyE' || e.code === 'KeyC') {
-        cycleClass();
+      // P: Toggle Pause / Resume
+      else if (e.code === 'KeyP') {
+        setIsPlaying((prev) => !prev);
       }
       // 1 to 5: Direct Jump to Scene Chapters
       else if (['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5'].includes(e.code)) {
         const target = parseInt(e.code.replace('Digit', ''), 10);
-        setAutoAdvance(false);
         goToScene(target);
       }
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [scene, triggerSlash, cycleClass, goToScene]);
+  }, [scene, triggerSlash, goToScene, handleEnterDungeon, handleSkip]);
 
-  // Main Canvas Rendering Engine
+  // =========================================================================
+  // RICH GRAPHICS & CANVAS RENDERING ENGINE
+  // =========================================================================
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -309,28 +374,61 @@ export function OpeningCutscene({ onComplete }) {
     };
     window.addEventListener('resize', handleResize);
 
-    // Dust particles
-    const dustParticles = Array.from({ length: 65 }, () => ({
+    // Supporting Visual Element 1: Atmospheric Dust & Mana Spores
+    const dustParticles = Array.from({ length: 75 }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      size: Math.random() * 2.2 + 1,
+      size: Math.random() * 2.5 + 1,
       speedX: (Math.random() - 0.5) * 0.4,
-      speedY: -Math.random() * 0.6 - 0.2,
-      alpha: Math.random() * 0.7 + 0.2
+      speedY: -Math.random() * 0.5 - 0.15,
+      alpha: Math.random() * 0.6 + 0.25,
+      color: Math.random() > 0.6 ? '#f59e0b' : Math.random() > 0.3 ? '#38bdf8' : '#e2e8f0'
     }));
 
-    // Torch fire particles
+    // Supporting Visual Element 2: Flickering Torch Fire & Embers
     const fireParticles = [];
 
-    // Creeping ground fog particles
-    const fogWaves = Array.from({ length: 14 }, (_, i) => ({
-      x: (width / 14) * i,
-      speed: Math.random() * 0.4 + 0.2,
-      baseY: height - 60,
-      radius: Math.random() * 60 + 80
+    // Supporting Visual Element 3: Creeping Multi-Layer Ground Mist / Fog Waves
+    const fogWavesBack = Array.from({ length: 12 }, (_, i) => ({
+      x: (width / 12) * i,
+      speed: Math.random() * 0.25 + 0.15,
+      baseY: height - 85,
+      radius: Math.random() * 60 + 90
     }));
 
-    let startTime = Date.now();
+    const fogWavesFront = Array.from({ length: 15 }, (_, i) => ({
+      x: (width / 15) * i,
+      speed: Math.random() * 0.45 + 0.3,
+      baseY: height - 50,
+      radius: Math.random() * 50 + 70
+    }));
+
+    // Supporting Visual Element 4: Fluttering Dungeon Bats in the Vault
+    const bats = Array.from({ length: 5 }, (_, i) => ({
+      x: -50 - i * 160,
+      y: Math.random() * 120 + 30,
+      speedX: Math.random() * 2.5 + 3.2,
+      wingCycle: Math.random() * Math.PI,
+      size: Math.random() * 4 + 7
+    }));
+
+    // Supporting Visual Element 5: Ancient Void Runes floating in Scene 1
+    const ancientRunes = Array.from({ length: 18 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      char: ['᚛', '᚜', 'ᚠ', 'ᚢ', 'ᚦ', 'ᚨ', 'ᚱ', 'ᚲ', 'ᛊ', 'ᛚ', 'ᛊ', 'ᚺ', '✦', '⚔', '🛡', '⚡'][Math.floor(Math.random() * 16)],
+      speedY: -Math.random() * 0.4 - 0.15,
+      alpha: Math.random() * 0.4 + 0.15,
+      size: Math.floor(Math.random() * 10 + 12)
+    }));
+
+    // Supporting Visual Element 6: Hanging iron chains swaying
+    const chains = [
+      { xPct: 0.12, length: 130, swingOffset: 0 },
+      { xPct: 0.28, length: 90, swingOffset: 1.2 },
+      { xPct: 0.72, length: 105, swingOffset: 2.1 },
+      { xPct: 0.88, length: 140, swingOffset: 0.7 }
+    ];
 
     const render = () => {
       const now = Date.now();
@@ -347,63 +445,201 @@ export function OpeningCutscene({ onComplete }) {
 
       ctx.clearRect(0, 0, width, height);
 
-      // --- SCENE 1: The Dark Catacombs Void & Ancient Seal ---
-      if (scene === 1) {
-        ctx.fillStyle = '#05070a';
-        ctx.fillRect(0, 0, width, height);
+      // Deep Catacomb Base Tint
+      ctx.fillStyle = '#06080d';
+      ctx.fillRect(0, 0, width, height);
 
-        // Cracking Ancient Void Seal in center
+      // =====================================================================
+      // 1. GOTHIC CEILING ARCHES & HIGH VAULTING
+      // =====================================================================
+      ctx.strokeStyle = '#151d2c';
+      ctx.lineWidth = 3;
+      const archCenterX = width / 2;
+      for (let r = 80; r <= 320; r += 70) {
+        ctx.beginPath();
+        ctx.arc(archCenterX, -40, r, 0, Math.PI);
+        ctx.stroke();
+      }
+
+      // Hanging sway chains from the ceiling
+      chains.forEach((ch) => {
+        const cx = width * ch.xPct;
+        const swing = Math.sin(time * 1.4 + ch.swingOffset) * 6;
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx, 0);
+        ctx.lineTo(cx + swing, ch.length);
+        ctx.stroke();
+
+        // Iron chain links
+        for (let y = 10; y < ch.length; y += 12) {
+          const ly = y;
+          const lx = cx + (swing * y) / ch.length;
+          ctx.strokeRect(lx - 2.5, ly - 3, 5, 6);
+        }
+
+        // Hanging rusted iron cage / lantern at the bottom of the chain
+        const endX = cx + swing;
+        const endY = ch.length;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(endX - 7, endY, 14, 18);
+        ctx.strokeStyle = '#475569';
+        ctx.strokeRect(endX - 7, endY, 14, 18);
+
+        // Faint glowing ember inside cage
+        if (scene >= 2) {
+          ctx.fillStyle = 'rgba(245, 158, 11, 0.45)';
+          ctx.fillRect(endX - 3, endY + 4, 6, 8);
+        }
+      });
+
+      // Fluttering Bats in the Vault (Scenes 1, 2, 3)
+      if (scene <= 3) {
+        ctx.fillStyle = '#1e293b';
+        bats.forEach((bat) => {
+          bat.x += bat.speedX;
+          bat.wingCycle += 0.25;
+          if (bat.x > width + 60) {
+            bat.x = -60;
+            bat.y = Math.random() * 120 + 30;
+          }
+          const wingSpan = Math.sin(bat.wingCycle) * bat.size;
+          ctx.beginPath();
+          ctx.moveTo(bat.x, bat.y);
+          ctx.quadraticCurveTo(bat.x - bat.size, bat.y - wingSpan, bat.x - bat.size * 1.8, bat.y - wingSpan * 0.5);
+          ctx.lineTo(bat.x, bat.y + 2);
+          ctx.quadraticCurveTo(bat.x + bat.size, bat.y - wingSpan, bat.x + bat.size * 1.8, bat.y - wingSpan * 0.5);
+          ctx.closePath();
+          ctx.fill();
+        });
+      }
+
+      // =====================================================================
+      // --- SCENE 1: THE CATACOMBS ABYSS & ANCIENT VOID SEAL ---
+      // =====================================================================
+      if (scene === 1) {
+        // Deep cosmic void background
         const sealX = width / 2;
         const sealY = height / 2;
         const sealPulse = Math.sin(time * 3) * 0.12 + 0.88;
 
-        ctx.strokeStyle = `rgba(245, 158, 11, ${0.25 * sealPulse})`;
+        // Swirling Dark Void Vortex in the center
+        const vortexGrad = ctx.createRadialGradient(sealX, sealY, 10, sealX, sealY, 220);
+        vortexGrad.addColorStop(0, 'rgba(15, 23, 42, 0.9)');
+        vortexGrad.addColorStop(0.4, 'rgba(30, 27, 75, 0.45)');
+        vortexGrad.addColorStop(0.8, 'rgba(14, 11, 30, 0.2)');
+        vortexGrad.addColorStop(1, 'transparent');
+        ctx.fillStyle = vortexGrad;
+        ctx.beginPath();
+        ctx.arc(sealX, sealY, 220, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Outer Tier 1: Concentric Runic Spinning Ring
+        ctx.save();
+        ctx.translate(sealX, sealY);
+        ctx.rotate(time * 0.25);
+        ctx.strokeStyle = `rgba(245, 158, 11, ${0.45 * sealPulse})`;
+        ctx.lineWidth = 2.5;
+        ctx.beginPath();
+        ctx.arc(0, 0, 140, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // 12 ancient rune nodes along outer ring
+        for (let i = 0; i < 12; i++) {
+          const ang = (i * Math.PI * 2) / 12;
+          const rx = Math.cos(ang) * 140;
+          const ry = Math.sin(ang) * 140;
+          ctx.fillStyle = '#fde047';
+          ctx.fillRect(rx - 3, ry - 3, 6, 6);
+          ctx.strokeStyle = 'rgba(253, 224, 71, 0.5)';
+          ctx.strokeRect(rx - 5, ry - 5, 10, 10);
+        }
+        ctx.restore();
+
+        // Middle Tier 2: Hexagram / Geometric Arcane Circle
+        ctx.save();
+        ctx.translate(sealX, sealY);
+        ctx.rotate(-time * 0.35);
+        ctx.strokeStyle = `rgba(56, 189, 248, ${0.35 * sealPulse})`;
+        ctx.lineWidth = 1.8;
+        ctx.beginPath();
+        ctx.arc(0, 0, 95, 0, Math.PI * 2);
+        ctx.stroke();
+
+        // Inner Triangle 1
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const a = (i * Math.PI * 2) / 3;
+          const x = Math.cos(a) * 95;
+          const y = Math.sin(a) * 95;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+
+        // Inner Triangle 2 (Inverted Hexagram)
+        ctx.beginPath();
+        for (let i = 0; i < 3; i++) {
+          const a = (i * Math.PI * 2) / 3 + Math.PI;
+          const x = Math.cos(a) * 95;
+          const y = Math.sin(a) * 95;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+
+        // Glowing Core Seal
+        ctx.strokeStyle = `rgba(245, 158, 11, ${0.7 * sealPulse})`;
         ctx.lineWidth = 3;
         ctx.beginPath();
-        ctx.arc(sealX, sealY, 90, 0, Math.PI * 2);
+        ctx.arc(sealX, sealY, 50, 0, Math.PI * 2);
         ctx.stroke();
 
-        ctx.strokeStyle = `rgba(56, 189, 248, ${0.18 * sealPulse})`;
-        ctx.lineWidth = 1.5;
-        ctx.beginPath();
-        ctx.arc(sealX, sealY, 130, 0, Math.PI * 2);
-        ctx.stroke();
-
-        // Cracking veins of gold light
-        for (let i = 0; i < 6; i++) {
-          const ang = (i * Math.PI) / 3 + time * 0.2;
+        // Molten golden veins cracking outward across the catacombs floor
+        for (let i = 0; i < 8; i++) {
+          const ang = (i * Math.PI) / 4 + Math.sin(time + i) * 0.1;
+          const len = 190 + Math.sin(time * 2 + i) * 25;
           ctx.beginPath();
           ctx.moveTo(sealX, sealY);
-          ctx.lineTo(sealX + Math.cos(ang) * 90, sealY + Math.sin(ang) * 90);
-          ctx.strokeStyle = `rgba(253, 224, 71, ${0.15 * sealPulse})`;
-          ctx.lineWidth = 1;
+          const midX = sealX + Math.cos(ang) * (len * 0.5) + (Math.sin(i) * 18);
+          const midY = sealY + Math.sin(ang) * (len * 0.5) + (Math.cos(i) * 18);
+          ctx.lineTo(midX, midY);
+          ctx.lineTo(sealX + Math.cos(ang) * len, sealY + Math.sin(ang) * len);
+          ctx.strokeStyle = `rgba(253, 224, 71, ${0.45 * sealPulse})`;
+          ctx.lineWidth = 1.5;
           ctx.stroke();
         }
 
-        // Ambient faint dust
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.25)';
-        dustParticles.forEach((p) => {
-          ctx.fillRect(p.x, p.y, p.size, p.size);
-          p.y += p.speedY * 0.3;
-          if (p.y < 0) p.y = height;
+        // Floating ancient runes drifting up
+        ancientRunes.forEach((r) => {
+          ctx.save();
+          ctx.font = `${r.size}px monospace`;
+          ctx.fillStyle = `rgba(245, 158, 11, ${r.alpha * sealPulse})`;
+          ctx.fillText(r.char, r.x, r.y);
+          r.y += r.speedY;
+          if (r.y < 0) r.y = height;
+          ctx.restore();
         });
       }
 
-      // --- SCENE 2: The Flickering Torch in the Dark ---
+      // =====================================================================
+      // --- SCENE 2: THE EMBER & ILLUMINATED CRYPT CHAMBER ---
+      // =====================================================================
       if (scene >= 2) {
-        ctx.fillStyle = '#080a0f';
-        ctx.fillRect(0, 0, width, height);
-
         const torchX = width / 2;
         const torchY = height / 2 - 40;
         const flicker = Math.sin(now * 0.02) * 8 + Math.cos(now * 0.05) * 6;
-        const radius = scene === 2 ? 180 + flicker : 380 + flicker;
+        const radius = scene === 2 ? 260 + flicker : 420 + flicker;
 
-        // Warm radial torch glow
-        const radialGlow = ctx.createRadialGradient(torchX, torchY, 10, torchX, torchY, radius);
+        // Warm radial torch glow illuminating the stone crypt
+        const radialGlow = ctx.createRadialGradient(torchX, torchY, 12, torchX, torchY, radius);
         radialGlow.addColorStop(0, 'rgba(245, 158, 11, 0.85)');
-        radialGlow.addColorStop(0.35, 'rgba(217, 119, 6, 0.35)');
-        radialGlow.addColorStop(0.7, 'rgba(180, 83, 9, 0.12)');
+        radialGlow.addColorStop(0.35, 'rgba(217, 119, 6, 0.38)');
+        radialGlow.addColorStop(0.7, 'rgba(180, 83, 9, 0.14)');
         radialGlow.addColorStop(1, 'transparent');
 
         ctx.fillStyle = radialGlow;
@@ -412,13 +648,13 @@ export function OpeningCutscene({ onComplete }) {
         ctx.fill();
 
         // Spawn fire embers
-        if (fireParticles.length < 40) {
+        if (fireParticles.length < 50) {
           fireParticles.push({
-            x: torchX + (Math.random() - 0.5) * 14,
-            y: torchY + 10,
+            x: torchX + (Math.random() - 0.5) * 16,
+            y: torchY + 8,
             vx: (Math.random() - 0.5) * 1.8,
             vy: -Math.random() * 2.8 - 1,
-            size: Math.random() * 3 + 2,
+            size: Math.random() * 3.5 + 2,
             color: Math.random() > 0.5 ? '#f59e0b' : '#ef4444',
             life: 1
           });
@@ -429,7 +665,7 @@ export function OpeningCutscene({ onComplete }) {
           const p = fireParticles[i];
           p.x += p.vx;
           p.y += p.vy;
-          p.life -= 0.032;
+          p.life -= 0.03;
           if (p.life <= 0) {
             fireParticles.splice(i, 1);
             continue;
@@ -440,7 +676,13 @@ export function OpeningCutscene({ onComplete }) {
           ctx.globalAlpha = 1.0;
         }
 
-        // Draw Torch wooden bracket & glowing flame head
+        // Draw Gothic Stone Pedestal / Wall Mount & Ancient Torch Head
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(torchX - 10, torchY + 40, 20, 50); // Stone wall pillar base
+        ctx.strokeStyle = '#334155';
+        ctx.strokeRect(torchX - 10, torchY + 40, 20, 50);
+
+        // Torch iron bracket
         ctx.fillStyle = '#451a03';
         ctx.fillRect(torchX - 4, torchY + 12, 8, 30);
         ctx.fillStyle = '#78350f';
@@ -451,23 +693,25 @@ export function OpeningCutscene({ onComplete }) {
         ctx.fillRect(torchX - 3, torchY - 6 + Math.sin(now * 0.05) * 3, 6, 8);
       }
 
-      // --- SCENE 3 & 4 & 5: Parallax Perspective Corridor & Volumetric Atmosphere ---
+      // =====================================================================
+      // --- SCENES 3, 4, 5: 3D PARALLAX CORRIDOR, COLUMNS & ATMOSPHERE ---
+      // =====================================================================
       if (scene >= 3) {
         const vanishingX = width / 2;
         const vanishingY = height / 2 - 30;
 
-        // Floor perspective lines
+        // Floor perspective lines receding into catacombs
         ctx.strokeStyle = '#1e293b';
         ctx.lineWidth = 3;
-        for (let i = -5; i <= 5; i++) {
+        for (let i = -6; i <= 6; i++) {
           ctx.beginPath();
           ctx.moveTo(vanishingX, vanishingY);
-          ctx.lineTo(vanishingX + i * (width * 0.2), height);
+          ctx.lineTo(vanishingX + i * (width * 0.18), height);
           ctx.stroke();
         }
 
-        // Horizontal floor flagstone tiles
-        const steps = 7;
+        // Horizontal floor flagstone tiles with perspective depth
+        const steps = 8;
         for (let s = 1; s <= steps; s++) {
           const y = vanishingY + Math.pow(s / steps, 2.1) * (height - vanishingY);
           ctx.beginPath();
@@ -476,28 +720,34 @@ export function OpeningCutscene({ onComplete }) {
           ctx.strokeStyle = '#182030';
           ctx.lineWidth = 2;
           ctx.stroke();
+
+          // Wet reflections on flagstones
+          ctx.fillStyle = 'rgba(56, 189, 248, 0.04)';
+          ctx.fillRect(vanishingX - 120 * (s / steps), y - 2, 240 * (s / steps), 4);
         }
 
-        // Left & Right Stone Wall Pillars
-        ctx.fillStyle = '#0f172a';
-        ctx.fillRect(0, 0, width * 0.18, height);
-        ctx.fillRect(width * 0.82, 0, width * 0.18, height);
+        // Left & Right Massive Gothic Stone Pillars
+        const pillarWidth = width * 0.19;
+        ctx.fillStyle = '#0b1120';
+        ctx.fillRect(0, 0, pillarWidth, height);
+        ctx.fillRect(width - pillarWidth, 0, pillarWidth, height);
 
-        // Brick Outlines & Moss Highlights
-        ctx.strokeStyle = '#273549';
+        // Stone Brick Carvings & Moss Highlights
+        ctx.strokeStyle = '#1e293b';
         ctx.lineWidth = 2;
-        for (let y = 0; y < height; y += 45) {
-          ctx.strokeRect(0, y, width * 0.18, 45);
-          ctx.strokeRect(width * 0.82, y, width * 0.18, 45);
-          // Faint green moss highlight on stones
+        for (let y = 0; y < height; y += 46) {
+          ctx.strokeRect(0, y, pillarWidth, 46);
+          ctx.strokeRect(width - pillarWidth, y, pillarWidth, 46);
+
+          // Emerald moss growth on dark stone
           ctx.fillStyle = '#064e3b';
-          ctx.fillRect(width * 0.18 - 8, y + 38, 6, 4);
-          ctx.fillRect(width * 0.82 + 2, y + 20, 6, 4);
+          ctx.fillRect(pillarWidth - 10, y + 36, 7, 5);
+          ctx.fillRect(width - pillarWidth + 3, y + 18, 7, 5);
         }
 
-        // Left & Right Wall Torches
-        const leftTorchX = width * 0.18 - 12;
-        const rightTorchX = width * 0.82 + 12;
+        // Ancient Wall Sconces with dynamic flickering flames
+        const leftTorchX = pillarWidth - 14;
+        const rightTorchX = width - pillarWidth + 14;
         const wallTorchY = height * 0.42;
 
         [leftTorchX, rightTorchX].forEach((tx) => {
@@ -507,60 +757,90 @@ export function OpeningCutscene({ onComplete }) {
           ctx.fillRect(tx - 4, wallTorchY - 8 + Math.sin(time * 8) * 2, 8, 10);
           ctx.fillStyle = '#fde047';
           ctx.fillRect(tx - 2, wallTorchY - 12 + Math.sin(time * 10) * 3, 4, 6);
+
+          // Warm ambient aura around wall sconces
+          const sconceGlow = ctx.createRadialGradient(tx, wallTorchY - 4, 2, tx, wallTorchY - 4, 55);
+          sconceGlow.addColorStop(0, 'rgba(245, 158, 11, 0.45)');
+          sconceGlow.addColorStop(1, 'transparent');
+          ctx.fillStyle = sconceGlow;
+          ctx.beginPath();
+          ctx.arc(tx, wallTorchY - 4, 55, 0, Math.PI * 2);
+          ctx.fill();
         });
 
-        // Volumetric God Rays from Ceiling Archways
+        // Atmospheric God Rays from high ceiling grates
         ctx.save();
         ctx.fillStyle = 'rgba(251, 191, 36, 0.035)';
         ctx.beginPath();
-        ctx.moveTo(width * 0.3, 0);
-        ctx.lineTo(width * 0.4, 0);
+        ctx.moveTo(width * 0.28, 0);
+        ctx.lineTo(width * 0.38, 0);
         ctx.lineTo(width * 0.65, height);
         ctx.lineTo(width * 0.45, height);
         ctx.closePath();
         ctx.fill();
         ctx.restore();
 
-        // --- SCENE 3: The Lurking Void Warden Demon Silhouette at the Depths ---
+        // Forgotten Rusted Sword stuck in stone alcove (Left Pillar base)
+        ctx.fillStyle = '#94a3b8';
+        ctx.fillRect(pillarWidth - 18, height - 110, 4, 30);
+        ctx.fillStyle = '#f59e0b';
+        ctx.fillRect(pillarWidth - 23, height - 102, 14, 4);
+
+        // Ancient Skull embedded in stone alcove (Right Pillar base)
+        ctx.fillStyle = '#cbd5e1';
+        ctx.beginPath();
+        ctx.arc(width - pillarWidth + 18, height - 90, 8, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(width - pillarWidth + 15, height - 91, 2.5, 3);
+        ctx.fillRect(width - pillarWidth + 19, height - 91, 2.5, 3);
+
+        // --- SCENE 3: THE LURKING VOID WARDEN (LEVEL 50 BOSS) ---
         if (scene === 3) {
           drawVoidWarden(ctx, vanishingX, vanishingY + 30, time);
         }
 
-        // Floating dungeon dust particles
-        ctx.fillStyle = 'rgba(248, 250, 252, 0.45)';
-        dustParticles.forEach((p) => {
-          ctx.fillRect(p.x, p.y, p.size, p.size);
-          p.x += p.speedX;
-          p.y += p.speedY;
-          if (p.y < 0) p.y = height;
-          if (p.x < 0) p.x = width;
-          if (p.x > width) p.x = 0;
-        });
-
-        // Creeping Floor Mist / Fog
-        ctx.fillStyle = 'rgba(30, 41, 59, 0.28)';
-        fogWaves.forEach((fw) => {
+        // Creeping Floor Mist / Back Fog Layer
+        ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
+        fogWavesBack.forEach((fw) => {
           fw.x += fw.speed;
           if (fw.x > width + 100) fw.x = -100;
           ctx.beginPath();
           ctx.arc(fw.x, fw.baseY + Math.sin(time * 2 + fw.x * 0.01) * 8, fw.radius, 0, Math.PI * 2);
           ctx.fill();
         });
+
+        // Creeping Floor Mist / Front Fog Layer
+        ctx.fillStyle = 'rgba(30, 41, 59, 0.25)';
+        fogWavesFront.forEach((fw) => {
+          fw.x += fw.speed;
+          if (fw.x > width + 80) fw.x = -80;
+          ctx.beginPath();
+          ctx.arc(fw.x, fw.baseY + Math.sin(time * 2.5 + fw.x * 0.015) * 6, fw.radius, 0, Math.PI * 2);
+          ctx.fill();
+        });
       }
 
-      // --- SCENE 4 & 5: Cinematic Champion & Interactive Target Minion ---
+      // =====================================================================
+      // --- SCENE 4 & 5: CINEMATIC CHAMPION & SHADOW MINIONS BATTLE ---
+      // =====================================================================
       if (scene >= 4) {
         const kx = width / 2;
-        const targetKy = scene === 4 ? height / 2 + 55 : height / 2 + 100;
-        const knightScale = scene === 4 ? 3.1 : 3.6;
+        const targetKy = scene === 4 ? height / 2 + 55 : height / 2 + 95;
+        const knightScale = scene === 4 ? 3.1 : 3.5;
 
-        // Draw Interactive Shadow Minion / Target Creature in Front
-        const minionX = kx + 85 * (knightScale / 3.2);
-        const minionY = targetKy - 15;
-        const isMinionHit = now - lastSlashTimeRef.current < 260;
-        drawShadowMinion(ctx, minionX, minionY, knightScale * 0.65, time, isMinionHit);
+        // Render Active Shadow Minions (Scene 4)
+        if (scene === 4) {
+          minionStatesRef.current.forEach((m) => {
+            if (m.isDead) return;
+            const minionX = kx + m.xOffset * (knightScale / 3.2);
+            const minionY = targetKy - 15;
+            const isMinionHit = now - m.hitTimer < 240;
+            drawShadowMinion(ctx, minionX, minionY, knightScale * 0.65, time, isMinionHit);
+          });
+        }
 
-        // Render Hero Champion
+        // Render Hero Champion with Class Model
         drawCinematicChampion(
           ctx,
           kx,
@@ -573,10 +853,49 @@ export function OpeningCutscene({ onComplete }) {
         );
       }
 
+      // =====================================================================
+      // --- SCENE 5 GRAND SLASH PARTICLES & SWEEPING ARC ---
+      // =====================================================================
+      if (scene === 5 && grandSlashRevealed) {
+        // Triumphant Golden/Cyan Arc Slash across the screen
+        ctx.save();
+        const slashProgress = Math.min(1, (currentTime - 22.0) * 1.5);
+        if (slashProgress < 1) {
+          ctx.strokeStyle = '#fde047';
+          ctx.lineWidth = 12 * (1 - slashProgress);
+          ctx.beginPath();
+          ctx.moveTo(width * 0.15, height * 0.25);
+          ctx.lineTo(width * (0.15 + 0.7 * slashProgress), height * (0.25 + 0.5 * slashProgress));
+          ctx.stroke();
+
+          ctx.strokeStyle = '#38bdf8';
+          ctx.lineWidth = 6 * (1 - slashProgress);
+          ctx.stroke();
+        }
+        ctx.restore();
+      }
+
+      // =====================================================================
+      // FLOATING PARTICLES & FX LAYERS
+      // =====================================================================
+
+      // Floating dungeon dust motes & mana particles
+      dustParticles.forEach((p) => {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.alpha;
+        ctx.fillRect(p.x, p.y, p.size, p.size);
+        p.x += p.speedX;
+        p.y += p.speedY;
+        if (p.y < 0) p.y = height;
+        if (p.x < 0) p.x = width;
+        if (p.x > width) p.x = 0;
+      });
+      ctx.globalAlpha = 1.0;
+
       // Render Floating Damage Numbers
       for (let i = damagePopupsRef.current.length - 1; i >= 0; i--) {
         const dp = damagePopupsRef.current[i];
-        dp.y -= 1.4;
+        dp.y -= 1.5;
         dp.life -= 0.022;
 
         if (dp.life <= 0) {
@@ -585,7 +904,7 @@ export function OpeningCutscene({ onComplete }) {
         }
 
         ctx.save();
-        ctx.font = `bold ${Math.round(13 * dp.scale)}px "Press Start 2P", monospace`;
+        ctx.font = `bold ${Math.round(13 * dp.scale)}px monospace`;
         ctx.fillStyle = dp.color;
         ctx.globalAlpha = Math.min(1, dp.life * 1.5);
         ctx.shadowColor = '#000000';
@@ -600,7 +919,7 @@ export function OpeningCutscene({ onComplete }) {
         sp.x += sp.vx;
         sp.y += sp.vy;
         sp.vy += 0.25; // gravity
-        sp.life -= 0.04;
+        sp.life -= 0.038;
 
         if (sp.life <= 0) {
           sparksRef.current.splice(i, 1);
@@ -610,6 +929,25 @@ export function OpeningCutscene({ onComplete }) {
         ctx.fillStyle = sp.color;
         ctx.globalAlpha = sp.life;
         ctx.fillRect(sp.x, sp.y, sp.size, sp.size);
+        ctx.globalAlpha = 1.0;
+      }
+
+      // Render Void Debris
+      for (let i = voidDebrisRef.current.length - 1; i >= 0; i--) {
+        const d = voidDebrisRef.current[i];
+        d.x += d.vx;
+        d.y += d.vy;
+        d.vy += 0.35;
+        d.life -= 0.045;
+
+        if (d.life <= 0) {
+          voidDebrisRef.current.splice(i, 1);
+          continue;
+        }
+
+        ctx.fillStyle = d.color;
+        ctx.globalAlpha = d.life;
+        ctx.fillRect(d.x, d.y, d.size, d.size);
         ctx.globalAlpha = 1.0;
       }
 
@@ -624,7 +962,7 @@ export function OpeningCutscene({ onComplete }) {
       window.removeEventListener('resize', handleResize);
       if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
     };
-  }, [scene, selectedClass, isSlashing, screenShake]);
+  }, [scene, selectedClass, isSlashing, screenShake, currentTime, grandSlashRevealed]);
 
   // --- DRAW THE VOID WARDEN (SCENE 3) ---
   function drawVoidWarden(ctx, vx, vy, time) {
@@ -632,22 +970,22 @@ export function OpeningCutscene({ onComplete }) {
     ctx.translate(vx, vy);
 
     const breathe = Math.sin(time * 3) * 6;
-    const wardenScale = 1.8;
+    const wardenScale = 1.85;
 
     // Menacing Dark Purple Void Miasma Aura
     const auraPulse = Math.sin(time * 4) * 0.2 + 0.8;
-    const auraGrad = ctx.createRadialGradient(0, -30, 20, 0, -30, 140 * wardenScale);
-    auraGrad.addColorStop(0, `rgba(88, 28, 135, ${0.65 * auraPulse})`);
-    auraGrad.addColorStop(0.5, `rgba(30, 27, 75, ${0.35 * auraPulse})`);
+    const auraGrad = ctx.createRadialGradient(0, -30, 20, 0, -30, 150 * wardenScale);
+    auraGrad.addColorStop(0, `rgba(88, 28, 135, ${0.7 * auraPulse})`);
+    auraGrad.addColorStop(0.5, `rgba(30, 27, 75, ${0.4 * auraPulse})`);
     auraGrad.addColorStop(1, 'transparent');
 
     ctx.fillStyle = auraGrad;
     ctx.beginPath();
-    ctx.arc(0, -30, 140 * wardenScale, 0, Math.PI * 2);
+    ctx.arc(0, -30, 150 * wardenScale, 0, Math.PI * 2);
     ctx.fill();
 
     // Colossal Horned Silhouette
-    ctx.fillStyle = '#090514';
+    ctx.fillStyle = '#080410';
 
     // Massive Spiked Shoulders
     ctx.beginPath();
@@ -661,8 +999,7 @@ export function OpeningCutscene({ onComplete }) {
     ctx.closePath();
     ctx.fill();
 
-    // Spiked Horns
-    // Left Horn
+    // Left Demon Horn
     ctx.beginPath();
     ctx.moveTo(-35 * wardenScale, -45 + breathe);
     ctx.quadraticCurveTo(-65 * wardenScale, -95 + breathe, -95 * wardenScale, -80 + breathe);
@@ -671,7 +1008,7 @@ export function OpeningCutscene({ onComplete }) {
     ctx.closePath();
     ctx.fill();
 
-    // Right Horn
+    // Right Demon Horn
     ctx.beginPath();
     ctx.moveTo(35 * wardenScale, -45 + breathe);
     ctx.quadraticCurveTo(65 * wardenScale, -95 + breathe, 95 * wardenScale, -80 + breathe);
@@ -690,15 +1027,27 @@ export function OpeningCutscene({ onComplete }) {
     ctx.fillRect(-17 * wardenScale, -39 + breathe, 5 * wardenScale, 3 * wardenScale);
     ctx.fillRect(12 * wardenScale, -39 + breathe, 5 * wardenScale, 3 * wardenScale);
 
+    // Glowing Ethereal Runic Chains Binding the Warden (Shattering effect)
+    ctx.strokeStyle = `rgba(168, 85, 247, ${0.5 * auraPulse})`;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-90 * wardenScale, -30 + breathe);
+    ctx.lineTo(-140 * wardenScale, 60);
+    ctx.stroke();
+
+    ctx.beginPath();
+    ctx.moveTo(90 * wardenScale, -30 + breathe);
+    ctx.lineTo(140 * wardenScale, 60);
+    ctx.stroke();
+
     ctx.restore();
   }
 
-  // --- DRAW THE SHADOW MINION / TRAINING DUMMY (SCENE 4 & 5) ---
+  // --- DRAW SHADOW MINION (SCENE 4) ---
   function drawShadowMinion(ctx, mx, my, s, time, isHit) {
     ctx.save();
     ctx.translate(mx, my);
 
-    // If hit, knockback and white flash
     if (isHit) {
       ctx.translate(14, -8);
       ctx.fillStyle = '#ffffff';
@@ -717,7 +1066,7 @@ export function OpeningCutscene({ onComplete }) {
     ctx.closePath();
     ctx.fill();
 
-    // Spiky Claws / Minion Arms
+    // Spiky Claws
     ctx.fillStyle = isHit ? '#ffffff' : '#1e293b';
     ctx.fillRect(-15 * s, -6 * s + bob, 5 * s, 12 * s);
     ctx.fillRect(10 * s, -6 * s + bob, 5 * s, 12 * s);
@@ -763,7 +1112,7 @@ export function OpeningCutscene({ onComplete }) {
         : 'rgba(56, 189, 248, ';
 
     // Outer spinning ward ring
-    ctx.strokeStyle = wardColor + (0.55 * wardPulse) + ')';
+    ctx.strokeStyle = wardColor + 0.55 * wardPulse + ')';
     ctx.lineWidth = 2.5;
     ctx.beginPath();
     ctx.ellipse(0, 36 * scale * 0.45, wardRadius, wardRadius * 0.38, 0, 0, Math.PI * 2);
@@ -816,7 +1165,7 @@ export function OpeningCutscene({ onComplete }) {
     const legStride = isWalking ? Math.sin(time * 6) * (5 * s) : 0;
     const capeWave = Math.sin(time * 3.5) * (4 * s);
 
-    // Twin-Tail Flowing Crimson Cape
+    // Flowing Crimson Cape
     ctx.fillStyle = '#450a0a';
     ctx.beginPath();
     ctx.moveTo(-10 * s, -6 * s + walkBob);
@@ -835,20 +1184,11 @@ export function OpeningCutscene({ onComplete }) {
     ctx.closePath();
     ctx.fill();
 
-    ctx.strokeStyle = '#f59e0b';
-    ctx.lineWidth = 1.4 * s;
-    ctx.beginPath();
-    ctx.moveTo(-14 * s - capeWave * 0.8, 27 * s);
-    ctx.lineTo(14 * s + capeWave * 0.8, 27 * s);
-    ctx.stroke();
-
-    // Armored Sabatons & Greaves (Legs)
+    // Greaves & Legs
     const leftLegX = -7 * s + legStride * 0.6;
     const leftLegY = 12 * s + (isWalking ? Math.abs(legStride) * 0.4 : 0);
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(leftLegX - 2 * s, leftLegY, 5 * s, 12 * s);
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(leftLegX - 1.5 * s, leftLegY + 1 * s, 4 * s, 6 * s);
     ctx.fillStyle = '#475569';
     ctx.fillRect(leftLegX - 3 * s, leftLegY + 10 * s, 6 * s, 4 * s);
 
@@ -856,19 +1196,12 @@ export function OpeningCutscene({ onComplete }) {
     const rightLegY = 12 * s + (isWalking ? Math.abs(legStride) * 0.4 : 0);
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(rightLegX - 3 * s, rightLegY, 5 * s, 12 * s);
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(rightLegX - 2.5 * s, rightLegY + 1 * s, 4 * s, 6 * s);
     ctx.fillStyle = '#475569';
     ctx.fillRect(rightLegX - 3 * s, rightLegY + 10 * s, 6 * s, 4 * s);
 
-    // Chainmail Fauld & Hip Tassets (Waist)
+    // Waist & Belt
     ctx.fillStyle = '#0f172a';
     ctx.fillRect(-8 * s, 6 * s + walkBob, 16 * s, 7 * s);
-    ctx.fillStyle = '#334155';
-    ctx.fillRect(-9 * s, 7 * s + walkBob, 4 * s, 6 * s);
-    ctx.fillRect(5 * s, 7 * s + walkBob, 4 * s, 6 * s);
-
-    // Leather belt with golden buckle
     ctx.fillStyle = '#78350f';
     ctx.fillRect(-8 * s, 4 * s + walkBob, 16 * s, 3 * s);
     ctx.fillStyle = '#f59e0b';
@@ -879,8 +1212,6 @@ export function OpeningCutscene({ onComplete }) {
     ctx.fillRect(-8 * s, -8 * s + walkBob, 16 * s, 13 * s);
     ctx.fillStyle = '#334155';
     ctx.fillRect(-7 * s, -7 * s + walkBob, 14 * s, 11 * s);
-    ctx.fillStyle = '#475569';
-    ctx.fillRect(-5 * s, -6 * s + walkBob, 10 * s, 9 * s);
 
     // Golden Rune Cross on Chest
     const runeGlow = Math.sin(time * 4) * 0.3 + 0.7;
@@ -892,9 +1223,6 @@ export function OpeningCutscene({ onComplete }) {
     ctx.fillStyle = '#1e293b';
     ctx.fillRect(-13 * s, -8 * s + walkBob, 6 * s, 8 * s);
     ctx.fillRect(7 * s, -8 * s + walkBob, 6 * s, 8 * s);
-    ctx.fillStyle = '#f59e0b';
-    ctx.fillRect(-13 * s, -9 * s + walkBob, 6 * s, 2 * s);
-    ctx.fillRect(7 * s, -9 * s + walkBob, 6 * s, 2 * s);
 
     // Kite Shield on Left Arm
     const shieldX = -13 * s;
@@ -903,8 +1231,6 @@ export function OpeningCutscene({ onComplete }) {
     ctx.fillRect(shieldX - 2 * s, shieldY, 8 * s, 16 * s);
     ctx.fillStyle = '#0284c7';
     ctx.fillRect(shieldX, shieldY + 2 * s, 4 * s, 12 * s);
-    ctx.fillStyle = '#f59e0b';
-    ctx.fillRect(shieldX - 1 * s, shieldY + 6 * s, 6 * s, 3 * s);
 
     // Great-Helm & Flowing Red Plume
     const headY = -20 * s + walkBob;
@@ -913,7 +1239,6 @@ export function OpeningCutscene({ onComplete }) {
     ctx.moveTo(0, headY - 4 * s);
     ctx.quadraticCurveTo(-14 * s - capeWave, headY - 14 * s, -18 * s - capeWave * 1.2, headY - 2 * s);
     ctx.lineTo(-12 * s - capeWave * 0.8, headY - 2 * s);
-    ctx.quadraticCurveTo(-8 * s - capeWave * 0.5, headY - 8 * s, 0, headY - 2 * s);
     ctx.closePath();
     ctx.fill();
 
@@ -924,7 +1249,7 @@ export function OpeningCutscene({ onComplete }) {
     ctx.fillStyle = '#080a10';
     ctx.fillRect(-6 * s, headY + 5.5 * s, 12 * s, 4 * s);
 
-    // Glowing Cyan Visor Soul Eyes
+    // Glowing Cyan Visor Eyes
     ctx.fillStyle = '#00e5ff';
     ctx.fillRect(-4 * s, headY + 6.5 * s, 3.5 * s, 2 * s);
     ctx.fillRect(0.5 * s, headY + 6.5 * s, 3.5 * s, 2 * s);
@@ -945,25 +1270,12 @@ export function OpeningCutscene({ onComplete }) {
     ctx.fillRect(1.5 * s, -2.5 * s, 33 * s, 5 * s);
 
     // Glowing cyan fuller runes
-    ctx.fillStyle = '#082f49';
-    ctx.fillRect(3 * s, -1.2 * s, 28 * s, 2.4 * s);
     ctx.fillStyle = '#00e5ff';
     ctx.fillRect(4 * s, -0.8 * s, 26 * s, 1.6 * s);
 
-    // Blade tip bevel
-    ctx.fillStyle = '#f8fafc';
-    ctx.beginPath();
-    ctx.moveTo(36 * s, -3.5 * s);
-    ctx.lineTo(41 * s, 0);
-    ctx.lineTo(36 * s, 3.5 * s);
-    ctx.closePath();
-    ctx.fill();
-
-    // Winged Golden Crossguard & Ruby Gem
+    // Crossguard
     ctx.fillStyle = '#f59e0b';
     ctx.fillRect(-2 * s, -7 * s, 4 * s, 14 * s);
-    ctx.fillStyle = '#ef4444';
-    ctx.fillRect(-1 * s, -2 * s, 2.5 * s, 4 * s);
 
     ctx.restore();
   }
@@ -986,8 +1298,6 @@ export function OpeningCutscene({ onComplete }) {
     ctx.fillRect(-8 * s, -6 * s + bob, 16 * s, 30 * s);
     ctx.fillStyle = '#9333ea';
     ctx.fillRect(-6 * s, -4 * s + bob, 12 * s, 26 * s);
-    ctx.fillStyle = '#f59e0b';
-    ctx.fillRect(-1 * s, -4 * s + bob, 2 * s, 26 * s);
 
     // Deep Mystic Hood & Glowing Purple Eyes
     const headY = -18 * s + bob;
@@ -1024,7 +1334,7 @@ export function OpeningCutscene({ onComplete }) {
   function drawCinematicAssassin(ctx, s, time, currentScene, isAttacking) {
     const bob = Math.sin(time * 3.5) * (1.8 * s);
 
-    // Dark Shadow Cloak & Mask
+    // Dark Shadow Cloak
     ctx.fillStyle = '#022c22';
     ctx.beginPath();
     ctx.moveTo(-9 * s, -5 * s + bob);
@@ -1057,33 +1367,12 @@ export function OpeningCutscene({ onComplete }) {
     ctx.fillRect(11 * s, 4 * s + bob, 1.5 * s, 8 * s);
   }
 
-  const handleEnterDungeon = () => {
-    playSlash();
-    setIsFadingOut(true);
-    startAmbientDungeon();
-    try {
-      localStorage.setItem('arcSlashIntroSeen', 'true');
-    } catch (e) {}
-    setTimeout(() => {
-      onComplete();
-    }, 850);
-  };
-
-  const handleSkip = () => {
-    playUiClick();
-    setIsFadingOut(true);
-    startAmbientDungeon();
-    try {
-      localStorage.setItem('arcSlashIntroSeen', 'true');
-    } catch (e) {}
-    setTimeout(() => {
-      onComplete();
-    }, 380);
-  };
+  // Current progress percentage (0 - 100)
+  const progressPercent = Math.min(100, Math.max(0, (currentTime / TOTAL_CUTSCENE_DURATION) * 100));
 
   return (
     <div
-      onClick={triggerSlash}
+      onClick={() => triggerSlash()}
       className={`fixed inset-0 z-50 flex flex-col items-center justify-between bg-[#080a0f] text-white transition-opacity duration-700 select-none overflow-hidden cursor-crosshair ${
         isFadingOut ? 'opacity-0 pointer-events-none scale-105' : 'opacity-100'
       }`}
@@ -1107,40 +1396,62 @@ export function OpeningCutscene({ onComplete }) {
       {/* ========================================================================= */}
       {/* TOP CINEMASCOPE LETTERBOX BAR */}
       {/* ========================================================================= */}
-      <div className="relative z-30 w-full h-14 md:h-16 bg-[#040609] border-b border-[#1e293b] flex items-center justify-between px-4 sm:px-8 select-none">
-        {/* Left Badge */}
+      <div className="relative z-30 w-full h-14 md:h-16 bg-[#040609]/95 border-b border-[#1e293b] flex items-center justify-between px-4 sm:px-8 select-none backdrop-blur-sm">
+        {/* Left Badge: Cinematic Mode Indicator */}
         <div className="flex items-center gap-2.5">
-          <span className="w-2 h-2 bg-[#f59e0b] rotate-45 animate-pulse" />
-          <span className="font-pixel text-[8px] sm:text-[9.5px] text-[#e2e8f0] tracking-widest uppercase">
+          <span className="w-2.5 h-2.5 bg-[#f59e0b] rotate-45 animate-pulse" />
+          <span className="font-pixel text-[8.5px] sm:text-[10px] text-[#e2e8f0] tracking-widest uppercase">
             ARC-CINEMATICS // PROLOGUE
           </span>
-          <span className="hidden sm:inline-block px-1.5 py-0.5 bg-[#1e293b] text-[#38bdf8] font-mono text-[9px] border border-[#3b4b66]">
-            60 FPS
+          <span className="inline-block px-1.5 py-0.5 bg-[#0f172a] text-[#38bdf8] font-mono text-[9px] border border-[#3b4b66]">
+            AUTO-PLAY
           </span>
         </div>
 
-        {/* Center Prompt / Audio Hint */}
-        <div className="hidden md:flex items-center gap-2 text-center">
-          <span className="font-pixel text-[8.5px] text-[#94a3b8] tracking-widest">
-            {audioUnlocked ? '🔊 STEREO SYNTH ACTIVE' : '🔇 CLICK ANYWHERE TO UNMUTE AUDIO'}
-          </span>
-        </div>
-
-        {/* Right Action Buttons */}
-        <div className="flex items-center gap-2.5">
-          {!audioUnlocked && (
+        {/* Center: Audio & Playback Status */}
+        <div className="hidden md:flex items-center gap-3 text-center">
+          {audioUnlocked ? (
+            <div className="flex items-center gap-1.5 text-[#38bdf8] font-pixel text-[8.5px] tracking-widest">
+              <span>🔊 STEREO SYNTH</span>
+              {/* Sound wave visualizer bars */}
+              <div className="flex items-center gap-0.5 h-3">
+                <span className="w-1 bg-[#38bdf8] h-3 animate-pulse" />
+                <span className="w-1 bg-[#38bdf8] h-2 animate-bounce" />
+                <span className="w-1 bg-[#38bdf8] h-3.5 animate-pulse" />
+              </div>
+            </div>
+          ) : (
             <button
               type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 unlockAudio();
               }}
-              className="px-2.5 py-1 bg-[#b45309] border border-[#fde047] text-[#fde047] font-pixel text-[8.5px] tracking-wider hover:bg-[#d97706] hover:text-white transition-all shadow-[0_0_10px_rgba(245,158,11,0.4)] cursor-pointer"
+              className="px-2 py-0.5 bg-[#b45309]/80 border border-[#fde047] text-[#fde047] font-pixel text-[8px] tracking-wider animate-pulse hover:bg-[#d97706] transition-all cursor-pointer"
             >
-              🔊 UNMUTE
+              🔇 KLIK UNTUK AKTIFKAN SUARA
             </button>
           )}
+        </div>
 
+        {/* Right Action Controls: Play/Pause, Unmute & Skip */}
+        <div className="flex items-center gap-2">
+          {/* Play / Pause Toggle */}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              playUiClick();
+              setIsPlaying((prev) => !prev);
+            }}
+            onMouseEnter={playUiHover}
+            className="px-2.5 py-1 bg-[#182030]/90 border border-[#3b4b66] text-[#cbd5e1] font-pixel text-[8px] tracking-wider hover:border-[#f8fafc] hover:text-white transition-all cursor-pointer"
+            title="Pause / Play Cinematic"
+          >
+            {isPlaying ? '⏸ PAUSE' : '▶ RESUME'}
+          </button>
+
+          {/* Skip Button */}
           <button
             type="button"
             onClick={(e) => {
@@ -1148,9 +1459,9 @@ export function OpeningCutscene({ onComplete }) {
               handleSkip();
             }}
             onMouseEnter={playUiHover}
-            className="px-3 py-1 bg-[#182030]/90 border border-[#3b4b66] text-[#cbd5e1] font-pixel text-[8.5px] tracking-widest hover:border-[#f8fafc] hover:text-white transition-all cursor-pointer"
+            className="px-3 py-1 bg-[#182030]/90 border border-[#3b4b66] text-[#cbd5e1] font-pixel text-[8.5px] tracking-widest hover:border-[#f59e0b] hover:text-[#fde047] transition-all cursor-pointer shadow-[0_0_10px_rgba(0,0,0,0.5)]"
           >
-            SKIP [ESC] ⏭
+            LEWATI [ESC] ⏭
           </button>
         </div>
       </div>
@@ -1162,14 +1473,19 @@ export function OpeningCutscene({ onComplete }) {
         {/* SCENE 1: THE ABYSS */}
         {scene === 1 && (
           <div className="animate-fade-in flex flex-col items-center">
-            <span className="font-pixel text-[9px] sm:text-[10px] text-[#38bdf8] tracking-widest uppercase mb-3 drop-shadow-[0_0_8px_rgba(56,189,248,0.5)]">
-              ✦ CHRONICLE ENTRY I ✦
-            </span>
-            <h1 className="font-pixel text-xl sm:text-3xl text-[#f8fafc] tracking-widest leading-relaxed drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#090d16]/80 border border-[#38bdf8]/40 mb-3 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
+              <span className="w-1.5 h-1.5 bg-[#38bdf8] rotate-45" />
+              <span className="font-pixel text-[9px] sm:text-[10px] text-[#38bdf8] tracking-widest uppercase">
+                BAB I : KEBANGKITAN RETAKAN KEGELAPAN
+              </span>
+              <span className="w-1.5 h-1.5 bg-[#38bdf8] rotate-45" />
+            </div>
+
+            <h1 className="font-pixel text-xl sm:text-3xl text-[#f8fafc] tracking-widest leading-relaxed drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)]">
               THE DUNGEON REMEMBERS...
             </h1>
-            <p className="font-outfit text-sm sm:text-base text-[#94a3b8] mt-3 tracking-wider max-w-lg leading-relaxed">
-              Di kedalaman 50 lantai Catacombs purba, segel kegelapan mulai retak.
+            <p className="font-outfit text-sm sm:text-base text-[#94a3b8] mt-3 tracking-wider max-w-lg leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+              Di kedalaman 50 lantai Catacombs purba, segel kuno mulai retak. Energi hampa yang terkunci ribuan tahun kini bergetar kembali.
             </p>
           </div>
         )}
@@ -1177,14 +1493,19 @@ export function OpeningCutscene({ onComplete }) {
         {/* SCENE 2: THE EMBER */}
         {scene === 2 && (
           <div className="animate-fade-in flex flex-col items-center">
-            <span className="font-pixel text-[9px] sm:text-[10px] text-[#f59e0b] tracking-widest uppercase mb-3 drop-shadow-[0_0_8px_rgba(245,158,11,0.6)]">
-              ✦ A SPARK IN THE VOID ✦
-            </span>
-            <h2 className="font-pixel text-base sm:text-2xl text-[#fef08a] tracking-widest leading-relaxed drop-shadow-[0_4px_16px_rgba(0,0,0,0.95)]">
-              A SINGLE EMBER PIERCES THE SHADOWS.
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#090d16]/80 border border-[#f59e0b]/40 mb-3 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
+              <span className="w-1.5 h-1.5 bg-[#f59e0b] rotate-45" />
+              <span className="font-pixel text-[9px] sm:text-[10px] text-[#f59e0b] tracking-widest uppercase">
+                BAB II : KILATAN CAHAYA PERTAMA
+              </span>
+              <span className="w-1.5 h-1.5 bg-[#f59e0b] rotate-45" />
+            </div>
+
+            <h2 className="font-pixel text-base sm:text-2xl text-[#fef08a] tracking-widest leading-relaxed drop-shadow-[0_4px_20px_rgba(0,0,0,0.95)]">
+              A SINGLE EMBER PIERCES THE SHADOWS
             </h2>
-            <p className="font-outfit text-sm sm:text-base text-[#cbd5e1] mt-3 tracking-wider max-w-md">
-              Sebuah obor kuno dinyalakan oleh mereka yang berani melangkah masuk.
+            <p className="font-outfit text-sm sm:text-base text-[#cbd5e1] mt-3 tracking-wider max-w-lg leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+              Sebuah obor kuno membakar kesunyian. Lorong batu berpilar terungkap, membimbing langkah sang penakluk menuju lorong terlarang.
             </p>
           </div>
         )}
@@ -1192,150 +1513,85 @@ export function OpeningCutscene({ onComplete }) {
         {/* SCENE 3: THE WARDEN */}
         {scene === 3 && (
           <div className="animate-fade-in flex flex-col items-center">
-            <span className="font-pixel text-[9.5px] sm:text-[11px] text-[#ef4444] tracking-widest uppercase mb-2 animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.8)]">
-              ⚠️ DANGER: LEVEL 50 BOSS DETECTED
-            </span>
-            <h2 className="font-pixel text-lg sm:text-2xl text-[#f8fafc] tracking-widest drop-shadow-[0_0_20px_rgba(168,85,247,0.7)]">
-              THE VOID WARDEN AWAKENS
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#450a0a]/90 border border-[#ef4444] mb-2 shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse">
+              <span className="font-pixel text-[9px] sm:text-[10.5px] text-[#fecaca] tracking-widest uppercase">
+                ⚠️ PERINGATAN: LEVEL 50 VOID WARDEN TERDETEKSI
+              </span>
+            </div>
+
+            <h2 className="font-pixel text-lg sm:text-3xl text-[#f8fafc] tracking-widest drop-shadow-[0_0_25px_rgba(168,85,247,0.8)]">
+              THE WARDEN OF THE VOID AWAKENS
             </h2>
-            <p className="font-outfit text-sm sm:text-base text-[#c084fc] mt-2 tracking-wider max-w-lg">
-              Entitas kegelapan mengintai di kedalaman terdalam. Hanya bilah Arc yang dapat mematahkan kutukannya.
+            <p className="font-outfit text-sm sm:text-base text-[#c084fc] mt-2.5 tracking-wider max-w-lg leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
+              Rantai segel hancur. Entitas kuno penguasa kegelapan bangkit menuntut jiwa siapa pun yang berani melangkah lebih dalam.
             </p>
           </div>
         )}
 
-        {/* SCENE 4: THE CHAMPION */}
+        {/* SCENE 4: THE STRIKE (Autonomous Combat Display) */}
         {scene === 4 && (
           <div className="animate-fade-in flex flex-col items-center">
-            <span className="font-pixel text-[9px] text-[#38bdf8] tracking-widest uppercase mb-2">
-              ✦ READY WEAPONS ✦
-            </span>
-            <h2 className="font-pixel text-base sm:text-xl text-[#fde047] tracking-widest drop-shadow-[0_2px_12px_rgba(0,0,0,0.9)] mb-3">
-              A CHAMPION STEPS FORWARD.
-            </h2>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 bg-[#0f172a]/90 border border-[#f59e0b] shadow-[0_0_15px_rgba(245,158,11,0.3)]">
-              <span className="font-pixel text-[8.5px] sm:text-[9.5px] text-[#f8fafc] tracking-widest">
-                [ KLIK ATAU TEKAN SPASI UNTUK MENGAYUNKAN SERANGAN ]
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0f172a]/90 border border-[#38bdf8] mb-2 shadow-[0_0_15px_rgba(56,189,248,0.4)]">
+              <span className="font-pixel text-[9px] sm:text-[10px] text-[#38bdf8] tracking-widest uppercase">
+                BAB IV : BILAH CAHAYA MENEBAS
               </span>
+            </div>
+
+            <h2 className="font-pixel text-base sm:text-2xl text-[#fde047] tracking-widest drop-shadow-[0_2px_15px_rgba(0,0,0,0.9)] mb-2">
+              A CHAMPION ENGAGES THE SWARM!
+            </h2>
+
+            <p className="font-outfit text-xs sm:text-sm text-[#cbd5e1] max-w-md tracking-wider mb-2">
+              Sang ksatria menebas bayangan kegelapan dengan rentetan serangan pedang sakti!
+            </p>
+
+            <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#090d16]/80 border border-[#f59e0b]/50 text-[#fde047] font-pixel text-[8px] sm:text-[9px] tracking-widest">
+              [ SERANGAN OTOMATIS BERLANGSUNG • KLIK UNTUK SERANGAN TAMBAHAN ]
             </div>
           </div>
         )}
 
-        {/* SCENE 5: ARC SLASH GRAND TITLE & HERO DEPLOYMENT */}
+        {/* SCENE 5: ARC SLASH GRAND TITLE (PURE CINEMATIC FINALE) */}
         {scene >= 5 && (
-          <div className="flex flex-col items-center animate-fade-in pointer-events-auto w-full max-w-3xl">
-            {/* Crest & Title */}
-            <div className="flex items-center gap-3 mb-1">
-              <span className="w-8 h-0.5 bg-[#f59e0b]" />
-              <span className="font-pixel text-[9px] sm:text-[10px] text-[#f59e0b] tracking-widest uppercase">
-                DARK FANTASY ACTION RPG
+          <div className="flex flex-col items-center animate-fade-in pointer-events-none w-full max-w-2xl text-center">
+            {/* Crest & Title Header */}
+            <div className="inline-flex items-center gap-2.5 px-4 py-1 bg-[#090d16]/85 border border-[#f59e0b]/40 mb-3 shadow-[0_0_20px_rgba(245,158,11,0.25)]">
+              <span className="w-2 h-2 bg-[#f59e0b] rotate-45" />
+              <span className="font-pixel text-[9px] sm:text-[10.5px] text-[#f59e0b] tracking-widest uppercase">
+                ✦ 50 FLOORS OF CATACOMBS ✦
               </span>
-              <span className="w-8 h-0.5 bg-[#f59e0b]" />
+              <span className="w-2 h-2 bg-[#f59e0b] rotate-45" />
             </div>
 
-            <h1 className="font-pixel text-3xl sm:text-5xl md:text-6xl text-[#f8fafc] tracking-widest my-1 drop-shadow-[0_0_30px_rgba(245,158,11,0.7)]">
+            <h1 className="font-pixel text-4xl sm:text-6xl md:text-7xl text-[#f8fafc] tracking-widest my-2 drop-shadow-[0_0_40px_rgba(245,158,11,0.8)] animate-pulse">
               ARC SLASH
             </h1>
 
-            <p className="font-outfit text-xs sm:text-sm text-[#cbd5e1] max-w-lg tracking-wider mb-4 drop-shadow-[0_2px_6px_rgba(0,0,0,0.9)]">
-              Taklukkan 50 lantai Catacombs. Kuasai gaya tempurmu dan kembalikan cahaya.
-            </p>
-
-            {/* Interactive Hero Class Selector Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 w-full mb-5">
-              {HERO_CLASSES.map((cls) => {
-                const isSelected = selectedClass === cls.id;
-                return (
-                  <button
-                    key={cls.id}
-                    type="button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      playUiClick();
-                      setSelectedClass(cls.id);
-                    }}
-                    onMouseEnter={playUiHover}
-                    className={`relative p-3 text-left border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-[#182030] shadow-[0_0_18px_rgba(245,158,11,0.35)] scale-102'
-                        : 'bg-[#0f172a]/80 border-[#2c394b] opacity-80 hover:opacity-100 hover:border-[#475569]'
-                    }`}
-                    style={{
-                      borderColor: isSelected ? cls.color : undefined
-                    }}
-                  >
-                    <div className="flex items-center justify-between mb-1.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-base">{cls.icon}</span>
-                        <span
-                          className="font-pixel text-[9.5px] tracking-wider"
-                          style={{ color: cls.color }}
-                        >
-                          {cls.name}
-                        </span>
-                      </div>
-                      {isSelected && (
-                        <span className="px-1 py-0.5 bg-[#f59e0b]/20 border border-[#f59e0b] font-pixel text-[7px] text-[#fde047]">
-                          ACTIVE
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="font-pixel text-[7.5px] text-[#94a3b8] mb-1.5 tracking-wider">
-                      {cls.skill}
-                    </div>
-
-                    {/* Stats Preview */}
-                    <div className="space-y-1 font-mono text-[9px] text-[#64748b]">
-                      <div className="flex justify-between items-center">
-                        <span>ATK</span>
-                        <div className="w-16 bg-[#1e293b] h-1.5">
-                          <div
-                            className="bg-[#ef4444] h-1.5"
-                            style={{ width: `${cls.stats.atk}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>DEF</span>
-                        <div className="w-16 bg-[#1e293b] h-1.5">
-                          <div
-                            className="bg-[#38bdf8] h-1.5"
-                            style={{ width: `${cls.stats.def}%` }}
-                          />
-                        </div>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span>SPD</span>
-                        <div className="w-16 bg-[#1e293b] h-1.5">
-                          <div
-                            className="bg-[#10b981] h-1.5"
-                            style={{ width: `${cls.stats.spd}%` }}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-                );
-              })}
+            <div className="flex items-center gap-3 my-2">
+              <span className="w-12 h-px bg-gradient-to-r from-transparent to-[#f59e0b]" />
+              <span className="font-pixel text-[10px] sm:text-xs text-[#fde047] tracking-[0.25em] uppercase">
+                DARK FANTASY ARPG
+              </span>
+              <span className="w-12 h-px bg-gradient-to-l from-transparent to-[#f59e0b]" />
             </div>
 
-            {/* Action Launch Button */}
-            <div className="flex flex-col items-center gap-2">
-              <PixelButton
-                variant="primary"
-                size="lg"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  handleEnterDungeon();
-                }}
-                className="animate-bounce shadow-[0_0_25px_rgba(245,158,11,0.6)]"
-              >
-                [ ENTER THE DUNGEON ]
-              </PixelButton>
+            <p className="font-outfit text-sm sm:text-base text-[#cbd5e1] max-w-lg tracking-wider mt-2 mb-6 leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
+              Kutukan kegelapan menanti untuk dipecahkan. Gerbang purba telah terbuka, menyambut langkah sang penakluk.
+            </p>
 
-              <span className="font-pixel text-[8px] sm:text-[9px] text-[#94a3b8] tracking-widest mt-1">
-                TEKAN ENTER ATAU KLIK UNTUK MASUK • [SPASI] UJI SERANGAN
+            {/* Seamless Auto-Launch Progress Bar */}
+            <div className="flex flex-col items-center gap-2 w-full max-w-xs">
+              <div className="w-full bg-[#1e293b]/90 border border-[#3b4b66] p-0.5 relative overflow-hidden rounded-xs">
+                <div
+                  className="h-1.5 bg-gradient-to-r from-[#f59e0b] via-[#fde047] to-[#38bdf8] transition-all duration-100"
+                  style={{
+                    width: `${Math.min(100, Math.max(0, ((currentTime - 22.0) / (TOTAL_CUTSCENE_DURATION - 22.0)) * 100))}%`
+                  }}
+                />
+              </div>
+
+              <span className="font-pixel text-[8.5px] sm:text-[9.5px] text-[#fde047] tracking-widest animate-pulse mt-1">
+                MEMASUKI DUNGEON... {autoEnterRemaining}s
               </span>
             </div>
           </div>
@@ -1350,48 +1606,51 @@ export function OpeningCutscene({ onComplete }) {
               COMBO x{combo}!
             </span>
             <span className="font-pixel text-[8px] text-[#38bdf8]">
-              {combo >= 8 ? 'GODLIKE' : combo >= 5 ? 'ARC RAGE' : 'STRIKE'}
+              {combo >= 8 ? 'GODLIKE' : combo >= 4 ? 'ARC RAGE' : 'STRIKE'}
             </span>
           </div>
         </div>
       )}
 
       {/* ========================================================================= */}
-      {/* BOTTOM CINEMASCOPE LETTERBOX BAR & CHAPTER SCRUBBER */}
+      {/* BOTTOM CINEMASCOPE LETTERBOX BAR (CLEAN MOVIE PRESENTATION - NO BUTTONS) */}
       {/* ========================================================================= */}
-      <div className="relative z-30 w-full h-16 md:h-20 bg-[#040609] border-t border-[#1e293b] flex flex-col sm:flex-row items-center justify-between px-4 sm:px-8 py-2 gap-2 select-none">
-        {/* Chapter Pills Scrubber */}
-        <div className="flex items-center gap-1.5 sm:gap-2.5 overflow-x-auto w-full sm:w-auto justify-center sm:justify-start">
-          {SCENE_CHAPTERS.map((ch) => {
-            const isActive = scene === ch.num;
-            return (
-              <button
-                key={ch.num}
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setAutoAdvance(false);
-                  goToScene(ch.num);
-                }}
-                className={`px-2.5 py-1 font-pixel text-[7.5px] sm:text-[8px] tracking-wider transition-all cursor-pointer whitespace-nowrap border ${
-                  isActive
-                    ? 'bg-[#1e293b] border-[#f59e0b] text-[#fde047] shadow-[0_0_10px_rgba(245,158,11,0.4)] scale-105'
-                    : 'bg-[#0d121c] border-[#2c394b] text-[#64748b] hover:text-[#cbd5e1] hover:border-[#475569]'
-                }`}
-              >
-                {ch.label}
-              </button>
-            );
-          })}
+      <div className="relative z-30 w-full bg-[#040609]/95 border-t border-[#1e293b]/60 flex flex-col justify-between select-none backdrop-blur-sm">
+        {/* Continuous Movie Timeline Progress Line */}
+        <div className="w-full bg-[#0b101b] h-1 relative overflow-hidden">
+          <div
+            className="h-full bg-gradient-to-r from-[#38bdf8] via-[#f59e0b] to-[#fde047] transition-all duration-100"
+            style={{ width: `${progressPercent}%` }}
+          />
         </div>
 
-        {/* Helpful Shortcut Indicator */}
-        <div className="hidden lg:flex items-center gap-4 text-[#64748b] font-pixel text-[8px] tracking-widest">
-          <span>[SPASI/KLIK] SERANG</span>
-          <span>[Q/E] GANTI KELAS</span>
-          <span>[ENTER] MASUK</span>
+        <div className="flex items-center justify-between px-6 py-3 text-[#64748b] font-pixel text-[8px] sm:text-[9px] tracking-widest">
+          {/* Active Chapter Label Display (Pure text, no button) */}
+          <div className="flex items-center gap-2 text-[#94a3b8]">
+            <span className="w-1.5 h-1.5 bg-[#f59e0b] rotate-45" />
+            <span>
+              {SCENE_CHAPTERS.find((ch) => ch.num === scene)?.label || 'ARC SLASH'}
+            </span>
+          </div>
+
+          {/* Timecode & Subtle Hint */}
+          <div className="flex items-center gap-4 text-[#64748b]">
+            <span className="text-[#38bdf8] font-mono text-[9px]">
+              {Math.floor(currentTime / 60)
+                .toString()
+                .padStart(2, '0')}
+              :
+              {Math.floor(currentTime % 60)
+                .toString()
+                .padStart(2, '0')}{' '}
+              / 00:28
+            </span>
+            <span className="hidden sm:inline text-[#475569]">[ESC] LEWATI</span>
+          </div>
         </div>
       </div>
     </div>
   );
 }
+
+export default OpeningCutscene;
