@@ -15,7 +15,7 @@ export function WorldSection() {
   };
 
   return (
-    <section id="world" className="py-20 px-4 max-w-7xl mx-auto">
+    <section id="world" className="py-20 px-4 max-w-7xl mx-auto scroll-mt-20 sm:scroll-mt-24">
       {/* Header */}
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
         <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-[#111622] border border-[#2ecc71]/40">
@@ -24,7 +24,7 @@ export function WorldSection() {
           </span>
         </div>
 
-        <h2 className="font-pixel text-3xl sm:text-4xl text-[#f8fafc] tracking-widest mb-4">
+        <h2 className="font-pixel text-xl sm:text-3xl md:text-4xl text-[#f8fafc] tracking-wider sm:tracking-widest mb-4">
           50 FLOORS OF THE ABYSS
         </h2>
 
@@ -36,7 +36,7 @@ export function WorldSection() {
       {/* Interactive Map Nodes Layout */}
       <div className="relative max-w-4xl mx-auto space-y-6">
         {/* Connecting Vertical Energy Conduit */}
-        <div className="hidden sm:block absolute left-8 top-10 bottom-10 w-1 bg-gradient-to-b from-[#2ecc71] via-[#f59e0b] to-[#06b6d4] opacity-40 pointer-events-none" />
+        <div className="hidden sm:block absolute left-6 -translate-x-1/2 top-10 bottom-10 w-0.5 bg-gradient-to-b from-[#2ecc71] via-[#f59e0b] to-[#06b6d4] opacity-50 pointer-events-none" />
 
         {DUNGEONS_DATA.map((dungeon, index) => {
           const isHovered = hoveredDungeon?.id === dungeon.id;

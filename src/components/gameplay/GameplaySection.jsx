@@ -83,7 +83,7 @@ export function GameplaySection() {
   ];
 
   return (
-    <section id="gameplay" className="py-20 px-4 max-w-7xl mx-auto">
+    <section id="gameplay" className="py-20 px-4 max-w-7xl mx-auto scroll-mt-20 sm:scroll-mt-24">
       {/* Header */}
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-14">
         <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-[#111622] border border-[#f59e0b]/40">
@@ -92,7 +92,7 @@ export function GameplaySection() {
           </span>
         </div>
 
-        <h2 className="font-pixel text-3xl sm:text-4xl text-[#f8fafc] tracking-widest mb-4">
+        <h2 className="font-pixel text-xl sm:text-3xl md:text-4xl text-[#f8fafc] tracking-wider sm:tracking-widest mb-4">
           CRAFTED FOR RETRO MASTERY
         </h2>
 

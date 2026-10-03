@@ -6,7 +6,7 @@ export function ScanlineOverlay({ enabled = true }) {
   return (
     <div 
       aria-hidden="true" 
-      className="fixed inset-0 pointer-events-none z-50 select-none overflow-hidden"
+      className="fixed inset-0 pointer-events-none z-30 select-none overflow-hidden"
     >
       {/* CRT Scanline bars */}
       <div 

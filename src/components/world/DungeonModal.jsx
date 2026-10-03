@@ -1,23 +1,36 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PixelBadge } from '../ui/PixelBadge';
 import { PixelButton } from '../ui/PixelButton';
 import { playUiClick } from '../../utils/audioSynth';
 
 export function DungeonModal({ dungeon, onClose }) {
+  useEffect(() => {
+    if (!dungeon) return;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [dungeon, onClose]);
+
   if (!dungeon) return null;
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in select-none"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm animate-fade-in select-none"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-2xl bg-[#0e131d] border-2 p-6 shadow-[0_0_35px_rgba(0,0,0,0.95)] max-h-[85vh] overflow-y-auto"
+        className="relative w-full max-w-2xl max-h-[90vh] flex flex-col bg-[#0e131d] border-2 shadow-[0_0_35px_rgba(0,0,0,0.95)] overflow-hidden"
         style={{ borderColor: dungeon.themeColor }}
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-start justify-between pb-4 mb-4 border-b-2 border-[#2c394b]">
+        <div className="flex items-start justify-between p-4 sm:p-5 pb-3 border-b-2 border-[#2c394b] shrink-0">
           <div>
             <div className="flex items-center gap-2 mb-1">
               <span className="font-pixel text-[9px] text-[#94a3b8] uppercase">
@@ -27,7 +40,7 @@ export function DungeonModal({ dungeon, onClose }) {
                 THREAT: {dungeon.threat}
               </PixelBadge>
             </div>
-            <h2 className="font-pixel text-lg sm:text-xl text-[#f8fafc] tracking-widest">
+            <h2 className="font-pixel text-base sm:text-xl text-[#f8fafc] tracking-widest">
               {dungeon.name}
             </h2>
             <span className="font-outfit text-xs text-[#cbd5e1]">
@@ -41,14 +54,14 @@ export function DungeonModal({ dungeon, onClose }) {
               playUiClick();
               onClose();
             }}
-            className="w-8 h-8 flex items-center justify-center bg-[#1e293b] border border-[#475569] text-[#f8fafc] font-pixel text-xs hover:bg-[#ef4444] transition-colors cursor-pointer"
+            className="w-8 h-8 flex items-center justify-center bg-[#1e293b] border border-[#475569] text-[#f8fafc] font-pixel text-xs hover:bg-[#ef4444] transition-colors cursor-pointer shrink-0 ml-3"
           >
             ✕
           </button>
         </div>
 
-        {/* Content */}
-        <div className="space-y-5">
+        {/* Content Body */}
+        <div className="p-4 sm:p-5 overflow-y-auto flex-1 space-y-4">
           {/* Overview */}
           <p className="font-outfit text-sm text-[#cbd5e1] leading-relaxed">
             {dungeon.desc}
@@ -112,7 +125,7 @@ export function DungeonModal({ dungeon, onClose }) {
         </div>
 
         {/* Footer */}
-        <div className="mt-6 pt-4 border-t border-[#2c394b] flex justify-between items-center">
+        <div className="p-4 border-t-2 border-[#2c394b] flex justify-between items-center bg-[#0a0e17] shrink-0">
           <PixelButton
             variant="primary"
             size="sm"

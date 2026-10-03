@@ -4,10 +4,87 @@
 /**
  * Draw a Hero (Knight, Mage, Assassin) with animated idle/attack states
  */
+/**
+ * Helper to draw a glowing crescent slash arc
+ */
+function drawSlashArc(ctx, cx, cy, radius, startAngle, endAngle, outerColor, innerColor, edgeColor, lineWidth) {
+  ctx.save();
+  ctx.lineCap = 'round';
+
+  // 1. Broad outer atmospheric blur/glow
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, startAngle, endAngle);
+  ctx.strokeStyle = outerColor;
+  ctx.lineWidth = lineWidth * 2.2;
+  ctx.stroke();
+
+  // 2. Core glowing slash wave
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, startAngle, endAngle);
+  ctx.strokeStyle = innerColor;
+  ctx.lineWidth = lineWidth;
+  ctx.stroke();
+
+  // 3. Razor-sharp white cutting edge
+  ctx.beginPath();
+  ctx.arc(cx, cy, radius, startAngle, endAngle);
+  ctx.strokeStyle = edgeColor;
+  ctx.lineWidth = Math.max(1.5, lineWidth * 0.35);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+/**
+ * Helper to draw rotating arcane magic circle / sigil
+ */
+function drawMagicSigil(ctx, cx, cy, radius, time, ringColor, innerColor, coreColor) {
+  ctx.save();
+  ctx.translate(cx, cy);
+
+  // Outer glowing ring
+  ctx.beginPath();
+  ctx.arc(0, 0, radius, 0, Math.PI * 2);
+  ctx.strokeStyle = ringColor;
+  ctx.lineWidth = 2.5;
+  ctx.stroke();
+
+  // Rotating inner square/diamond
+  const rot = time * 3;
+  ctx.save();
+  ctx.rotate(rot);
+  ctx.strokeStyle = innerColor;
+  ctx.lineWidth = 1.5;
+  ctx.strokeRect(-radius * 0.65, -radius * 0.65, radius * 1.3, radius * 1.3);
+  ctx.rotate(Math.PI / 4);
+  ctx.strokeRect(-radius * 0.65, -radius * 0.65, radius * 1.3, radius * 1.3);
+  ctx.restore();
+
+  // 4 Cardinal runic points
+  ctx.fillStyle = ringColor;
+  for (let i = 0; i < 4; i++) {
+    const a = rot + (i * Math.PI) / 2;
+    ctx.fillRect(Math.cos(a) * radius - 1.5, Math.sin(a) * radius - 1.5, 3, 3);
+  }
+
+  // Pulsing core
+  ctx.fillStyle = coreColor;
+  ctx.beginPath();
+  ctx.arc(0, 0, radius * 0.35, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.restore();
+}
+
+/**
+ * Draw a Hero (Knight, Mage, Assassin) with animated idle/attack states
+ */
 export function drawHeroCanvas(ctx, role, width, height, options = {}) {
   const {
     time = Date.now() * 0.005,
     isAttacking = false,
+    attackProgress = 0,
+    combo = 0,
     facing = 'right',
     scale = 3,
     hasGlow = true
@@ -17,59 +94,143 @@ export function drawHeroCanvas(ctx, role, width, height, options = {}) {
   ctx.save();
   ctx.imageSmoothingEnabled = false;
 
-  // Center coordinate
-  const cx = width / 2;
+  // Resolve attack progress: if isAttacking but attackProgress is 0, synthesize a cyclic progress
+  const progress = isAttacking ? (attackProgress > 0 ? attackProgress : Math.min(1, ((time * 2.5) % 1))) : 0;
+  const dir = facing === 'left' ? -1 : 1;
+
+  // Center coordinate - bias slightly towards opposite of facing to leave ample room for forward slash/projectiles
+  const cx = facing === 'left' ? width * 0.54 : width * 0.46;
   const cy = height / 2 + 10;
   const pw = 20 * scale;
   const ph = 24 * scale;
-  const px = cx - pw / 2;
-  const py = cy - ph / 2;
 
-  // Contact Shadow
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+  // Calculate dynamic root lunge offset for shadow & sprite
+  let rootLungeX = 0;
+  let rootLungeY = 0;
+
+  if (isAttacking) {
+    if (role === 'knight') {
+      if (progress < 0.22) {
+        rootLungeX = -2.5 * scale * dir * Math.sin((progress / 0.22) * Math.PI * 0.5);
+      } else if (progress < 0.65) {
+        const st = (progress - 0.22) / 0.43;
+        rootLungeX = Math.sin(st * Math.PI * 0.85) * 6.5 * scale * dir;
+        rootLungeY = Math.sin(st * Math.PI) * 1.5 * scale;
+      } else {
+        const rt = (progress - 0.65) / 0.35;
+        rootLungeX = (1 - rt) * 3 * scale * dir;
+      }
+    } else if (role === 'mage') {
+      if (progress < 0.25) {
+        rootLungeY = -6 * scale * Math.sin((progress / 0.25) * Math.PI * 0.5);
+      } else if (progress < 0.70) {
+        const st = (progress - 0.25) / 0.45;
+        rootLungeX = Math.sin(st * Math.PI) * 3.5 * scale * dir;
+        rootLungeY = -6 * scale * (1 - st * 0.4);
+      } else {
+        const rt = (progress - 0.70) / 0.30;
+        rootLungeY = -3.6 * scale * (1 - rt);
+      }
+    } else if (role === 'assassin') {
+      if (progress < 0.18) {
+        rootLungeY = 2 * scale * (progress / 0.18);
+      } else if (progress < 0.65) {
+        const st = (progress - 0.18) / 0.47;
+        rootLungeX = Math.sin(st * Math.PI * 0.9) * 8.5 * scale * dir;
+      } else {
+        const rt = (progress - 0.65) / 0.35;
+        rootLungeX = (1 - rt) * 3.5 * scale * dir;
+      }
+    }
+  }
+
+  const px = cx - pw / 2 + rootLungeX;
+  const py = cy - ph / 2 + rootLungeY;
+
+  // Contact Shadow (moves with rootLungeX, shrinks when airborne)
+  const shadowAlpha = role === 'mage' && rootLungeY < -2 ? 0.25 : 0.4;
+  const shadowScale = role === 'mage' && rootLungeY < -2 ? 0.75 : 1.0;
+  ctx.fillStyle = `rgba(0, 0, 0, ${shadowAlpha})`;
   ctx.beginPath();
-  ctx.ellipse(cx, cy + ph / 2 + 2, pw * 0.55, 6 * scale * 0.4, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx + rootLungeX, cy + ph / 2 + 2, (pw * 0.55) * shadowScale, (6 * scale * 0.4) * shadowScale, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Subtle role aura glow
   if (hasGlow) {
     const pulse = Math.sin(time * 2) * 0.15 + 0.25;
     const glowColor = role === 'mage' ? 'rgba(168, 85, 247, ' : role === 'assassin' ? 'rgba(16, 185, 129, ' : 'rgba(59, 130, 246, ';
-    const grad = ctx.createRadialGradient(cx, cy, 10, cx, cy, pw * 1.2);
-    grad.addColorStop(0, glowColor + pulse + ')');
+    const grad = ctx.createRadialGradient(cx + rootLungeX, cy + rootLungeY, 10, cx + rootLungeX, cy + rootLungeY, pw * 1.25);
+    grad.addColorStop(0, glowColor + (isAttacking ? pulse + 0.25 : pulse) + ')');
     grad.addColorStop(1, 'transparent');
     ctx.fillStyle = grad;
     ctx.beginPath();
-    ctx.arc(cx, cy, pw * 1.2, 0, Math.PI * 2);
+    ctx.arc(cx + rootLungeX, cy + rootLungeY, pw * 1.25, 0, Math.PI * 2);
     ctx.fill();
   }
 
   if (role === 'mage') {
-    drawMageProcedural(ctx, px, py, pw, ph, scale, time, isAttacking, facing);
+    drawMageProcedural(ctx, px, py, pw, ph, scale, time, isAttacking, facing, progress, combo);
   } else if (role === 'assassin') {
-    drawAssassinProcedural(ctx, px, py, pw, ph, scale, time, isAttacking, facing);
+    drawAssassinProcedural(ctx, px, py, pw, ph, scale, time, isAttacking, facing, progress, combo);
   } else {
-    drawKnightProcedural(ctx, px, py, pw, ph, scale, time, isAttacking, facing);
+    drawKnightProcedural(ctx, px, py, pw, ph, scale, time, isAttacking, facing, progress, combo);
   }
 
   ctx.restore();
 }
 
 // 1. KNIGHT
-function drawKnightProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing) {
+function drawKnightProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing, progress = 0, combo = 0) {
+  const dir = facing === 'left' ? -1 : 1;
   const wave = Math.sin(time) * 3 * s;
   const headY = py - 4 * s;
 
-  // Flowing Crimson Cape
+  // Attack kinematics & angles
+  let swordRot = dir === -1 ? -0.4 : 0.4;
+  let bodyLean = 0;
+  let stepOffset = 0;
+  let isCleaving = false;
+  let cleaveT = 0;
+
+  if (isAttacking) {
+    if (progress < 0.22) {
+      // Windup: sword cocks back high behind head
+      const t = progress / 0.22;
+      bodyLean = -0.1 * dir * t;
+      const startRot = dir === -1 ? -0.4 : 0.4;
+      const windupRot = dir === -1 ? 1.8 : -1.8;
+      swordRot = startRot + (windupRot - startRot) * t;
+    } else if (progress < 0.65) {
+      // Cleave strike: explosive slash downward
+      isCleaving = true;
+      cleaveT = (progress - 0.22) / 0.43;
+      const st = Math.pow(cleaveT, 0.55);
+      bodyLean = 0.16 * dir * Math.sin(cleaveT * Math.PI);
+      stepOffset = 3.5 * s * dir * Math.sin(cleaveT * Math.PI);
+      const startRot = dir === -1 ? 1.8 : -1.8;
+      const endRot = dir === -1 ? -2.0 : 2.0;
+      swordRot = startRot + (endRot - startRot) * st;
+    } else {
+      // Recovery: blade returns to ready stance
+      const t = (progress - 0.65) / 0.35;
+      bodyLean = 0.1 * dir * (1 - t);
+      const startRot = dir === -1 ? -2.0 : 2.0;
+      const endRot = dir === -1 ? -0.4 : 0.4;
+      swordRot = startRot + (endRot - startRot) * t;
+    }
+  }
+
+  // Flowing Crimson Cape (flutters violently backward during attack)
+  const capeWave = isAttacking ? wave - 6 * s * dir : wave;
   ctx.fillStyle = '#7f1d1d';
   ctx.beginPath();
   if (facing === 'left') {
     ctx.moveTo(px + pw - 4 * s, py + 8 * s);
-    ctx.quadraticCurveTo(px + pw + 13 * s + wave, py + ph / 2, px + pw + 9 * s + wave * 0.5, py + ph + 6 * s);
+    ctx.quadraticCurveTo(px + pw + 13 * s + capeWave, py + ph / 2, px + pw + 9 * s + capeWave * 0.5, py + ph + 6 * s);
     ctx.lineTo(px + pw - 6 * s, py + ph + 3 * s);
   } else {
     ctx.moveTo(px + 4 * s, py + 8 * s);
-    ctx.quadraticCurveTo(px - 13 * s - wave, py + ph / 2, px - 9 * s - wave * 0.5, py + ph + 6 * s);
+    ctx.quadraticCurveTo(px - 13 * s - capeWave, py + ph / 2, px - 9 * s - capeWave * 0.5, py + ph + 6 * s);
     ctx.lineTo(px + 6 * s, py + ph + 3 * s);
   }
   ctx.closePath();
@@ -80,16 +241,19 @@ function drawKnightProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing)
   ctx.lineWidth = 1.2 * s;
   ctx.stroke();
 
-  // Armored Sabatons (Boots)
+  // Armored Sabatons (Boots) - front boot steps forward in martial stance during cleave
+  const leftBootX = px + 3 * s + (facing === 'left' ? stepOffset : 0);
+  const rightBootX = px + pw - 9 * s + (facing === 'right' ? stepOffset : 0);
+
   ctx.fillStyle = '#0f172a';
-  ctx.fillRect(px + 3 * s, py + ph - 6 * s, 6 * s, 6 * s);
-  ctx.fillRect(px + pw - 9 * s, py + ph - 6 * s, 6 * s, 6 * s);
+  ctx.fillRect(leftBootX, py + ph - 6 * s, 6 * s, 6 * s);
+  ctx.fillRect(rightBootX, py + ph - 6 * s, 6 * s, 6 * s);
   ctx.fillStyle = '#475569';
-  ctx.fillRect(px + 4 * s, py + ph - 6 * s, 4 * s, 3 * s);
-  ctx.fillRect(px + pw - 8 * s, py + ph - 6 * s, 4 * s, 3 * s);
+  ctx.fillRect(leftBootX + 1 * s, py + ph - 6 * s, 4 * s, 3 * s);
+  ctx.fillRect(rightBootX + 1 * s, py + ph - 6 * s, 4 * s, 3 * s);
   ctx.fillStyle = '#94a3b8';
-  ctx.fillRect(px + 4 * s, py + ph - 3 * s, 4 * s, 1.5 * s);
-  ctx.fillRect(px + pw - 8 * s, py + ph - 3 * s, 4 * s, 1.5 * s);
+  ctx.fillRect(leftBootX + 1 * s, py + ph - 3 * s, 4 * s, 1.5 * s);
+  ctx.fillRect(rightBootX + 1 * s, py + ph - 3 * s, 4 * s, 1.5 * s);
 
   // Steel Cuirass (Breastplate)
   ctx.fillStyle = '#1e293b';
@@ -124,8 +288,9 @@ function drawKnightProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing)
   ctx.fillStyle = '#fde68a';
   ctx.fillRect(px + pw / 2 - 1 * s, py + ph - 8 * s, 2 * s, 1 * s);
 
-  // Left Arm & Kite Shield
-  const sx = facing === 'left' ? px + pw - 4 * s : px - 5 * s;
+  // Left Arm & Kite Shield (shield pulls back slightly during strike to brace)
+  const shieldPull = isCleaving ? -2 * s * dir : 0;
+  const sx = (facing === 'left' ? px + pw - 4 * s : px - 5 * s) + shieldPull;
   const sy = py + 7 * s;
   ctx.fillStyle = '#0f172a';
   ctx.fillRect(sx, sy, 6 * s, 11 * s);
@@ -151,21 +316,21 @@ function drawKnightProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing)
   ctx.fillStyle = '#0a0d14'; // Visor slit background
   ctx.fillRect(px + 3 * s, headY + 5 * s, pw - 6 * s, 4 * s);
 
-  // Glowing Cyan Eye Slits with Bloom
+  // Glowing Cyan Eye Slits with Bloom (flare bright cyan during strike)
   const eyeX = facing === 'left' ? px + 4 * s : px + 10 * s;
-  ctx.fillStyle = 'rgba(56, 189, 248, 0.4)';
+  const eyeAlpha = isCleaving ? 0.8 : 0.4;
+  ctx.fillStyle = `rgba(56, 189, 248, ${eyeAlpha})`;
   ctx.fillRect(eyeX - 1 * s, headY + 5 * s, 6 * s, 4 * s);
   ctx.fillStyle = '#00e5ff';
   ctx.fillRect(eyeX, headY + 6 * s, 4 * s, 2 * s);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(eyeX + 1 * s, headY + 6.5 * s, 2 * s, 1 * s);
 
-  // Sword Blade
+  // Sword Blade & Pivot
   ctx.save();
   const swordX = facing === 'left' ? px + 2 * s : px + pw - 2 * s;
   const swordY = py + 12 * s;
   ctx.translate(swordX, swordY);
-  const swordRot = isAttacking ? (facing === 'left' ? -1.2 : 1.2) : (facing === 'left' ? -0.4 : 0.4);
   ctx.rotate(swordRot);
 
   // Blade steel with edge gleam
@@ -173,11 +338,11 @@ function drawKnightProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing)
   ctx.fillRect(0, -2.5 * s, 25 * s, 5 * s);
   ctx.fillStyle = '#94a3b8';
   ctx.fillRect(1 * s, -1.5 * s, 22 * s, 3 * s);
-  ctx.fillStyle = '#00e5ff'; // Runic fuller
+  ctx.fillStyle = isCleaving ? '#38bdf8' : '#00e5ff'; // Runic fuller
   ctx.fillRect(3 * s, -1 * s, 17 * s, 2 * s);
   ctx.fillStyle = '#ffffff'; // Pulsing rune core
-  const runePulseX = (Math.sin(time * 4) * 0.5 + 0.5) * 12 * s + 3 * s;
-  ctx.fillRect(runePulseX, -0.5 * s, 3 * s, 1 * s);
+  const runePulseX = (Math.sin(time * 6) * 0.5 + 0.5) * 12 * s + 3 * s;
+  ctx.fillRect(runePulseX, -0.5 * s, 3.5 * s, 1 * s);
 
   // Crossguard & Pommel
   ctx.fillStyle = '#f59e0b';
@@ -190,24 +355,113 @@ function drawKnightProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing)
   ctx.fillRect(-8 * s, -2.5 * s, 2.5 * s, 5 * s);
 
   ctx.restore();
+
+  // --- VISUAL CRESCENT ARC SLASH TRAIL (VFX) ---
+  if (isCleaving && cleaveT > 0.15 && cleaveT < 0.95) {
+    const arcRadius = 24 * s;
+    let arcStart, arcEnd;
+
+    if (facing === 'right') {
+      arcStart = -1.8;
+      arcEnd = Math.min(2.1, swordRot);
+    } else {
+      arcStart = 1.8;
+      arcEnd = Math.max(-2.1, swordRot);
+    }
+
+    drawSlashArc(
+      ctx,
+      swordX,
+      swordY,
+      arcRadius,
+      arcStart,
+      arcEnd,
+      'rgba(0, 229, 255, 0.35)',
+      '#00e5ff',
+      '#ffffff',
+      4 * s
+    );
+
+    // Golden secondary edge glow
+    drawSlashArc(
+      ctx,
+      swordX,
+      swordY,
+      arcRadius - 1.5 * s,
+      arcStart,
+      arcEnd,
+      'rgba(245, 158, 11, 0.25)',
+      '#fde047',
+      '#ffffff',
+      2 * s
+    );
+
+    // Tip impact sparks & burst
+    if (cleaveT > 0.35 && cleaveT < 0.85) {
+      const tipX = swordX + Math.cos(swordRot) * 25 * s;
+      const tipY = swordY + Math.sin(swordRot) * 25 * s;
+
+      // Flying slash sparks
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(tipX + dir * 3 * s, tipY - 2 * s, 3 * s, 3 * s);
+      ctx.fillStyle = '#00e5ff';
+      ctx.fillRect(tipX + dir * 6 * s, tipY + 1 * s, 2.5 * s, 2.5 * s);
+      ctx.fillStyle = '#fde047';
+      ctx.fillRect(tipX + dir * 8 * s, tipY - 4 * s, 2 * s, 2 * s);
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(tipX + dir * 5 * s, tipY + 4 * s, 2 * s, 2 * s);
+
+      // Impact star flash (+)
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(tipX - 1 * s, tipY - 4 * s, 2 * s, 8 * s);
+      ctx.fillRect(tipX - 4 * s, tipY - 1 * s, 8 * s, 2 * s);
+    }
+  }
 }
 
 // 2. MAGE
-function drawMageProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing) {
+function drawMageProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing, progress = 0, combo = 0) {
+  const dir = facing === 'left' ? -1 : 1;
   const wave = Math.sin(time) * 2.5 * s;
   const headY = py - 4 * s;
 
-  // Astral Robe Back
+  let staffAngle = dir === -1 ? -0.3 : 0.3;
+  let isCasting = false;
+  let castT = 0;
+
+  if (isAttacking) {
+    if (progress < 0.25) {
+      // Windup / Levitation: staff raises high
+      const t = progress / 0.25;
+      const startAngle = dir === -1 ? -0.3 : 0.3;
+      const raiseAngle = dir === -1 ? 0.75 : -0.75;
+      staffAngle = startAngle + (raiseAngle - startAngle) * t;
+    } else if (progress < 0.72) {
+      // Cast burst: staff thrusts forward
+      isCasting = true;
+      castT = (progress - 0.25) / 0.47;
+      staffAngle = dir === -1 ? -1.15 : 1.15;
+    } else {
+      // Recovery: staff floats back down
+      const t = (progress - 0.72) / 0.28;
+      const startAngle = dir === -1 ? -1.15 : 1.15;
+      const endAngle = dir === -1 ? -0.3 : 0.3;
+      staffAngle = startAngle + (endAngle - startAngle) * t;
+    }
+  }
+
+  // Astral Robe Back (billows wider during magic cast)
+  const robeExpansion = isAttacking ? 3 * s : 0;
   ctx.fillStyle = '#4c1d95';
   ctx.beginPath();
   ctx.moveTo(px + 2 * s, py + 8 * s);
-  ctx.quadraticCurveTo(px - 5 * s + wave, py + ph + 8 * s, px + 2 * s, py + ph + 9 * s);
+  ctx.quadraticCurveTo(px - (5 * s + robeExpansion) + wave, py + ph + 8 * s, px + 2 * s, py + ph + 9 * s);
   ctx.lineTo(px + pw - 2 * s, py + ph + 9 * s);
-  ctx.quadraticCurveTo(px + pw + 5 * s - wave, py + ph + 8 * s, px + pw - 2 * s, py + 8 * s);
+  ctx.quadraticCurveTo(px + pw + (5 * s + robeExpansion) - wave, py + ph + 8 * s, px + pw - 2 * s, py + 8 * s);
   ctx.closePath();
   ctx.fill();
 
-  ctx.strokeStyle = '#c084fc';
+  ctx.strokeStyle = isCasting ? '#f472b6' : '#c084fc';
   ctx.lineWidth = 1 * s;
   ctx.stroke();
 
@@ -224,10 +478,19 @@ function drawMageProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing) {
   ctx.fillStyle = '#fbbf24';
   ctx.fillRect(px + pw / 2 - 1 * s, py + 12 * s, 2 * s, 4 * s);
 
-  // Floating Mana Orb (offhand)
-  const orbX = facing === 'left' ? px + pw + 3 * s : px - 6 * s;
-  const orbY = py + 10 * s + Math.sin(time * 3) * 3 * s;
-  ctx.fillStyle = '#a855f7';
+  // Floating Mana Orb (offhand - orbits rapidly during cast)
+  const orbSpeed = isAttacking ? 8 : 3;
+  const orbDist = isAttacking ? 5 * s : 3 * s;
+  const orbX = (facing === 'left' ? px + pw + 3 * s : px - 6 * s) + Math.cos(time * orbSpeed) * orbDist;
+  const orbY = py + 10 * s + Math.sin(time * orbSpeed) * orbDist;
+
+  // Mana orb aura
+  ctx.fillStyle = isCasting ? 'rgba(244, 114, 182, 0.5)' : 'rgba(168, 85, 247, 0.4)';
+  ctx.beginPath();
+  ctx.arc(orbX, orbY, 6 * s, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = isCasting ? '#f472b6' : '#a855f7';
   ctx.beginPath();
   ctx.arc(orbX, orbY, 4 * s, 0, Math.PI * 2);
   ctx.fill();
@@ -240,13 +503,14 @@ function drawMageProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing) {
   ctx.fillStyle = '#1e1b4b';
   ctx.fillRect(px + 3 * s, headY + 3 * s, pw - 6 * s, 8 * s);
 
-  // Glowing Purple Eyes
-  ctx.fillStyle = '#c084fc';
-  if (facing === 'left') {
-    ctx.fillRect(px + 4 * s, headY + 5 * s, 3 * s, 2 * s);
-  } else {
-    ctx.fillRect(px + 10 * s, headY + 5 * s, 3 * s, 2 * s);
+  // Glowing Purple Eyes (flares intensely during cast)
+  const eyeX = facing === 'left' ? px + 4 * s : px + 10 * s;
+  if (isCasting) {
+    ctx.fillStyle = 'rgba(244, 114, 182, 0.6)';
+    ctx.fillRect(eyeX - 1 * s, headY + 4 * s, 5 * s, 4 * s);
   }
+  ctx.fillStyle = isCasting ? '#ffffff' : '#c084fc';
+  ctx.fillRect(eyeX, headY + 5 * s, 3 * s, 2 * s);
 
   // Wizard Hat Brim
   ctx.fillStyle = '#fbbf24';
@@ -267,39 +531,160 @@ function drawMageProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing) {
   const staffX = facing === 'left' ? px + 2 * s : px + pw - 2 * s;
   const staffY = py + 11 * s;
   ctx.translate(staffX, staffY);
-  ctx.rotate(isAttacking ? (facing === 'left' ? -0.8 : 0.8) : (facing === 'left' ? -0.3 : 0.3));
+  ctx.rotate(staffAngle);
 
   // Wood shaft
   ctx.fillStyle = '#78350f';
   ctx.fillRect(0, -18 * s, 2.5 * s, 30 * s);
-  // Crystal Headpiece
-  ctx.fillStyle = '#c084fc';
+
+  // Staff Headpiece Frame
+  ctx.fillStyle = '#fbbf24';
+  ctx.fillRect(-1 * s, -22 * s, 4.5 * s, 4 * s);
+
+  // Crystal Headpiece (flares with intense radial burst during attack)
+  const crystalGlowRad = isCasting ? 10 * s : (5 * s + Math.sin(time * 4) * 1.5 * s);
+  ctx.fillStyle = isCasting ? 'rgba(244, 114, 182, 0.5)' : 'rgba(192, 132, 252, 0.4)';
+  ctx.beginPath();
+  ctx.arc(1.25 * s, -20 * s, crystalGlowRad, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = isCasting ? '#f472b6' : '#c084fc';
   ctx.beginPath();
   ctx.arc(1.25 * s, -20 * s, 5 * s, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = '#fdf4ff';
+  ctx.fillStyle = '#ffffff';
   ctx.beginPath();
-  ctx.arc(1.25 * s, -20 * s, 2 * s, 0, Math.PI * 2);
+  ctx.arc(1.25 * s, -20 * s, 2.5 * s, 0, Math.PI * 2);
   ctx.fill();
 
   ctx.restore();
+
+  // --- ARCANE SUMMONING SIGIL & COSMIC MISSILE BURST (VFX) ---
+  if (isCasting && castT > 0.1 && castT < 0.95) {
+    const tipGlobalX = staffX + Math.cos(staffAngle - Math.PI / 2) * 20 * s;
+    const tipGlobalY = staffY + Math.sin(staffAngle - Math.PI / 2) * 20 * s;
+
+    // 1. Rotating Arcane Sigil
+    const sigilX = tipGlobalX + dir * 6 * s;
+    const sigilY = tipGlobalY;
+    drawMagicSigil(ctx, sigilX, sigilY, 11 * s, time, '#c084fc', '#f472b6', '#ffffff');
+
+    // 2. Arcane Missile Projectile surge
+    const beamDist = castT * 60 * s;
+    const projX = sigilX + dir * beamDist;
+    const projY = sigilY;
+
+    // Trailing plasma beam
+    ctx.save();
+    ctx.strokeStyle = 'rgba(192, 132, 252, 0.4)';
+    ctx.lineWidth = 8 * s;
+    ctx.beginPath();
+    ctx.moveTo(sigilX, sigilY);
+    ctx.lineTo(projX, projY);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#ffffff';
+    ctx.lineWidth = 2.5 * s;
+    ctx.beginPath();
+    ctx.moveTo(sigilX, sigilY);
+    ctx.lineTo(projX, projY);
+    ctx.stroke();
+    ctx.restore();
+
+    // Piercing Comet Head
+    ctx.fillStyle = 'rgba(232, 121, 249, 0.6)';
+    ctx.beginPath();
+    ctx.arc(projX, projY, 8 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#f472b6';
+    ctx.beginPath();
+    ctx.arc(projX, projY, 5 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath();
+    ctx.arc(projX, projY, 3 * s, 0, Math.PI * 2);
+    ctx.fill();
+
+    // Magic spark particles
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(projX - dir * 6 * s, projY - 4 * s, 2 * s, 2 * s);
+    ctx.fillRect(projX - dir * 10 * s, projY + 3 * s, 2.5 * s, 2.5 * s);
+    ctx.fillStyle = '#c084fc';
+    ctx.fillRect(projX - dir * 14 * s, projY - 2 * s, 2 * s, 2 * s);
+  }
 }
 
 // 3. ASSASSIN
-function drawAssassinProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing) {
+function drawAssassinProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facing, progress = 0, combo = 0) {
+  const dir = facing === 'left' ? -1 : 1;
   const wave = Math.sin(time) * 3 * s;
   const headY = py - 4 * s;
 
-  // Agile Scarf / Shadow Cloak
+  let d1Rot = dir === -1 ? -0.5 : 0.5;
+  let d2Rot = dir === -1 ? 0.4 : -0.4;
+  let isCleaving = false;
+  let cleaveT = 0;
+
+  if (isAttacking) {
+    if (progress < 0.18) {
+      // Windup / Stealth Coil
+      const t = progress / 0.18;
+      d1Rot = dir === -1 ? (0.5 - 2.0 * t) : (-0.5 + 2.0 * t);
+      d2Rot = dir === -1 ? (-0.4 + 2.0 * t) : (0.4 - 2.0 * t);
+    } else if (progress < 0.65) {
+      // Scissor Cleave: dual daggers cross in explosive X-cleave
+      isCleaving = true;
+      cleaveT = (progress - 0.18) / 0.47;
+      const st = Math.pow(cleaveT, 0.55);
+
+      // Dagger 1 slashes downward
+      const start1 = dir === -1 ? 1.5 : -1.5;
+      const end1 = dir === -1 ? -1.7 : 1.7;
+      d1Rot = start1 + (end1 - start1) * st;
+
+      // Dagger 2 slashes upward
+      const start2 = dir === -1 ? -1.6 : 1.6;
+      const end2 = dir === -1 ? 1.4 : -1.4;
+      d2Rot = start2 + (end2 - start2) * st;
+    } else {
+      // Recovery: daggers return to stealth guard
+      const t = (progress - 0.65) / 0.35;
+      const start1 = dir === -1 ? -1.7 : 1.7;
+      const end1 = dir === -1 ? -0.5 : 0.5;
+      d1Rot = start1 + (end1 - start1) * t;
+
+      const start2 = dir === -1 ? 1.4 : -1.4;
+      const end2 = dir === -1 ? 0.4 : -0.4;
+      d2Rot = start2 + (end2 - start2) * t;
+    }
+  }
+
+  // --- SHADOW AFTERIMAGE (GHOST SILHOUETTE) DURING DASH ---
+  if (isCleaving && cleaveT > 0.15 && cleaveT < 0.85) {
+    const ghostOffset = -dir * 8 * s;
+    ctx.save();
+    ctx.globalAlpha = 0.35 * (1 - cleaveT);
+    ctx.fillStyle = '#064e3b';
+    ctx.fillRect(px + ghostOffset, py + 4 * s, pw, ph - 4 * s);
+    ctx.fillStyle = '#34d399';
+    const ghostEyeX = facing === 'left' ? px + ghostOffset + 4 * s : px + ghostOffset + 10 * s;
+    ctx.fillRect(ghostEyeX, headY + 5 * s, 4 * s, 2 * s);
+    ctx.restore();
+  }
+
+  // Agile Scarf / Shadow Cloak (whips back with speed)
+  const scarfWave = isAttacking ? wave - 7 * s * dir : wave;
   ctx.fillStyle = '#18181b';
   ctx.beginPath();
   if (facing === 'left') {
     ctx.moveTo(px + pw - 2 * s, py + 6 * s);
-    ctx.quadraticCurveTo(px + pw + 14 * s + wave, py + 12 * s, px + pw + 9 * s, py + ph + 4 * s);
+    ctx.quadraticCurveTo(px + pw + 14 * s + scarfWave, py + 12 * s, px + pw + 9 * s, py + ph + 4 * s);
     ctx.lineTo(px + pw - 4 * s, py + ph - 2 * s);
   } else {
     ctx.moveTo(px + 2 * s, py + 6 * s);
-    ctx.quadraticCurveTo(px - 14 * s - wave, py + 12 * s, px - 9 * s, py + ph + 4 * s);
+    ctx.quadraticCurveTo(px - 14 * s - scarfWave, py + 12 * s, px - 9 * s, py + ph + 4 * s);
     ctx.lineTo(px + 4 * s, py + ph - 2 * s);
   }
   ctx.closePath();
@@ -331,42 +716,97 @@ function drawAssassinProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facin
   ctx.fillStyle = '#18181b';
   ctx.fillRect(px + 3 * s, headY + 2 * s, pw - 6 * s, 9 * s);
 
-  // Glowing Emerald Eyes
-  ctx.fillStyle = '#34d399';
-  if (facing === 'left') {
-    ctx.fillRect(px + 4 * s, headY + 5 * s, 4 * s, 2 * s);
-  } else {
-    ctx.fillRect(px + 10 * s, headY + 5 * s, 4 * s, 2 * s);
+  // Glowing Emerald Eyes (flares brightly during attack)
+  const eyeX = facing === 'left' ? px + 4 * s : px + 10 * s;
+  if (isCleaving) {
+    ctx.fillStyle = 'rgba(52, 211, 153, 0.6)';
+    ctx.fillRect(eyeX - 1 * s, headY + 4 * s, 6 * s, 4 * s);
   }
+  ctx.fillStyle = '#34d399';
+  ctx.fillRect(eyeX, headY + 5 * s, 4 * s, 2 * s);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(eyeX + 1 * s, headY + 5.5 * s, 2 * s, 1 * s);
 
-  // Dual Daggers
+  // Dagger 1 (Main hand)
   ctx.save();
   const d1X = facing === 'left' ? px + 2 * s : px + pw - 2 * s;
   const d1Y = py + 12 * s;
   ctx.translate(d1X, d1Y);
-  ctx.rotate(isAttacking ? (facing === 'left' ? -1.3 : 1.3) : (facing === 'left' ? -0.5 : 0.5));
+  ctx.rotate(d1Rot);
 
-  // Dagger 1
   ctx.fillStyle = '#e2e8f0';
-  ctx.fillRect(0, -1.5 * s, 14 * s, 3 * s);
-  ctx.fillStyle = '#10b981';
-  ctx.fillRect(2 * s, -0.5 * s, 10 * s, 1 * s);
+  ctx.fillRect(0, -1.5 * s, 16 * s, 3 * s);
+  ctx.fillStyle = isCleaving ? '#34d399' : '#10b981';
+  ctx.fillRect(2 * s, -0.5 * s, 12 * s, 1 * s);
   ctx.fillStyle = '#09090b';
   ctx.fillRect(-3 * s, -1 * s, 3 * s, 2 * s);
-
   ctx.restore();
 
-  // Dagger 2 in offhand
+  // Dagger 2 (Offhand)
   ctx.save();
   const d2X = facing === 'left' ? px + pw - 3 * s : px + 3 * s;
   const d2Y = py + 14 * s;
   ctx.translate(d2X, d2Y);
-  ctx.rotate(facing === 'left' ? 0.4 : -0.4);
+  ctx.rotate(d2Rot);
+
   ctx.fillStyle = '#94a3b8';
-  ctx.fillRect(0, -1.5 * s, 11 * s, 3 * s);
+  ctx.fillRect(0, -1.5 * s, 14 * s, 3 * s);
+  ctx.fillStyle = isCleaving ? '#6ee7b7' : '#10b981';
+  ctx.fillRect(2 * s, -0.5 * s, 10 * s, 1 * s);
   ctx.fillStyle = '#09090b';
   ctx.fillRect(-2 * s, -1 * s, 2 * s, 2 * s);
   ctx.restore();
+
+  // --- DUAL X-CLEAVE ARC TRAILS (VFX) ---
+  if (isCleaving && cleaveT > 0.15 && cleaveT < 0.9) {
+    const slashReach = 18 * s;
+
+    // Slash Arc 1 (Downward cut)
+    drawSlashArc(
+      ctx,
+      d1X,
+      d1Y,
+      slashReach,
+      dir === 1 ? -1.5 : 1.5,
+      d1Rot,
+      'rgba(16, 185, 129, 0.4)',
+      '#10b981',
+      '#ffffff',
+      3 * s
+    );
+
+    // Slash Arc 2 (Upward cut)
+    drawSlashArc(
+      ctx,
+      d2X,
+      d2Y,
+      slashReach,
+      dir === 1 ? 1.5 : -1.5,
+      d2Rot,
+      'rgba(52, 211, 153, 0.4)',
+      '#34d399',
+      '#ffffff',
+      3 * s
+    );
+
+    // Center Cross Intersection Flash
+    if (cleaveT > 0.35 && cleaveT < 0.75) {
+      const crossX = (d1X + d2X) / 2 + dir * 14 * s;
+      const crossY = (d1Y + d2Y) / 2;
+
+      // 4-Point Impact Star (+)
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(crossX - 1 * s, crossY - 5 * s, 2 * s, 10 * s);
+      ctx.fillRect(crossX - 5 * s, crossY - 1 * s, 10 * s, 2 * s);
+
+      // Green slash embers flying forward
+      ctx.fillStyle = '#34d399';
+      ctx.fillRect(crossX + dir * 5 * s, crossY - 3 * s, 2.5 * s, 2.5 * s);
+      ctx.fillRect(crossX + dir * 8 * s, crossY + 4 * s, 2 * s, 2 * s);
+      ctx.fillStyle = '#a7f3d0';
+      ctx.fillRect(crossX + dir * 10 * s, crossY - 1 * s, 2 * s, 2 * s);
+    }
+  }
 }
 
 /**

@@ -93,12 +93,12 @@ export function ArsenalSection() {
           </span>
         </div>
 
-        <h2 className="font-pixel text-3xl sm:text-4xl text-[#f8fafc] tracking-widest mb-4">
+        <h2 className="font-pixel text-xl sm:text-3xl md:text-4xl text-[#f8fafc] tracking-wider sm:tracking-widest mb-4">
           FORGED IN THE ABYSS
         </h2>
 
         <p className="font-outfit text-sm sm:text-base text-[#94a3b8] max-w-xl mb-6">
-          Database lengkap 120 senjata, perisai, armor keramat, dan relik jurang maut. Dilengkapi fitur buka-tutup (collapsible) serta pemisahan halaman agar eksplorasi lebih nyaman tanpa scroll berlebih.
+          Complete database of 120 weapons, shields, sacred armor, and abyssal relics. Features collapsible vault access and multi-page pagination for seamless exploration.
         </p>
 
         {/* Master Open / Close Toggle Button in Header */}
@@ -114,18 +114,18 @@ export function ArsenalSection() {
             }`}
           >
             <span>{isVaultOpen ? '▼' : '►'}</span>
-            <span>{isVaultOpen ? '✕ TUTUP ARSENAL (COLLAPSE)' : '🔓 BUKA ARSENAL (120 ITEM)'}</span>
+            <span>{isVaultOpen ? '✕ CLOSE ARSENAL (COLLAPSE)' : '🔓 OPEN ARSENAL (120 ITEMS)'}</span>
           </button>
 
           {isVaultOpen && (
             <span className="font-pixel text-[8.5px] text-[#94a3b8] px-3 py-1 bg-[#111622] border border-[#2c394b]">
-              HALAMAN {currentPage} / {totalPages} • {filteredItems.length} ITEM DITEMUKAN
+              PAGE {currentPage} / {totalPages} • {filteredItems.length} ITEMS FOUND
             </span>
           )}
         </div>
       </div>
 
-      {/* STATE 1: COLLAPSED VAULT PREVIEW (BUKA-TUTUP: TAMPILAN TERTUTUP) */}
+      {/* STATE 1: COLLAPSED VAULT PREVIEW */}
       {!isVaultOpen && (
         <PixelCard variant="gold" className="p-6 sm:p-8 bg-[#0d121c] border-2 border-[#f59e0b]/50">
           <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
@@ -138,14 +138,14 @@ export function ArsenalSection() {
                 <div className="flex items-center gap-2 mb-1.5">
                   <span className="w-2 h-2 bg-[#f59e0b] animate-ping" />
                   <span className="font-pixel text-[9px] text-[#f59e0b] tracking-widest uppercase">
-                    ARSENAL VAULT DISEGEL / COLLAPSED
+                    ARSENAL VAULT SEALED / COLLAPSED
                   </span>
                 </div>
                 <h3 className="font-pixel text-base sm:text-lg text-[#f8fafc] mb-2 tracking-wider">
-                  ARSIP PERLENGKAPAN SEDANG DITUTUP
+                  EQUIPMENT ARCHIVE IS CURRENTLY CLOSED
                 </h3>
                 <p className="font-outfit text-xs sm:text-sm text-[#94a3b8] max-w-xl leading-relaxed">
-                  Buka arsenal untuk menjelajahi seluruh 120 item perlengkapan dengan filter role, tier V God-Tier, dan sistem navigasi halaman yang ringkas tanpa scroll panjang.
+                  Open the arsenal to browse all 120 pieces of gear with class filters, Tier V God-Tier gear, and clean pagination without endless scrolling.
                 </p>
 
                 {/* Quick Spec Pills */}
@@ -157,10 +157,10 @@ export function ArsenalSection() {
                     ⚡ 5 TIERS (T1 - GOD TIER)
                   </span>
                   <span className="px-2 py-1 bg-[#111622] border border-[#2c394b]">
-                    🛡️ 6 KATEGORI GEAR
+                    🛡️ 6 GEAR CATEGORIES
                   </span>
                   <span className="px-2 py-1 bg-[#111622] border border-[#2c394b]">
-                    📖 NAVIGASI PER HALAMAN
+                    📖 PAGINATED NAVIGATION
                   </span>
                 </div>
               </div>
@@ -175,10 +175,10 @@ export function ArsenalSection() {
                 icon="🔓"
                 className="w-full sm:w-auto"
               >
-                BUKA KATALOG LENGKAP
+                OPEN FULL CATALOG
               </PixelButton>
               <span className="font-pixel text-[7.5px] text-[#64748b]">
-                KLIK UNTUK MEMBUKA PERALATAN
+                CLICK TO UNLOCK EQUIPMENT
               </span>
             </div>
           </div>
@@ -187,10 +187,10 @@ export function ArsenalSection() {
           <div className="mt-6 pt-6 border-t border-[#1e293b]">
             <div className="flex items-center justify-between mb-3">
               <span className="font-pixel text-[8.5px] text-[#fde047] tracking-wider uppercase">
-                ✦ CUPLIKAN GOD-TIER SENJATA & RELIK ✦
+                ✦ FEATURED GOD-TIER WEAPONS & RELICS ✦
               </span>
               <span className="font-pixel text-[7.5px] text-[#94a3b8]">
-                KLIK KARTU UNTUK LIHAT DETAIL
+                CLICK CARD TO VIEW DETAILS
               </span>
             </div>
 
@@ -241,17 +241,17 @@ export function ArsenalSection() {
         </PixelCard>
       )}
 
-      {/* STATE 2: EXPANDED FULL ARSENAL VAULT WITH PAGINATION (TAMPILAN TERBUKA DENGAN PAGE) */}
+      {/* STATE 2: EXPANDED FULL ARSENAL VAULT WITH PAGINATION */}
       {isVaultOpen && (
         <PixelCard variant="gold" className="p-5 sm:p-7 bg-[#0d121c] animate-fade-in border-2 border-[#f59e0b]">
           {/* Top Vault Bar: Close & Stats */}
           <div className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-4 border-b border-[#2c394b]">
             <div className="flex items-center gap-2">
               <span className="font-pixel text-[10px] text-[#fde047] tracking-wider">
-                VAULT TERBUKA
+                VAULT UNLOCKED
               </span>
               <span className="font-pixel text-[8px] text-[#64748b]">
-                • {filteredItems.length} ITEM DITEMUKAN
+                • {filteredItems.length} ITEMS FOUND
               </span>
             </div>
 
@@ -262,7 +262,7 @@ export function ArsenalSection() {
               className="px-3 py-1 bg-[#1e131d] border border-[#ef4444] text-[#fca5a5] hover:bg-[#ef4444] hover:text-white font-pixel text-[8.5px] tracking-wider transition-all cursor-pointer flex items-center gap-1.5"
             >
               <span>✕</span>
-              <span>TUTUP ARSENAL</span>
+              <span>CLOSE ARSENAL</span>
             </button>
           </div>
 
@@ -428,7 +428,7 @@ export function ArsenalSection() {
 
                   <div>
                     {/* Top Category & Tier */}
-                    <div className="flex items-center justify-between mb-3">
+                    <div className={`flex items-center justify-between mb-3 ${item.isGodTier ? 'pr-7' : ''}`}>
                       <span className="font-pixel text-[7.5px] text-[#94a3b8] uppercase">
                         {item.role === 'all' ? 'UNIVERSAL' : item.role}
                       </span>
@@ -504,19 +504,19 @@ export function ArsenalSection() {
             <div className="py-16 text-center">
               <span className="text-3xl block mb-2">🔍</span>
               <span className="font-pixel text-xs text-[#94a3b8]">
-                TIDAK ADA PERLENGKAPAN YANG COCOK DENGAN FILTER
+                NO EQUIPMENT MATCHES YOUR ACTIVE FILTERS
               </span>
             </div>
           )}
 
-          {/* Pagination Navigation Bar ("Pemisah Halaman") */}
+          {/* Pagination Navigation Bar */}
           {totalPages > 1 && (
             <div className="mt-8 pt-6 border-t border-[#2c394b] flex flex-col sm:flex-row items-center justify-between gap-4">
               <span className="font-pixel text-[8px] text-[#94a3b8]">
-                HALAMAN {currentPage} DARI {totalPages} • MENAMPILKAN {paginatedItems.length} ITEM DARI {filteredItems.length}
+                PAGE {currentPage} OF {totalPages} • SHOWING {paginatedItems.length} OF {filteredItems.length} ITEMS
               </span>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center justify-center gap-1.5">
                 {/* Prev Button */}
                 <button
                   type="button"
@@ -605,7 +605,7 @@ export function ArsenalSection() {
                 onMouseEnter={playUiHover}
                 className="px-3 py-1.5 bg-[#111622] border border-[#2c394b] text-[#94a3b8] hover:text-[#f8fafc] hover:border-[#3b4b66] font-pixel text-[8px] cursor-pointer"
               >
-                ▲ KE ATAS ARSENAL
+                ▲ BACK TO TOP OF ARSENAL
               </button>
 
               <button
@@ -618,7 +618,7 @@ export function ArsenalSection() {
                 className="px-4 py-1.5 bg-[#1e131d] border border-[#ef4444] text-[#fca5a5] hover:bg-[#ef4444] hover:text-white font-pixel text-[8px] cursor-pointer flex items-center gap-1.5 shadow-sm"
               >
                 <span>✕</span>
-                <span>TUTUP ARSENAL</span>
+                <span>CLOSE ARSENAL</span>
               </button>
             </div>
           </div>

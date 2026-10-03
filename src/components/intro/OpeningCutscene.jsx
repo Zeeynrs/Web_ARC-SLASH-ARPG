@@ -1400,10 +1400,10 @@ export function OpeningCutscene({ onComplete }) {
         {/* Left Badge: Cinematic Mode Indicator */}
         <div className="flex items-center gap-2.5">
           <span className="w-2.5 h-2.5 bg-[#f59e0b] rotate-45 animate-pulse" />
-          <span className="font-pixel text-[8.5px] sm:text-[10px] text-[#e2e8f0] tracking-widest uppercase">
-            PARALLEL-CINEMATICS // PROLOGUE
+          <span className="font-pixel text-[8px] sm:text-[10px] text-[#e2e8f0] tracking-wider sm:tracking-widest uppercase truncate max-w-[140px] sm:max-w-none">
+            <span className="hidden sm:inline">PARALLEL // </span>PROLOGUE
           </span>
-          <span className="inline-block px-1.5 py-0.5 bg-[#0f172a] text-[#38bdf8] font-mono text-[9px] border border-[#3b4b66]">
+          <span className="hidden sm:inline-block px-1.5 py-0.5 bg-[#0f172a] text-[#38bdf8] font-mono text-[9px] border border-[#3b4b66]">
             AUTO-PLAY
           </span>
         </div>
@@ -1429,7 +1429,7 @@ export function OpeningCutscene({ onComplete }) {
               }}
               className="px-2 py-0.5 bg-[#b45309]/80 border border-[#fde047] text-[#fde047] font-pixel text-[8px] tracking-wider animate-pulse hover:bg-[#d97706] transition-all cursor-pointer"
             >
-              🔇 KLIK UNTUK AKTIFKAN SUARA
+              🔇 CLICK TO ENABLE AUDIO
             </button>
           )}
         </div>
@@ -1461,7 +1461,7 @@ export function OpeningCutscene({ onComplete }) {
             onMouseEnter={playUiHover}
             className="px-3 py-1 bg-[#182030]/90 border border-[#3b4b66] text-[#cbd5e1] font-pixel text-[8.5px] tracking-widest hover:border-[#f59e0b] hover:text-[#fde047] transition-all cursor-pointer shadow-[0_0_10px_rgba(0,0,0,0.5)]"
           >
-            LEWATI [ESC] ⏭
+            SKIP [ESC] ⏭
           </button>
         </div>
       </div>
@@ -1476,7 +1476,7 @@ export function OpeningCutscene({ onComplete }) {
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#090d16]/80 border border-[#38bdf8]/40 mb-3 shadow-[0_0_15px_rgba(56,189,248,0.2)]">
               <span className="w-1.5 h-1.5 bg-[#38bdf8] rotate-45" />
               <span className="font-pixel text-[9px] sm:text-[10px] text-[#38bdf8] tracking-widest uppercase">
-                BAB I : KEBANGKITAN RETAKAN KEGELAPAN
+                CHAPTER I : THE ABYSSAL RIFT AWAKENS
               </span>
               <span className="w-1.5 h-1.5 bg-[#38bdf8] rotate-45" />
             </div>
@@ -1485,7 +1485,7 @@ export function OpeningCutscene({ onComplete }) {
               THE DUNGEON REMEMBERS...
             </h1>
             <p className="font-outfit text-sm sm:text-base text-[#94a3b8] mt-3 tracking-wider max-w-lg leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-              Di kedalaman 50 lantai Catacombs purba, segel kuno mulai retak. Energi hampa yang terkunci ribuan tahun kini bergetar kembali.
+              Deep within the 50 floors of the ancient Catacombs, primordial seals begin to shatter. Void energy locked away for millennia surges once again.
             </p>
           </div>
         )}
@@ -1496,7 +1496,7 @@ export function OpeningCutscene({ onComplete }) {
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#090d16]/80 border border-[#f59e0b]/40 mb-3 shadow-[0_0_15px_rgba(245,158,11,0.2)]">
               <span className="w-1.5 h-1.5 bg-[#f59e0b] rotate-45" />
               <span className="font-pixel text-[9px] sm:text-[10px] text-[#f59e0b] tracking-widest uppercase">
-                BAB II : KILATAN CAHAYA PERTAMA
+                CHAPTER II : THE FIRST FLICKER OF LIGHT
               </span>
               <span className="w-1.5 h-1.5 bg-[#f59e0b] rotate-45" />
             </div>
@@ -1505,7 +1505,7 @@ export function OpeningCutscene({ onComplete }) {
               A SINGLE EMBER PIERCES THE SHADOWS
             </h2>
             <p className="font-outfit text-sm sm:text-base text-[#cbd5e1] mt-3 tracking-wider max-w-lg leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-              Sebuah obor kuno membakar kesunyian. Lorong batu berpilar terungkap, membimbing langkah sang penakluk menuju lorong terlarang.
+              An ancient torch ignites the silence. Pillared stone corridors emerge from the gloom, guiding the conqueror into the forbidden depths.
             </p>
           </div>
         )}
@@ -1515,7 +1515,7 @@ export function OpeningCutscene({ onComplete }) {
           <div className="animate-fade-in flex flex-col items-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#450a0a]/90 border border-[#ef4444] mb-2 shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-pulse">
               <span className="font-pixel text-[9px] sm:text-[10.5px] text-[#fecaca] tracking-widest uppercase">
-                ⚠️ PERINGATAN: LEVEL 50 VOID WARDEN TERDETEKSI
+                ⚠️ WARNING: LEVEL 50 VOID WARDEN DETECTED
               </span>
             </div>
 
@@ -1523,7 +1523,7 @@ export function OpeningCutscene({ onComplete }) {
               THE WARDEN OF THE VOID AWAKENS
             </h2>
             <p className="font-outfit text-sm sm:text-base text-[#c084fc] mt-2.5 tracking-wider max-w-lg leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.9)]">
-              Rantai segel hancur. Entitas kuno penguasa kegelapan bangkit menuntut jiwa siapa pun yang berani melangkah lebih dalam.
+              Binding chains shatter. An ancient sovereign of darkness rises to claim the souls of any who dare step deeper.
             </p>
           </div>
         )}
@@ -1533,7 +1533,7 @@ export function OpeningCutscene({ onComplete }) {
           <div className="animate-fade-in flex flex-col items-center">
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#0f172a]/90 border border-[#38bdf8] mb-2 shadow-[0_0_15px_rgba(56,189,248,0.4)]">
               <span className="font-pixel text-[9px] sm:text-[10px] text-[#38bdf8] tracking-widest uppercase">
-                BAB IV : BILAH CAHAYA MENEBAS
+                CHAPTER IV : BLADES OF LIGHT STRIKE
               </span>
             </div>
 
@@ -1542,11 +1542,11 @@ export function OpeningCutscene({ onComplete }) {
             </h2>
 
             <p className="font-outfit text-xs sm:text-sm text-[#cbd5e1] max-w-md tracking-wider mb-2">
-              Sang ksatria menebas bayangan kegelapan dengan rentetan serangan pedang sakti!
+              The champion cleaves through shadows with a flurry of legendary arc slashes!
             </p>
 
             <div className="inline-flex items-center gap-2 px-3 py-1 bg-[#090d16]/80 border border-[#f59e0b]/50 text-[#fde047] font-pixel text-[8px] sm:text-[9px] tracking-widest">
-              [ SERANGAN OTOMATIS BERLANGSUNG • KLIK UNTUK SERANGAN TAMBAHAN ]
+              [ AUTO-ATTACK ENGAGED • CLICK FOR EXTRA STRIKES ]
             </div>
           </div>
         )}
@@ -1563,7 +1563,7 @@ export function OpeningCutscene({ onComplete }) {
               <span className="w-2 h-2 bg-[#f59e0b] rotate-45" />
             </div>
 
-            <h1 className="font-pixel text-3xl sm:text-5xl md:text-6xl text-[#f8fafc] tracking-wider sm:tracking-widest my-2 drop-shadow-[0_0_40px_rgba(245,158,11,0.8)] animate-pulse">
+            <h1 className="font-pixel text-2xl sm:text-5xl md:text-6xl text-[#f8fafc] tracking-wider sm:tracking-widest my-2 drop-shadow-[0_0_40px_rgba(245,158,11,0.8)] animate-pulse">
               PARALLEL DUNGEONS
             </h1>
 
@@ -1576,7 +1576,7 @@ export function OpeningCutscene({ onComplete }) {
             </div>
 
             <p className="font-outfit text-sm sm:text-base text-[#cbd5e1] max-w-lg tracking-wider mt-2 mb-6 leading-relaxed drop-shadow-[0_2px_8px_rgba(0,0,0,0.95)]">
-              Kutukan kegelapan menanti untuk dipecahkan. Gerbang purba telah terbuka, menyambut langkah sang penakluk.
+              The abyssal curse awaits its undoing. The primordial gates have opened, welcoming the champion.
             </p>
 
             {/* Seamless Auto-Launch Progress Bar */}
@@ -1591,7 +1591,7 @@ export function OpeningCutscene({ onComplete }) {
               </div>
 
               <span className="font-pixel text-[8.5px] sm:text-[9.5px] text-[#fde047] tracking-widest animate-pulse mt-1">
-                MEMASUKI DUNGEON... {autoEnterRemaining}s
+                ENTERING DUNGEON... {autoEnterRemaining}s
               </span>
             </div>
           </div>
@@ -1645,7 +1645,7 @@ export function OpeningCutscene({ onComplete }) {
                 .padStart(2, '0')}{' '}
               / 00:28
             </span>
-            <span className="hidden sm:inline text-[#475569]">[ESC] LEWATI</span>
+            <span className="hidden sm:inline text-[#475569]">[ESC] SKIP</span>
           </div>
         </div>
       </div>

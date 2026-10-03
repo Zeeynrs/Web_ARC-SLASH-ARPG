@@ -134,7 +134,7 @@ export function TrailerSection() {
       // Horizontal Center Chains
       drawChain(0, height / 2, width, height / 2, '#475569', '#1e293b');
 
-      // --- LAYER 3: Glowing Arcane Seal & Magic Sigil (Pusat Segel Sihir) ---
+      // --- LAYER 3: Glowing Arcane Seal & Magic Sigil (Arcane Seal Core) ---
       const midX = width / 2;
       const midY = height / 2;
       const pulse = Math.sin(time * 3) * 0.15 + 0.85;
@@ -227,13 +227,13 @@ export function TrailerSection() {
       ctx.fillStyle = '#f59e0b';
       ctx.font = '7.5px "Press Start 2P", monospace';
       ctx.textAlign = 'center';
-      ctx.fillText('/// ⚠ AREA DISEGEL • DALAM PENGEMBANGAN • WORK IN PROGRESS ⚠ ///', width / 2, 14);
+      ctx.fillText('/// ⚠ RESTRICTED VAULT • IN ACTIVE PRODUCTION • WORK IN PROGRESS ⚠ ///', width / 2, 14);
 
       // Bottom Hazard Tape
       ctx.fillStyle = 'rgba(15, 23, 42, 0.9)';
       ctx.fillRect(0, height - tapeH, width, tapeH);
       ctx.fillStyle = '#ef4444';
-      ctx.fillText('/// 🔒 CLASSIFIED REEL • TAHAP PRODUKSI • ACCESS LOCKED 🔒 ///', width / 2, height - 8);
+      ctx.fillText('/// 🔒 CLASSIFIED REEL • UNDER PRODUCTION • ACCESS LOCKED 🔒 ///', width / 2, height - 8);
 
       animFrameRef.current = requestAnimationFrame(render);
     };
@@ -253,17 +253,17 @@ export function TrailerSection() {
         <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-[#111622] border border-[#ef4444]/60 shadow-[0_0_12px_rgba(239,68,68,0.25)]">
           <span className="w-2 h-2 bg-[#ef4444] animate-ping" />
           <span className="font-pixel text-[9px] text-[#ef4444] tracking-widest uppercase">
-            SEKTOR TERKUNCI // CLASSIFIED ARCHIVE
+            LOCKED SECTOR // CLASSIFIED ARCHIVE
           </span>
         </div>
 
-        <h2 className="font-pixel text-3xl sm:text-4xl text-[#f8fafc] tracking-widest mb-4 flex items-center gap-3">
-          <span>RUANG TRAILER SINEMATIK</span>
-          <span className="text-[#ef4444] text-2xl sm:text-3xl">[DISEGEL]</span>
+        <h2 className="font-pixel text-xl sm:text-3xl md:text-4xl text-[#f8fafc] tracking-wider sm:tracking-widest mb-4 flex flex-wrap items-center justify-center gap-2 sm:gap-3">
+          <span className="text-center">CINEMATIC TRAILER CHAMBER</span>
+          <span className="text-[#ef4444] text-lg sm:text-2xl md:text-3xl">[SEALED]</span>
         </h2>
 
         <p className="font-outfit text-sm sm:text-base text-[#94a3b8] max-w-xl">
-          Bilik rekaman trailer resmi saat ini disegel oleh rantai sihir kuno dan sedang dalam tahap pengembangan aktif oleh tim pengembang Parallel Dungeons. Rekaman penuh akan dibuka pada pembaruan rilis mendatang.
+          The official cinematic trailer reel is currently locked behind ancient arcane chains while under active production by the Parallel Dungeons team. The full feature reel will unlock in an upcoming update.
         </p>
       </div>
 
@@ -279,16 +279,16 @@ export function TrailerSection() {
           <div className="flex items-center justify-between px-3 py-2 bg-[#111622] border-b border-[#2c394b] font-pixel text-[8.5px] text-[#94a3b8]">
             <div className="flex items-center gap-2">
               <span className="w-2.5 h-2.5 bg-[#ef4444] animate-pulse" />
-              <span className="text-[#fca5a5]">STATUS: DISEGEL (DALAM PENGEMBANGAN)</span>
+              <span className="text-[#fca5a5]">STATUS: SEALED (IN PRODUCTION)</span>
             </div>
-            <span className="text-[#f59e0b]">ENKRIPSI: LEVEL 5 ARCANUM</span>
+            <span className="text-[#f59e0b]">ENCRYPTION: LEVEL 5 ARCANUM</span>
           </div>
 
           {/* Sealed Interactive Canvas Container */}
           <div
             className="relative w-full h-[300px] sm:h-[400px] md:h-[460px] cursor-not-allowed bg-[#05070a] overflow-hidden select-none group"
             onClick={handleAttemptAccess}
-            title="Sektor trailer disegel! Klik untuk mengetes kekuatan segel sihir."
+            title="Trailer sector is sealed! Click to test the strength of the magical barrier."
           >
             <canvas ref={canvasRef} className="w-full h-full block pixelated" />
 
@@ -296,7 +296,7 @@ export function TrailerSection() {
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity bg-black/40 backdrop-blur-[1px]">
               <div className="px-4 py-2 bg-[#18111d] border-2 border-[#ef4444] text-[#fca5a5] font-pixel text-[9px] tracking-wider shadow-lg flex items-center gap-2">
                 <span>🔒</span>
-                <span>SEGEL SIHIR AKTIF • KLIK UNTUK MENGUJI</span>
+                <span>ARCANE SEAL ACTIVE • CLICK TO TEST BARRIER</span>
               </div>
             </div>
           </div>
@@ -310,10 +310,10 @@ export function TrailerSection() {
                   <span className="text-lg">⚡</span>
                   <div>
                     <span className="font-pixel text-[8.5px] text-[#ef4444] block mb-0.5">
-                      SEGEL SIHIR TERLALU KUAT! ({sealHitCount}x DIUJI)
+                      ARCANE SEAL IS TOO POWERFUL! ({sealHitCount}x TESTED)
                     </span>
                     <span>
-                      Rekaman sinematik sedang dipersiapkan dan dioptimalkan untuk performa 60 FPS. Belum siap untuk diputar ke publik.
+                      The cinematic reel is being finalized and optimized for 60 FPS web playback. Not yet ready for public broadcast.
                     </span>
                   </div>
                 </div>
@@ -330,7 +330,7 @@ export function TrailerSection() {
             {/* Development Progress Bar */}
             <div>
               <div className="flex items-center justify-between font-pixel text-[8px] text-[#cbd5e1] mb-1.5">
-                <span className="text-[#f59e0b]">PROGRES PENGEMBANGAN TRAILER</span>
+                <span className="text-[#f59e0b]">TRAILER PRODUCTION PROGRESS</span>
                 <span className="text-[#38bdf8]">82% COMPLETE</span>
               </div>
               <div className="w-full h-3 bg-[#090d15] border border-[#3b4b66] p-0.5">
@@ -355,7 +355,7 @@ export function TrailerSection() {
                   }`}
                 >
                   <span>{notified ? '✓' : '🔔'}</span>
-                  <span>{notified ? 'NOTIFIKASI AKTIF' : 'KABARI SAAT RILIS'}</span>
+                  <span>{notified ? 'NOTIFICATIONS ON' : 'NOTIFY ON LAUNCH'}</span>
                 </button>
 
                 <button
@@ -367,13 +367,13 @@ export function TrailerSection() {
                   onMouseEnter={playUiHover}
                   className="px-3 py-1.5 bg-[#182030] border border-[#3b4b66] text-[#cbd5e1] hover:border-[#38bdf8] hover:text-[#38bdf8] transition-all cursor-pointer"
                 >
-                  {showRoadmap ? '▲ SEMBUNYIKAN ROADMAP' : '▼ INTIP ROADMAP'}
+                  {showRoadmap ? '▲ HIDE ROADMAP' : '▼ VIEW ROADMAP'}
                 </button>
               </div>
 
               <div className="flex items-center gap-3">
                 <span className="font-outfit text-xs text-[#64748b] hidden sm:inline">
-                  TARGET: UPDATE EKSPANSI 2026
+                  TARGET: 2026 EXPANSION UPDATE
                 </span>
                 <PixelButton
                   variant="primary"
@@ -384,7 +384,7 @@ export function TrailerSection() {
                   className="text-[8px] px-3 py-1.5"
                   icon="⚔️"
                 >
-                  MAINKAN GAME LIVE
+                  PLAY LIVE GAME
                 </PixelButton>
               </div>
             </div>
@@ -393,16 +393,16 @@ export function TrailerSection() {
             {showRoadmap && (
               <div className="mt-2 p-3 bg-[#0d121c] border border-[#2c394b] animate-fade-in font-outfit text-xs space-y-2">
                 <div className="font-pixel text-[8px] text-[#fde047] uppercase tracking-wider mb-2">
-                  ✦ ROADMAP PRODUKSI TRAILER RESMI ✦
+                  ✦ OFFICIAL TRAILER PRODUCTION ROADMAP ✦
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[#94a3b8]">
                   <div className="flex items-center gap-2 p-2 bg-[#111622] border border-[#1e293b]">
                     <span className="text-[#22c55e]">✓</span>
-                    <span>16-Bit Engine Capture Footage (Selesai)</span>
+                    <span>16-Bit Engine Capture Footage (Complete)</span>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-[#111622] border border-[#1e293b]">
                     <span className="text-[#22c55e]">✓</span>
-                    <span>Boss Encounters Storyboard (Selesai)</span>
+                    <span>Boss Encounters Storyboard (Complete)</span>
                   </div>
                   <div className="flex items-center gap-2 p-2 bg-[#111622] border border-[#1e293b]">
                     <span className="text-[#f59e0b]">⏳</span>

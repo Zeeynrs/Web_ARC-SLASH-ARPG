@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { PixelButton } from '../ui/PixelButton';
 import { playUiClick, playUiHover } from '../../utils/audioSynth';
 
@@ -9,19 +9,32 @@ export function SettingsModal({
   updateSetting,
   onReplayIntro
 }) {
+  useEffect(() => {
+    if (!isOpen) return;
+    document.body.style.overflow = 'hidden';
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
     <div 
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in select-none"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-sm animate-fade-in select-none"
       onClick={onClose}
     >
       <div
-        className="relative w-full max-w-lg bg-[#111622] border-2 border-[#b45309] p-6 shadow-[0_0_30px_rgba(0,0,0,0.9),0_0_15px_rgba(245,158,11,0.2)]"
+        className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-[#111622] border-2 border-[#b45309] shadow-[0_0_30px_rgba(0,0,0,0.9),0_0_15px_rgba(245,158,11,0.2)] overflow-hidden"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className="flex items-center justify-between pb-4 mb-5 border-b-2 border-[#2c394b]">
+        <div className="flex items-center justify-between p-4 sm:p-5 pb-3 border-b-2 border-[#2c394b] shrink-0">
           <div className="flex items-center gap-3">
             <span className="text-xl">⚙️</span>
             <div>
@@ -46,7 +59,7 @@ export function SettingsModal({
         </div>
 
         {/* Settings Sections */}
-        <div className="space-y-6 max-h-[70vh] overflow-y-auto pr-1">
+        <div className="space-y-6 overflow-y-auto flex-1 p-4 sm:p-5">
           {/* Audio Section */}
           <div className="space-y-3">
             <h3 className="font-pixel text-[10px] text-[#38bdf8] uppercase tracking-wider flex items-center gap-2">
@@ -222,7 +235,7 @@ export function SettingsModal({
         </div>
 
         {/* Footer */}
-        <div className="mt-6 pt-4 border-t border-[#2c394b] flex justify-end">
+        <div className="p-4 border-t-2 border-[#2c394b] flex justify-end shrink-0 bg-[#0c1017]">
           <PixelButton variant="primary" size="sm" onClick={onClose}>
             CONFIRM & CLOSE
           </PixelButton>

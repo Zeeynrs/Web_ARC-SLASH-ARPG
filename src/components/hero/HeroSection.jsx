@@ -14,7 +14,7 @@ export function HeroSection({ onExploreWorld, onWatchTrailer }) {
   ];
 
   return (
-    <section id="hero" className="relative pt-24 sm:pt-28 pb-16 px-4 max-w-7xl mx-auto overflow-hidden">
+    <section id="hero" className="relative pt-28 sm:pt-32 pb-16 px-4 max-w-7xl mx-auto overflow-hidden scroll-mt-20 sm:scroll-mt-24">
       {/* Background ambient radial glow */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-b from-[#0284c7]/10 via-[#f59e0b]/5 to-transparent blur-3xl pointer-events-none" />
 
@@ -29,7 +29,7 @@ export function HeroSection({ onExploreWorld, onWatchTrailer }) {
         </div>
 
         {/* Hero Title */}
-        <h1 className="font-pixel text-3xl sm:text-5xl md:text-6xl lg:text-7xl text-[#f8fafc] tracking-wider sm:tracking-widest leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] mb-4">
+        <h1 className="font-pixel text-2xl sm:text-4xl md:text-6xl lg:text-7xl text-[#f8fafc] tracking-wider sm:tracking-widest leading-none drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)] mb-4">
           PARALLEL DUNGEONS
         </h1>
 
@@ -62,7 +62,7 @@ export function HeroSection({ onExploreWorld, onWatchTrailer }) {
             onClick={onWatchTrailer}
             icon="🔒"
           >
-            TRAILER [DISEGEL]
+            TRAILER [SEALED]
           </PixelButton>
 
           <PixelButton

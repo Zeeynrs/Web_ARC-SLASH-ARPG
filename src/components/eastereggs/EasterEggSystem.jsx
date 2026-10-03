@@ -58,6 +58,20 @@ export function EasterEggSystem({ secretTrigger, onClearSecret }) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [konamiProgress]);
 
+  // Handle Escape key and body scroll lock when activeSecret is open
+  useEffect(() => {
+    if (!activeSecret) return;
+    document.body.style.overflow = 'hidden';
+    const handleEsc = (e) => {
+      if (e.key === 'Escape') setActiveSecret(null);
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', handleEsc);
+    };
+  }, [activeSecret]);
+
   // Handle external triggers (e.g. Logo clicks)
   useEffect(() => {
     if (secretTrigger === 'logo') {
@@ -76,11 +90,11 @@ export function EasterEggSystem({ secretTrigger, onClearSecret }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fade-in select-none"
+      className="fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-4 bg-black/85 backdrop-blur-md animate-fade-in select-none"
       onClick={() => setActiveSecret(null)}
     >
       <div
-        className="relative w-full max-w-md bg-[#111622] border-2 border-[#ffd700] p-6 shadow-[0_0_35px_rgba(255,215,0,0.4)] text-center animate-bounce-short"
+        className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-[#111622] border-2 border-[#ffd700] p-5 sm:p-6 shadow-[0_0_35px_rgba(255,215,0,0.4)] text-center animate-bounce-short"
         onClick={(e) => e.stopPropagation()}
       >
         <span className="text-4xl block mb-2">✨ ⚔️ ✨</span>

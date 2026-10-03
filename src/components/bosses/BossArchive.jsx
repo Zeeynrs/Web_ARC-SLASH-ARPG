@@ -23,7 +23,7 @@ export function BossArchive() {
   };
 
   return (
-    <section id="bosses" className="py-20 px-4 max-w-7xl mx-auto">
+    <section id="bosses" className="py-20 px-4 max-w-7xl mx-auto scroll-mt-20 sm:scroll-mt-24">
       {/* Header */}
       <div className="flex flex-col items-center text-center max-w-3xl mx-auto mb-12">
         <div className="inline-flex items-center gap-2 mb-3 px-3 py-1 bg-[#111622] border border-[#ef4444]/40">
@@ -32,7 +32,7 @@ export function BossArchive() {
           </span>
         </div>
 
-        <h2 className="font-pixel text-3xl sm:text-4xl text-[#f8fafc] tracking-widest mb-4">
+        <h2 className="font-pixel text-xl sm:text-3xl md:text-4xl text-[#f8fafc] tracking-wider sm:tracking-widest mb-4">
           ANCIENT GUARDIANS OF THE DEEP
         </h2>
 
@@ -60,7 +60,7 @@ export function BossArchive() {
                   onMouseEnter={playUiHover}
                   className={`px-3.5 py-2 font-pixel text-[9px] tracking-wider transition-all whitespace-nowrap border-2 cursor-pointer flex items-center gap-2 ${
                     isActive
-                      ? 'bg-[#182338] text-[#f8fafc] shadow-[0_0_12px_rgba(245,158,11,0.25)] translate-y-[-2px]'
+                      ? 'bg-[#182338] text-[#f8fafc] shadow-[0_0_12px_rgba(245,158,11,0.25)] scale-[1.02]'
                       : 'bg-[#0f1420] text-[#94a3b8] border-[#2c394b] hover:border-[#3b4b66] hover:text-[#f8fafc]'
                   }`}
                   style={{

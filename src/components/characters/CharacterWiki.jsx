@@ -36,7 +36,7 @@ export function CharacterWiki() {
           <div className="flex items-center gap-3">
             <span className="text-2xl">{hero.icon}</span>
             <div>
-              <h3 className="font-pixel text-base sm:text-lg text-[#f8fafc] tracking-widest uppercase">
+              <h3 className="font-pixel text-xs sm:text-sm md:text-base text-[#f8fafc] tracking-wider sm:tracking-widest uppercase">
                 PARALLEL DUNGEONS CODEX — HERO ARCHIVES
               </h3>
               <span className="font-outfit text-xs text-[#94a3b8]">
@@ -52,8 +52,8 @@ export function CharacterWiki() {
 
         {/* 3-Column Layout: Left (Class List), Center (Pixel Sprite), Right (Data Panel) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-          {/* Left Column: Hero Selectors (3 cols on lg) */}
-          <div className="lg:col-span-3 space-y-3">
+          {/* Left Column: Hero Selectors (4 cols on lg, 3 cols on xl) */}
+          <div className="lg:col-span-4 xl:col-span-3 space-y-3">
             <span className="font-pixel text-[9px] text-[#38bdf8] uppercase tracking-widest block mb-2">
               SELECT CLASS
             </span>
@@ -99,8 +99,8 @@ export function CharacterWiki() {
             </div>
           </div>
 
-          {/* Center Column: Live Pixel Art Hero Canvas (4 cols on lg) */}
-          <div className="lg:col-span-4 flex flex-col items-center justify-center p-4 bg-[#0a0d14] border-2 border-[#2c394b] shadow-inner min-h-[340px]">
+          {/* Center Column: Live Pixel Art Hero Canvas (8 cols on lg, 4 cols on xl) */}
+          <div className="lg:col-span-8 xl:col-span-4 flex flex-col items-center justify-center p-4 bg-[#0a0d14] border-2 border-[#2c394b] shadow-inner min-h-[340px]">
             <div className="w-full flex items-center justify-between px-2 mb-2 font-pixel text-[8px] text-[#64748b]">
               <span>CANVAS 2D SPRITE</span>
               <span className="text-[#38bdf8] uppercase">{hero.name} IDLE</span>
@@ -118,10 +118,10 @@ export function CharacterWiki() {
             </div>
           </div>
 
-          {/* Right Column: Tabbed Information Panel (5 cols on lg) */}
-          <div className="lg:col-span-5 bg-[#0a0d14] border-2 border-[#2c394b] p-4 sm:p-5">
+          {/* Right Column: Tabbed Information Panel (12 cols on lg, 5 cols on xl) */}
+          <div className="lg:col-span-12 xl:col-span-5 bg-[#0a0d14] border-2 border-[#2c394b] p-4 sm:p-5">
             {/* Nav Tabs */}
-            <div className="flex items-center gap-1.5 pb-3 mb-4 border-b border-[#2c394b] overflow-x-auto">
+            <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 pb-3 mb-4 border-b border-[#2c394b] overflow-x-auto">
               {[
                 { id: 'overview', label: 'OVERVIEW' },
                 { id: 'abilities', label: 'ABILITIES' },
@@ -136,7 +136,7 @@ export function CharacterWiki() {
                     setActiveTab(tab.id);
                   }}
                   onMouseEnter={playUiHover}
-                  className={`px-3 py-1.5 font-pixel text-[8.5px] tracking-wider transition-all border cursor-pointer ${
+                  className={`px-3 py-1.5 font-pixel text-[8.5px] tracking-wider transition-all border cursor-pointer whitespace-nowrap ${
                     activeTab === tab.id
                       ? 'bg-[#182030] border-[#f59e0b] text-[#fde047]'
                       : 'bg-transparent border-transparent text-[#94a3b8] hover:text-[#f8fafc]'

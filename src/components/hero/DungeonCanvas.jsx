@@ -4,8 +4,8 @@ import { playSlash } from '../../utils/audioSynth';
 
 export function DungeonCanvas({ onKnightClick }) {
   const canvasRef = useRef(null);
-  const [isSwinging, setIsSwinging] = useState(false);
   const [knightFacing, setKnightFacing] = useState('right');
+  const swingRef = useRef({ active: false, startTime: 0, duration: 460 });
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -113,13 +113,23 @@ export function DungeonCanvas({ onKnightClick }) {
         ctx.fillRect(tx - 2, ty - 7 + Math.sin(now * 0.05) * 2, 4, 6);
       });
 
-      // 3. Central Animated Knight
-      const knightX = width / 2;
-      const knightY = wallH + 45;
+      // 3. Central Animated Knight with smooth sub-frame attack progression
+      let isAttacking = false;
+      let attackProgress = 0;
+      if (swingRef.current.active) {
+        const elapsed = now - swingRef.current.startTime;
+        if (elapsed < swingRef.current.duration) {
+          isAttacking = true;
+          attackProgress = elapsed / swingRef.current.duration;
+        } else {
+          swingRef.current.active = false;
+        }
+      }
 
       drawHeroCanvas(ctx, 'knight', width, height, {
         time,
-        isAttacking: isSwinging,
+        isAttacking,
+        attackProgress,
         facing: knightFacing,
         scale: 3.4,
         hasGlow: true
@@ -147,14 +157,23 @@ export function DungeonCanvas({ onKnightClick }) {
       window.removeEventListener('resize', handleResize);
       if (animId) cancelAnimationFrame(animId);
     };
-  }, [isSwinging, knightFacing]);
+  }, [knightFacing]);
 
   const handleCanvasClick = (e) => {
     playSlash();
-    setIsSwinging(true);
-    // Alternate facing direction
-    setKnightFacing((prev) => (prev === 'right' ? 'left' : 'right'));
-    setTimeout(() => setIsSwinging(false), 300);
+    swingRef.current = {
+      active: true,
+      startTime: Date.now(),
+      duration: 460
+    };
+
+    // Face the click direction instead of flipping arbitrarily
+    const rect = canvasRef.current?.getBoundingClientRect();
+    if (rect) {
+      const clickX = e.clientX - rect.left;
+      setKnightFacing(clickX < rect.width / 2 ? 'left' : 'right');
+    }
+
     if (onKnightClick) onKnightClick();
   };
 
@@ -167,8 +186,8 @@ export function DungeonCanvas({ onKnightClick }) {
       <canvas ref={canvasRef} className="w-full h-full block pixelated" />
 
       {/* Floating Tactical Cue */}
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-[#111622]/85 border border-[#3b4b66] text-[#94a3b8] font-pixel text-[8px] tracking-wider pointer-events-none group-hover:border-[#f59e0b] group-hover:text-[#fde047] transition-all">
-        ⚔️ CLICK CHAMPION TO SWING BLADE
+      <div className="absolute top-3 right-3 px-3 py-1 bg-[#111622]/90 border border-[#3b4b66] text-[#94a3b8] font-pixel text-[8px] tracking-wider pointer-events-none group-hover:border-[#f59e0b] group-hover:text-[#fde047] shadow-md transition-all">
+        ⚔️ CLICK ARENA TO SWING
       </div>
     </div>
   );
