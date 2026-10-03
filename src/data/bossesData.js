@@ -52,6 +52,11 @@ export const BOSSES_DATA = [
       'Abyssal Titan Plate (Tier V)',
       'Echo Shard Catalyst',
       '1,500 Gold Coins'
+    ],
+    actions: [
+      { id: 'sonic', name: 'Sonic Cataclysm', icon: '🔊', badge: 'BEAM', desc: 'Charges ribcage and fires a piercing horizontal acoustic sonic beam with shockwaves.' },
+      { id: 'slam', name: 'Sculk Quake Slam', icon: '💥', badge: 'SMASH', desc: 'Slams both stone fists down, shattering the floor with rising sculk crystals.' },
+      { id: 'roar', name: 'Darkness Roar', icon: '💙', badge: 'ROAR', desc: 'Unhinges jaws with frantic soul palpitations and room-shaking acoustic soundwaves.' }
     ]
   },
   {
@@ -106,6 +111,11 @@ export const BOSSES_DATA = [
       'Voidwalker Edge (Tier V Abyssal)',
       'Shadow Crown of Reflection',
       '3,000 Gold Coins'
+    ],
+    actions: [
+      { id: 'parry', name: 'Parry Riposte', icon: '🛡️⚡', badge: 'COUNTER', desc: 'Forms an octagonal runic barrier that flashes into a lethal counter-thrust.' },
+      { id: 'slash', name: 'Void Cross-Slash', icon: '🗡️', badge: 'SLASH', desc: 'Phases through dimensional rifts leaving dual magenta/violet crescent slashes.' },
+      { id: 'clones', name: 'Mirror Shatter', icon: '🪞', badge: 'CLONES', desc: 'Splits into twin shadowy clones channelling dark void vortex comets.' }
     ]
   },
   {
@@ -153,6 +163,11 @@ export const BOSSES_DATA = [
       'Dragon Tooth Dagger',
       'Fire Drake Crest',
       '800 Gold Coins'
+    ],
+    actions: [
+      { id: 'breath', name: 'Inferno Breath', icon: '🔥', badge: 'FIRE', desc: 'Rears back and spews a raging torrent of draconic fire and flying molten sparks.' },
+      { id: 'meteor', name: 'Magma Meteors', icon: '☄️', badge: 'METEOR', desc: 'Calls down fiery volcanic boulders that explode into lingering magma pools.' },
+      { id: 'buffet', name: 'Wing Buffet', icon: '🌪️', badge: 'GALE', desc: 'Beats colossal wings forward, blasting sweeping fire-wind shockwave arcs.' }
     ]
   },
   {
@@ -193,6 +208,11 @@ export const BOSSES_DATA = [
       'King’s Jeweled Signet',
       'Catacomb Key',
       '400 Gold Coins'
+    ],
+    actions: [
+      { id: 'cleave', name: 'Necrotic Cleave', icon: '⚔️', badge: 'CLEAVE', desc: 'Two-handed greatsword overhead smash with golden ground fractures and shockwaves.' },
+      { id: 'summon', name: 'Summon Archers', icon: '🏹', badge: 'SUMMON', desc: 'Summons two spectral catacomb archers on flanks with glowing phantom bows.' },
+      { id: 'wrath', name: 'Monarch Wrath', icon: '👑', badge: 'WRATH', desc: 'Crown flares with radiant amber halo, laughing chattering jaw, and orbiting bone daggers.' }
     ]
   },
   {
@@ -232,6 +252,11 @@ export const BOSSES_DATA = [
       'Royal Slime Crown',
       'Sticky Slime Shield',
       '200 Gold Coins'
+    ],
+    actions: [
+      { id: 'slam', name: 'Colossal Slam', icon: '🟣', badge: 'SLAM', desc: 'Squashes flat, launches high into the air, and crashes down with giant slime splashes.' },
+      { id: 'mitosis', name: 'Mitosis Split', icon: '🧪', badge: 'SPLIT', desc: 'Divides mass into 2 bouncy royal mini-slimes hopping happily on both sides.' },
+      { id: 'tantrum', name: 'Crown Tantrum', icon: '👑', badge: 'BOUNCE', desc: 'Wild high-speed gelatinous wobble, spinning crown, and flying bubble coins.' }
     ]
   }
 ];

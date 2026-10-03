@@ -814,7 +814,13 @@ function drawAssassinProcedural(ctx, px, py, pw, ph, s, time, isAttacking, facin
  * High-fidelity 16-bit procedural canvas rendering with dynamic lighting, animations, and roar states.
  */
 export function drawBossCanvas(ctx, bossId, width, height, options = {}) {
-  const { time = Date.now() * 0.005, scale = 2.4, isRoaring = false } = options;
+  const {
+    time = Date.now() * 0.005,
+    scale = 2.4,
+    isRoaring = false,
+    action = 'idle',
+    actionProgress = 0
+  } = options;
 
   ctx.clearRect(0, 0, width, height);
   ctx.save();
@@ -824,15 +830,15 @@ export function drawBossCanvas(ctx, bossId, width, height, options = {}) {
   const cy = height / 2 + 15;
 
   if (bossId === 'warden') {
-    drawWardenProcedural(ctx, cx, cy, scale * 1.05, time, isRoaring);
+    drawWardenProcedural(ctx, cx, cy, scale * 1.05, time, isRoaring, action, actionProgress);
   } else if (bossId === 'alter_ego') {
-    drawAlterEgoProcedural(ctx, cx, cy, scale * 1.0, time, isRoaring);
+    drawAlterEgoProcedural(ctx, cx, cy, scale * 1.0, time, isRoaring, action, actionProgress);
   } else if (bossId === 'ancient_dragon') {
-    drawDragonProcedural(ctx, cx, cy, scale * 1.0, time, isRoaring);
+    drawDragonProcedural(ctx, cx, cy, scale * 1.0, time, isRoaring, action, actionProgress);
   } else if (bossId === 'skeleton_king') {
-    drawSkeletonKingProcedural(ctx, cx, cy, scale * 1.05, time, isRoaring);
+    drawSkeletonKingProcedural(ctx, cx, cy, scale * 1.05, time, isRoaring, action, actionProgress);
   } else {
-    drawSlimeKingProcedural(ctx, cx, cy, scale * 1.15, time, isRoaring);
+    drawSlimeKingProcedural(ctx, cx, cy, scale * 1.15, time, isRoaring, action, actionProgress);
   }
 
   ctx.restore();
@@ -841,45 +847,41 @@ export function drawBossCanvas(ctx, bossId, width, height, options = {}) {
 // -----------------------------------------------------------------------------
 // 1. THE WARDEN (Stage 35 - Apex Titan of the Deep Dark)
 // -----------------------------------------------------------------------------
-function drawWardenProcedural(ctx, cx, cy, s, time, isRoaring) {
-  const breathe = Math.sin(time * 2.5) * 2 * s;
-  const heartRate = isRoaring ? 16 : 6;
+function drawWardenProcedural(ctx, cx, cy, s, time, isRoaring, action = 'idle', p = 0) {
+  const isSonic = action === 'sonic';
+  const isSlam = action === 'slam';
+  const isRoarAct = action === 'roar' || isRoaring;
+
+  const breathe = Math.sin(time * 2.2) * 2.2 * s;
+  const heartRate = (isRoarAct || isSonic) ? 20 : 6;
   const heartBeat = (Math.sin(time * heartRate) + 1) * 0.5;
-  const hornVibe = Math.sin(time * 16) * (isRoaring ? 3.5 : 1.5) * s;
+  const hornVibe = Math.sin(time * (isRoarAct ? 30 : 16)) * (isRoarAct ? 4.5 : 1.5) * s;
+  const headScan = Math.sin(time * 1.4) * 3 * s;
 
   // A. Deepslate Crater & Glowing Sculk Fissures
   ctx.save();
-  ctx.fillStyle = 'rgba(2, 6, 23, 0.75)';
+  ctx.fillStyle = 'rgba(2, 6, 23, 0.85)';
   ctx.beginPath();
-  ctx.ellipse(cx, cy + 34 * s, 42 * s, 10 * s, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, cy + 34 * s, 46 * s, 11 * s, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Glowing cyan sculk fractures on the floor
-  ctx.strokeStyle = '#06b6d4';
-  ctx.lineWidth = 1.5 * s;
+  ctx.strokeStyle = (isSlam && p >= 0.4 && p <= 0.8) ? '#22d3ee' : '#06b6d4';
+  ctx.lineWidth = (isSlam && p >= 0.4 && p <= 0.8) ? 2.5 * s : 1.5 * s;
   ctx.beginPath();
-  ctx.moveTo(cx - 36 * s, cy + 34 * s);
+  ctx.moveTo(cx - 38 * s, cy + 34 * s);
   ctx.lineTo(cx - 18 * s, cy + 37 * s);
   ctx.lineTo(cx, cy + 35 * s);
   ctx.lineTo(cx + 22 * s, cy + 38 * s);
-  ctx.lineTo(cx + 38 * s, cy + 33 * s);
+  ctx.lineTo(cx + 40 * s, cy + 33 * s);
   ctx.stroke();
 
-  ctx.strokeStyle = '#22d3ee';
-  ctx.lineWidth = 1 * s;
-  ctx.beginPath();
-  ctx.moveTo(cx - 12 * s, cy + 36 * s);
-  ctx.lineTo(cx - 6 * s, cy + 42 * s);
-  ctx.moveTo(cx + 10 * s, cy + 36 * s);
-  ctx.lineTo(cx + 18 * s, cy + 41 * s);
-  ctx.stroke();
-
-  // Acoustic Shockwave Rings (if roaring or periodic heartbeat)
-  if (isRoaring || heartBeat > 0.8) {
-    const ringRadius = ((time * 35) % 65) * s;
-    const ringAlpha = Math.max(0, 1 - ringRadius / (65 * s));
-    ctx.strokeStyle = `rgba(34, 211, 238, ${ringAlpha * 0.7})`;
-    ctx.lineWidth = 2 * s;
+  // Acoustic Shockwave Rings (Roar / Sonic / Heartbeat)
+  if (isRoarAct || (isSonic && p >= 0.35 && p <= 0.8) || heartBeat > 0.85) {
+    const ringRadius = ((time * 40) % 75) * s;
+    const ringAlpha = Math.max(0, 1 - ringRadius / (75 * s));
+    ctx.strokeStyle = `rgba(34, 211, 238, ${ringAlpha * 0.85})`;
+    ctx.lineWidth = 2.5 * s;
     ctx.beginPath();
     ctx.arc(cx, cy - 8 * s + breathe * 0.5, ringRadius, 0, Math.PI * 2);
     ctx.stroke();
@@ -891,12 +893,11 @@ function drawWardenProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillRect(cx - 20 * s, cy + 12 * s, 14 * s, 22 * s);
   ctx.fillRect(cx + 6 * s, cy + 12 * s, 14 * s, 22 * s);
 
-  // Muscular plate shading
   ctx.fillStyle = '#092237';
   ctx.fillRect(cx - 18 * s, cy + 14 * s, 10 * s, 16 * s);
   ctx.fillRect(cx + 8 * s, cy + 14 * s, 10 * s, 16 * s);
 
-  // Sculk growth on knees & shins
+  // Sculk growth on shins
   ctx.fillStyle = '#0e7490';
   ctx.fillRect(cx - 19 * s, cy + 18 * s, 5 * s, 6 * s);
   ctx.fillRect(cx + 14 * s, cy + 18 * s, 5 * s, 6 * s);
@@ -923,7 +924,7 @@ function drawWardenProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillStyle = '#040d17';
   ctx.fillRect(cx - 24 * s, torsoY + 2 * s, 48 * s, 34 * s);
 
-  // Chiseled rock shoulder boulders
+  // Shoulder Boulders
   ctx.fillStyle = '#0b1f33';
   ctx.fillRect(cx - 29 * s, torsoY + 1 * s, 8 * s, 14 * s);
   ctx.fillRect(cx + 21 * s, torsoY + 1 * s, 8 * s, 14 * s);
@@ -931,89 +932,157 @@ function drawWardenProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillRect(cx - 28 * s, torsoY + 2 * s, 4 * s, 3 * s);
   ctx.fillRect(cx + 24 * s, torsoY + 2 * s, 4 * s, 3 * s);
 
-  // D. Exposed Sculk Soul Ribcage & Beating Soul Core
+  // D. Exposed Sculk Soul Ribcage & Soul Core
   const ribY = torsoY + 8 * s;
-  // Recessed cavity shadow
   ctx.fillStyle = '#020617';
   ctx.fillRect(cx - 16 * s, ribY - 2 * s, 32 * s, 22 * s);
 
-  // Glowing bioluminescent soul center
+  // Glowing soul center (Sonic charge-up glow)
   ctx.save();
+  const chargeMult = (isSonic && p < 0.35) ? (1 + (p / 0.35) * 2) : 1;
   ctx.shadowColor = '#22d3ee';
-  ctx.shadowBlur = 18 * heartBeat * (isRoaring ? 1.5 : 1);
-  ctx.fillStyle = `rgba(6, 182, 212, ${0.75 + heartBeat * 0.25})`;
+  ctx.shadowBlur = (20 * heartBeat * chargeMult);
+  ctx.fillStyle = (isSonic && p < 0.35)
+    ? `rgba(236, 254, 255, ${0.85 + heartBeat * 0.15})`
+    : `rgba(6, 182, 212, ${0.75 + heartBeat * 0.25})`;
   ctx.fillRect(cx - 10 * s, ribY + 2 * s, 20 * s, 14 * s);
   ctx.fillStyle = '#ecfeff';
   ctx.fillRect(cx - 5 * s, ribY + 5 * s, 10 * s, 8 * s);
 
-  // Floating trapped soul wisps inside chest
+  // Floating soul wisps
   const s1X = cx + Math.sin(time * 4) * 5 * s;
   const s1Y = ribY + 6 * s + Math.cos(time * 3) * 2 * s;
   ctx.fillStyle = '#a5f3fc';
   ctx.fillRect(s1X - 2 * s, s1Y, 4 * s, 4 * s);
   ctx.restore();
 
-  // Heavy sculpted deepslate ribs overlapping soul cavity
+  // Rib bones
   ctx.fillStyle = '#0f2942';
   for (let r = 0; r < 4; r++) {
     const ry = ribY + r * 5 * s;
     const rw = (28 - r * 3) * s;
     ctx.fillRect(cx - rw / 2, ry, rw, 2.5 * s);
-    // Rib highlights & edges
     ctx.fillStyle = '#164e63';
     ctx.fillRect(cx - rw / 2, ry, rw, 1 * s);
     ctx.fillStyle = '#0f2942';
   }
 
-  // E. Massive Heavy Arms & Cyan Claws
-  const armSwing = Math.sin(time * 3) * 3 * s;
+  // E. Massive Arms & Claws with dynamic animation
+  let armSwingLeft = Math.sin(time * 3) * 3 * s;
+  let armSwingRight = -armSwingLeft;
+  let armYOffset = 0;
+
+  if (isSlam) {
+    if (p < 0.4) {
+      // Windup: arms raise high
+      armYOffset = -(p / 0.4) * 22 * s;
+      armSwingLeft = 0;
+      armSwingRight = 0;
+    } else if (p < 0.75) {
+      // Smash down
+      armYOffset = 14 * s;
+    } else {
+      // Recovery
+      const rec = (p - 0.75) / 0.25;
+      armYOffset = (1 - rec) * 14 * s;
+    }
+  }
+
   // Left Arm
   ctx.fillStyle = '#071626';
-  ctx.fillRect(cx - 36 * s, torsoY + 4 * s + armSwing, 11 * s, 26 * s);
+  ctx.fillRect(cx - 36 * s, torsoY + 4 * s + armSwingLeft + armYOffset, 11 * s, 26 * s);
   ctx.fillStyle = '#0e7490';
-  ctx.fillRect(cx - 38 * s, torsoY + 22 * s + armSwing, 13 * s, 12 * s);
+  ctx.fillRect(cx - 38 * s, torsoY + 22 * s + armSwingLeft + armYOffset, 13 * s, 12 * s);
   ctx.fillStyle = '#22d3ee';
-  ctx.fillRect(cx - 38 * s, torsoY + 33 * s + armSwing, 3 * s, 5 * s);
-  ctx.fillRect(cx - 33 * s, torsoY + 34 * s + armSwing, 3 * s, 5 * s);
-  ctx.fillRect(cx - 28 * s, torsoY + 33 * s + armSwing, 3 * s, 5 * s);
+  ctx.fillRect(cx - 38 * s, torsoY + 33 * s + armSwingLeft + armYOffset, 3 * s, 5 * s);
+  ctx.fillRect(cx - 33 * s, torsoY + 34 * s + armSwingLeft + armYOffset, 3 * s, 5 * s);
+  ctx.fillRect(cx - 28 * s, torsoY + 33 * s + armSwingLeft + armYOffset, 3 * s, 5 * s);
 
   // Right Arm
   ctx.fillStyle = '#071626';
-  ctx.fillRect(cx + 25 * s, torsoY + 4 * s - armSwing, 11 * s, 26 * s);
+  ctx.fillRect(cx + 25 * s, torsoY + 4 * s + armSwingRight + armYOffset, 11 * s, 26 * s);
   ctx.fillStyle = '#0e7490';
-  ctx.fillRect(cx + 25 * s, torsoY + 22 * s - armSwing, 13 * s, 12 * s);
+  ctx.fillRect(cx + 25 * s, torsoY + 22 * s + armSwingRight + armYOffset, 13 * s, 12 * s);
   ctx.fillStyle = '#22d3ee';
-  ctx.fillRect(cx + 26 * s, torsoY + 33 * s - armSwing, 3 * s, 5 * s);
-  ctx.fillRect(cx + 31 * s, torsoY + 34 * s - armSwing, 3 * s, 5 * s);
-  ctx.fillRect(cx + 36 * s, torsoY + 33 * s - armSwing, 3 * s, 5 * s);
+  ctx.fillRect(cx + 26 * s, torsoY + 33 * s + armSwingRight + armYOffset, 3 * s, 5 * s);
+  ctx.fillRect(cx + 31 * s, torsoY + 34 * s + armSwingRight + armYOffset, 3 * s, 5 * s);
+  ctx.fillRect(cx + 36 * s, torsoY + 33 * s + armSwingRight + armYOffset, 3 * s, 5 * s);
 
-  // F. Eyeless Monolith Head & Horrific Sculk Maw
-  const headY = cy - 44 * s + breathe;
-  ctx.fillStyle = '#0a1d30';
-  ctx.fillRect(cx - 18 * s, headY, 36 * s, 23 * s);
-  ctx.fillStyle = '#040e1a';
-  ctx.fillRect(cx - 16 * s, headY + 2 * s, 32 * s, 19 * s);
-
-  // Chiseled brow ridge
-  ctx.fillStyle = '#0f2d4a';
-  ctx.fillRect(cx - 17 * s, headY + 4 * s, 34 * s, 3 * s);
-
-  // Gaping cavernous mouth cavity
-  const mouthOpen = isRoaring ? 12 * s : 7 * s;
-  ctx.fillStyle = '#020617';
-  ctx.fillRect(cx - 13 * s, headY + 11 * s, 26 * s, mouthOpen);
-
-  // Dual rows of bioluminescent sharp sculk teeth
-  ctx.fillStyle = '#22d3ee';
-  for (let t = -11; t <= 9; t += 4) {
-    ctx.fillRect(cx + t * s, headY + 11 * s, 2 * s, 3 * s);
-    ctx.fillRect(cx + t * s, headY + 11 * s + mouthOpen - 3 * s, 2 * s, 3 * s);
+  // Sculk Slam Impact Crystals & Ground Ruptures
+  if (isSlam && p >= 0.4 && p <= 0.85) {
+    ctx.save();
+    ctx.fillStyle = '#22d3ee';
+    ctx.shadowColor = '#06b6d4';
+    ctx.shadowBlur = 15;
+    for (let spk = -2; spk <= 2; spk++) {
+      const spkX = cx + spk * 18 * s;
+      const spkH = (18 - Math.abs(spk) * 4) * s;
+      ctx.beginPath();
+      ctx.moveTo(spkX - 4 * s, cy + 34 * s);
+      ctx.lineTo(spkX, cy + 34 * s - spkH);
+      ctx.lineTo(spkX + 4 * s, cy + 34 * s);
+      ctx.closePath();
+      ctx.fill();
+    }
+    // Radial Quake Ring
+    const qR = ((p - 0.4) / 0.45) * 65 * s;
+    ctx.strokeStyle = 'rgba(34, 211, 238, 0.7)';
+    ctx.lineWidth = 3 * s;
+    ctx.beginPath();
+    ctx.ellipse(cx, cy + 34 * s, qR, qR * 0.3, 0, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
   }
 
-  // Cyan soul breath vapor puffing from mouth
-  if (isRoaring || Math.sin(time * 3) > 0.2) {
-    ctx.fillStyle = 'rgba(34, 211, 238, 0.35)';
-    ctx.fillRect(cx - 6 * s, headY + 13 * s + mouthOpen, 12 * s, 4 * s);
+  // F. Eyeless Monolith Head & Maw
+  const headY = cy - 44 * s + breathe;
+  ctx.fillStyle = '#0a1d30';
+  ctx.fillRect(cx - 18 * s + headScan * 0.3, headY, 36 * s, 23 * s);
+  ctx.fillStyle = '#040e1a';
+  ctx.fillRect(cx - 16 * s + headScan * 0.3, headY + 2 * s, 32 * s, 19 * s);
+
+  // Brow ridge
+  ctx.fillStyle = '#0f2d4a';
+  ctx.fillRect(cx - 17 * s + headScan * 0.3, headY + 4 * s, 34 * s, 3 * s);
+
+  // Gaping cavernous mouth cavity
+  let mouthOpen = 7 * s;
+  if (isRoarAct) mouthOpen = 14 * s;
+  if (isSonic && p >= 0.35 && p <= 0.8) mouthOpen = 18 * s;
+
+  ctx.fillStyle = '#020617';
+  ctx.fillRect(cx - 13 * s + headScan * 0.3, headY + 11 * s, 26 * s, mouthOpen);
+
+  // Sharp sculk teeth
+  ctx.fillStyle = '#22d3ee';
+  for (let t = -11; t <= 9; t += 4) {
+    ctx.fillRect(cx + t * s + headScan * 0.3, headY + 11 * s, 2 * s, 3 * s);
+    ctx.fillRect(cx + t * s + headScan * 0.3, headY + 11 * s + mouthOpen - 3 * s, 2 * s, 3 * s);
+  }
+
+  // Acoustic Sonic Cataclysm Piercing Laser Beam!
+  if (isSonic && p >= 0.35 && p <= 0.8) {
+    ctx.save();
+    const beamY = headY + 11 * s + mouthOpen * 0.5;
+    // Outer cyan aura
+    ctx.shadowColor = '#06b6d4';
+    ctx.shadowBlur = 24;
+    ctx.fillStyle = 'rgba(34, 211, 238, 0.45)';
+    ctx.fillRect(cx - 5 * s, beamY - 14 * s, 160 * s, 28 * s);
+    // Core white beam
+    ctx.fillStyle = '#ecfeff';
+    ctx.fillRect(cx - 5 * s, beamY - 7 * s, 160 * s, 14 * s);
+
+    // Sonic soundwave discs along the beam
+    for (let sw = 1; sw <= 4; sw++) {
+      const discX = cx + sw * 32 * s;
+      ctx.strokeStyle = '#22d3ee';
+      ctx.lineWidth = 2.5 * s;
+      ctx.beginPath();
+      ctx.ellipse(discX, beamY, 8 * s, 24 * s, 0, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+    ctx.restore();
   }
 
   // G. Resonating Branching Sculk Horns
@@ -1022,7 +1091,6 @@ function drawWardenProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillRect(cx - 25 * s + hornVibe, headY - 10 * s, 8 * s, 13 * s);
   ctx.fillRect(cx - 31 * s + hornVibe, headY - 18 * s, 8 * s, 10 * s);
   ctx.fillRect(cx - 37 * s + hornVibe, headY - 26 * s, 7 * s, 9 * s);
-  // Left Horn Sensor Nodes (Cyan Glow)
   ctx.save();
   ctx.shadowColor = '#06b6d4';
   ctx.shadowBlur = 12;
@@ -1036,7 +1104,6 @@ function drawWardenProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillRect(cx + 17 * s - hornVibe, headY - 10 * s, 8 * s, 13 * s);
   ctx.fillRect(cx + 23 * s - hornVibe, headY - 18 * s, 8 * s, 10 * s);
   ctx.fillRect(cx + 30 * s - hornVibe, headY - 26 * s, 7 * s, 9 * s);
-  // Right Horn Sensor Nodes
   ctx.save();
   ctx.shadowColor = '#06b6d4';
   ctx.shadowBlur = 12;
@@ -1049,20 +1116,24 @@ function drawWardenProcedural(ctx, cx, cy, s, time, isRoaring) {
 // -----------------------------------------------------------------------------
 // 2. ALTER EGO / APEX MIRROR (Stage 22 & Stage 50 True Nemesis)
 // -----------------------------------------------------------------------------
-function drawAlterEgoProcedural(ctx, cx, cy, s, time, isRoaring) {
+function drawAlterEgoProcedural(ctx, cx, cy, s, time, isRoaring, action = 'idle', p = 0) {
+  const isParry = action === 'parry';
+  const isSlash = action === 'slash';
+  const isClones = action === 'clones';
+
   const pulse = Math.sin(time * 3) * 4 * s;
-  const floatY = Math.sin(time * 2.5) * 3 * s;
-  const glitch = isRoaring ? (Math.random() - 0.5) * 6 * s : Math.sin(time * 12) * 1.5 * s;
+  const floatY = Math.sin(time * 2.5) * 4 * s;
+  const glitch = (isSlash || isRoaring) ? (Math.random() - 0.5) * 8 * s : Math.sin(time * 12) * 1.5 * s;
 
   // A. Swirling Corrupted Void Rift Vortex
   ctx.save();
-  const vGrad = ctx.createRadialGradient(cx, cy + 24 * s, 4 * s, cx, cy + 24 * s, 34 * s);
+  const vGrad = ctx.createRadialGradient(cx, cy + 24 * s, 4 * s, cx, cy + 24 * s, 36 * s);
   vGrad.addColorStop(0, 'rgba(88, 28, 135, 0.85)');
   vGrad.addColorStop(0.5, 'rgba(30, 10, 60, 0.7)');
   vGrad.addColorStop(1, 'transparent');
   ctx.fillStyle = vGrad;
   ctx.beginPath();
-  ctx.ellipse(cx, cy + 24 * s, 32 * s + pulse, 9 * s, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, cy + 24 * s, 34 * s + pulse, 9 * s, 0, 0, Math.PI * 2);
   ctx.fill();
 
   // Spiral void tendrils
@@ -1070,7 +1141,7 @@ function drawAlterEgoProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.lineWidth = 1.5 * s;
   for (let i = 0; i < 3; i++) {
     const angle = time * 2 + (i * Math.PI * 2) / 3;
-    const ax = cx + Math.cos(angle) * (20 * s + pulse * 0.5);
+    const ax = cx + Math.cos(angle) * (22 * s + pulse * 0.5);
     const ay = cy + 24 * s + Math.sin(angle) * 6 * s;
     ctx.beginPath();
     ctx.moveTo(cx, cy + 24 * s);
@@ -1079,18 +1150,27 @@ function drawAlterEgoProcedural(ctx, cx, cy, s, time, isRoaring) {
   }
   ctx.restore();
 
-  // B. Apex Mirror Chromatic Glitch Phantom (Stage 50 True Mirror effect)
-  if (isRoaring || Math.sin(time * 4) > 0.3) {
-    ctx.save();
-    ctx.globalAlpha = 0.28;
-    ctx.fillStyle = '#22d3ee';
-    ctx.fillRect(cx - 14 * s - 4 * s, cy - 14 * s + floatY, 26 * s, 30 * s);
-    ctx.fillStyle = '#ec4899';
-    ctx.fillRect(cx - 14 * s + 4 * s, cy - 14 * s + floatY, 26 * s, 30 * s);
-    ctx.restore();
+  // B. Shadow Clones (Mirror Shatter mode)
+  if (isClones) {
+    [-38, 38].forEach((cloneOffset, idx) => {
+      ctx.save();
+      ctx.globalAlpha = 0.65;
+      const cloneColor = idx === 0 ? '#22d3ee' : '#ec4899';
+      ctx.fillStyle = cloneColor;
+      ctx.shadowColor = cloneColor;
+      ctx.shadowBlur = 12;
+      // Silhouette clone
+      ctx.fillRect(cx + cloneOffset * s - 10 * s, cy - 14 * s + floatY, 20 * s, 28 * s);
+      ctx.beginPath();
+      ctx.ellipse(cx + cloneOffset * s, cy - 24 * s + floatY, 9 * s, 8 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Clone blade
+      ctx.fillRect(cx + cloneOffset * s + 12 * s, cy - 28 * s + floatY, 4 * s, 36 * s);
+      ctx.restore();
+    });
   }
 
-  // C. Flowing Tattered Shadow Cape (Billowing in the void wind)
+  // C. Flowing Tattered Shadow Cape
   const capeWave = Math.sin(time * 3.5) * 6 * s;
   ctx.fillStyle = '#2e1065';
   ctx.beginPath();
@@ -1120,118 +1200,171 @@ function drawAlterEgoProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillRect(cx - 8 * s, cy + 22 * s + floatY, 6 * s, 4 * s);
   ctx.fillRect(cx + 3 * s, cy + 22 * s + floatY, 6 * s, 4 * s);
 
-  // E. Corrupted Plate Armor & Crimson Core Sash
+  // E. Corrupted Plate Armor & Core
   ctx.fillStyle = '#09090b';
   ctx.fillRect(cx - 12 * s + glitch * 0.3, cy - 10 * s + floatY, 24 * s, 24 * s);
   ctx.fillStyle = '#180828';
   ctx.fillRect(cx - 10 * s + glitch * 0.3, cy - 8 * s + floatY, 20 * s, 20 * s);
 
-  // Neon violet rune chasuble lines
+  // Neon violet rune lines
   ctx.fillStyle = '#c084fc';
   ctx.fillRect(cx - 2 * s, cy - 8 * s + floatY, 4 * s, 16 * s);
-  ctx.fillStyle = '#f43f5e'; // Crimson Core buckle
+  ctx.fillStyle = '#f43f5e';
   ctx.fillRect(cx - 4 * s, cy + 6 * s + floatY, 8 * s, 4 * s);
 
-  // F. Abyssal Cowl & Piercing Heterochromatic Stare
+  // F. Abyssal Cowl & Eyes
   const headY = cy - 28 * s + floatY;
   ctx.fillStyle = '#09090b';
   ctx.beginPath();
   ctx.ellipse(cx + glitch * 0.5, headY + 8 * s, 14 * s, 11 * s, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Cowl front opening (pitch black void)
+  // Cowl opening
   ctx.fillStyle = '#020617';
   ctx.fillRect(cx - 10 * s, headY + 5 * s, 20 * s, 9 * s);
 
-  // Left Eye: Piercing Cyan (#22d3ee)
+  // Left Eye: Piercing Cyan
   ctx.save();
   ctx.shadowColor = '#06b6d4';
   ctx.shadowBlur = 10;
   ctx.fillStyle = '#22d3ee';
   ctx.fillRect(cx - 7 * s, headY + 7 * s, 4.5 * s, 3 * s);
-  // Left eye trail wisp
   ctx.fillRect(cx - 9 * s, headY + 5 * s, 2 * s, 2 * s);
   ctx.restore();
 
-  // Right Eye: Blazing Magenta (#f43f5e)
+  // Right Eye: Blazing Magenta
   ctx.save();
   ctx.shadowColor = '#f43f5e';
   ctx.shadowBlur = 10;
   ctx.fillStyle = '#f43f5e';
   ctx.fillRect(cx + 2.5 * s, headY + 7 * s, 4.5 * s, 3 * s);
-  // Right eye trail wisp
   ctx.fillRect(cx + 7 * s, headY + 5 * s, 2 * s, 2 * s);
   ctx.restore();
 
-  // G. Wielding The Corrupted Void Greatblade
+  // G. Wielding Corrupted Void Greatblade
   ctx.save();
-  const swordX = cx + 18 * s;
-  const swordY = cy + floatY;
+  const swordX = cx + (isParry ? 0 : 18 * s);
+  const swordY = cy + floatY + (isParry ? -6 * s : 0);
   ctx.translate(swordX, swordY);
-  ctx.rotate(0.35 + Math.sin(time * 2.5) * 0.1);
+  ctx.rotate(isParry ? -0.75 : (0.35 + Math.sin(time * 2.5) * 0.1));
 
-  // Obsidian Blade Core
+  // Blade Core
   ctx.fillStyle = '#0f0217';
   ctx.fillRect(0, -32 * s, 6 * s, 42 * s);
-  // Glowing Violet Inscription
   ctx.fillStyle = '#c084fc';
   ctx.fillRect(1.5 * s, -28 * s, 3 * s, 34 * s);
-  // Hot pink / magenta razor edge
   ctx.fillStyle = '#f43f5e';
   ctx.fillRect(5 * s, -30 * s, 2 * s, 38 * s);
-  // Jagged Barb Spine
-  ctx.fillStyle = '#0f0217';
-  ctx.beginPath();
-  ctx.moveTo(0, -24 * s);
-  ctx.lineTo(-6 * s, -20 * s);
-  ctx.lineTo(0, -16 * s);
-  ctx.closePath();
-  ctx.fill();
 
-  // Crossguard & Ruby Pommel
+  // Crossguard
   ctx.fillStyle = '#a855f7';
   ctx.fillRect(-6 * s, 8 * s, 18 * s, 4 * s);
   ctx.fillStyle = '#dc2626';
   ctx.fillRect(1 * s, 14 * s, 4 * s, 4 * s);
   ctx.restore();
+
+  // H. Special Action Overlays:
+  // 1. Parry Stance Octagonal Barrier
+  if (isParry) {
+    ctx.save();
+    ctx.shadowColor = '#22d3ee';
+    ctx.shadowBlur = 18;
+    ctx.strokeStyle = '#c084fc';
+    ctx.lineWidth = 3 * s;
+    ctx.beginPath();
+    ctx.arc(cx, cy + floatY, 32 * s, 0, Math.PI * 2);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#22d3ee';
+    ctx.lineWidth = 1.5 * s;
+    ctx.strokeRect(cx - 24 * s, cy + floatY - 24 * s, 48 * s, 48 * s);
+
+    // Floating Parry text banner
+    ctx.fillStyle = 'rgba(2, 6, 23, 0.9)';
+    ctx.fillRect(cx - 44 * s, headY - 18 * s, 88 * s, 12 * s);
+    ctx.strokeStyle = '#f43f5e';
+    ctx.lineWidth = 1 * s;
+    ctx.strokeRect(cx - 44 * s, headY - 18 * s, 88 * s, 12 * s);
+    ctx.fillStyle = '#fde047';
+    ctx.font = `bold ${Math.floor(7 * s)}px monospace`;
+    ctx.textAlign = 'center';
+    ctx.fillText('⚡ PARRY STANCE! ⚡', cx, headY - 9 * s);
+
+    if (p > 0.45) {
+      // Counter Flash
+      ctx.fillStyle = 'rgba(34, 211, 238, 0.35)';
+      ctx.fillRect(cx - 60 * s, cy - 60 * s, 120 * s, 120 * s);
+    }
+    ctx.restore();
+  }
+
+  // 2. Void Cross-Slash X-Crescents
+  if (isSlash && p >= 0.25 && p <= 0.8) {
+    ctx.save();
+    ctx.shadowColor = '#ec4899';
+    ctx.shadowBlur = 20;
+
+    // Magenta Crescent Slash
+    ctx.strokeStyle = '#f43f5e';
+    ctx.lineWidth = 5 * s;
+    ctx.beginPath();
+    ctx.arc(cx, cy + floatY, 46 * s, -0.75 * Math.PI, 0.25 * Math.PI);
+    ctx.stroke();
+
+    // Cyan/Violet Crescent Slash
+    ctx.strokeStyle = '#22d3ee';
+    ctx.lineWidth = 4 * s;
+    ctx.beginPath();
+    ctx.arc(cx, cy + floatY, 46 * s, 0.25 * Math.PI, 1.25 * Math.PI);
+    ctx.stroke();
+
+    // Crossing sparks
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(cx - 2 * s, cy + floatY - 2 * s, 4 * s, 4 * s);
+    ctx.restore();
+  }
 }
 
 // -----------------------------------------------------------------------------
 // 3. ANCIENT DRAGON (Stage 20 - Sovereign of the Molten Core)
 // -----------------------------------------------------------------------------
-function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring) {
+function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring, action = 'idle', p = 0) {
+  const isBreath = action === 'breath';
+  const isMeteor = action === 'meteor';
+  const isBuffet = action === 'buffet';
+
   const breathe = Math.sin(time * 2.2) * 2.5 * s;
-  const wingSpeed = isRoaring ? 7 : 4;
-  const wingFlap = Math.sin(time * wingSpeed) * (isRoaring ? 14 : 9) * s;
+  const wingSpeed = isBuffet ? 14 : (isRoaring ? 7 : 4);
+  const wingFlap = Math.sin(time * wingSpeed) * (isBuffet ? 18 : (isRoaring ? 14 : 9)) * s;
   const tailSway = Math.sin(time * 3) * 8 * s;
 
   // A. Volcanic Basalt Perch & Floating Embers
   ctx.save();
-  ctx.fillStyle = 'rgba(15, 6, 8, 0.75)';
+  ctx.fillStyle = 'rgba(15, 6, 8, 0.8)';
   ctx.beginPath();
-  ctx.ellipse(cx, cy + 32 * s, 46 * s, 9 * s, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, cy + 32 * s, 48 * s, 9 * s, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Molten magma fissures in the ground
-  ctx.strokeStyle = '#ea580c';
+  // Magma fissures
+  ctx.strokeStyle = (isBreath || isMeteor) ? '#ef4444' : '#ea580c';
   ctx.lineWidth = 2 * s;
   ctx.beginPath();
-  ctx.moveTo(cx - 38 * s, cy + 32 * s);
+  ctx.moveTo(cx - 40 * s, cy + 32 * s);
   ctx.lineTo(cx - 18 * s, cy + 35 * s);
   ctx.lineTo(cx + 8 * s, cy + 32 * s);
-  ctx.lineTo(cx + 36 * s, cy + 36 * s);
+  ctx.lineTo(cx + 38 * s, cy + 36 * s);
   ctx.stroke();
 
   // Floating volcanic sparks & embers
-  for (let i = 0; i < 5; i++) {
-    const sparkX = cx + ((i * 18 - 36) + Math.sin(time * 3 + i) * 6) * s;
-    const sparkY = cy + 24 * s - ((time * 22 + i * 16) % 55) * s;
+  for (let i = 0; i < 6; i++) {
+    const sparkX = cx + ((i * 16 - 40) + Math.sin(time * 3 + i) * 6) * s;
+    const sparkY = cy + 24 * s - ((time * 24 + i * 14) % 60) * s;
     ctx.fillStyle = i % 2 === 0 ? '#fbbf24' : '#ef4444';
-    ctx.fillRect(sparkX, sparkY, 2 * s, 2 * s);
+    ctx.fillRect(sparkX, sparkY, 2.5 * s, 2.5 * s);
   }
   ctx.restore();
 
-  // B. Sinuous Barbed Tail with Scythe Blade Tip
+  // B. Sinuous Barbed Tail
   ctx.save();
   ctx.strokeStyle = '#180709';
   ctx.lineWidth = 8 * s;
@@ -1242,25 +1375,11 @@ function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.quadraticCurveTo(cx - 62 * s + tailSway, cy + 30 * s, cx - 74 * s + tailSway * 1.2, cy + 22 * s);
   ctx.stroke();
 
-  // Crimson scale core on tail
   ctx.strokeStyle = '#b91c1c';
   ctx.lineWidth = 4 * s;
   ctx.stroke();
 
-  // Dorsal spikes along tail
-  for (let sp = 1; sp <= 3; sp++) {
-    const spX = cx - 22 * s - sp * 14 * s + tailSway * (sp / 4);
-    const spY = cy + 14 * s + sp * 4 * s;
-    ctx.fillStyle = '#0f0204';
-    ctx.beginPath();
-    ctx.moveTo(spX - 2 * s, spY);
-    ctx.lineTo(spX - 5 * s, spY - 9 * s);
-    ctx.lineTo(spX + 3 * s, spY);
-    ctx.closePath();
-    ctx.fill();
-  }
-
-  // Barbed volcanic scythe tip
+  // Barbed tip
   const tipX = cx - 74 * s + tailSway * 1.2;
   const tipY = cy + 22 * s;
   ctx.fillStyle = '#140507';
@@ -1291,14 +1410,13 @@ function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillStyle = '#1c080b';
   ctx.fillRect(cx - 24 * s, cy + 12 * s, 14 * s, 20 * s);
   ctx.fillRect(cx + 8 * s, cy + 12 * s, 14 * s, 20 * s);
-  // Razor sharp ivory talons
   ctx.fillStyle = '#f8fafc';
   ctx.fillRect(cx - 27 * s, cy + 30 * s, 4 * s, 4 * s);
   ctx.fillRect(cx - 21 * s, cy + 30 * s, 4 * s, 4 * s);
   ctx.fillRect(cx + 7 * s, cy + 30 * s, 4 * s, 4 * s);
   ctx.fillRect(cx + 13 * s, cy + 30 * s, 4 * s, 4 * s);
 
-  // E. Armored Obsidian Torso & Molten Core Underbelly
+  // E. Obsidian Torso & Molten Core Underbelly
   const torsoY = cy - 14 * s + breathe * 0.4;
   ctx.fillStyle = '#1c080b';
   ctx.beginPath();
@@ -1308,24 +1426,17 @@ function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring) {
   // Breathing molten underbelly
   ctx.save();
   ctx.shadowColor = '#f59e0b';
-  ctx.shadowBlur = 14;
-  ctx.fillStyle = '#ea580c';
+  ctx.shadowBlur = (isBreath ? 26 : 14);
+  ctx.fillStyle = isBreath ? '#f97316' : '#ea580c';
   ctx.fillRect(cx - 14 * s, torsoY + 6 * s, 20 * s, 14 * s);
-  ctx.fillStyle = '#fbbf24';
+  ctx.fillStyle = isBreath ? '#ffffff' : '#fbbf24';
   ctx.fillRect(cx - 10 * s, torsoY + 9 * s, 12 * s, 8 * s);
   ctx.restore();
-
-  // Segmented obsidian scale ridges
-  ctx.fillStyle = '#3b0d12';
-  for (let sc = 0; sc < 3; sc++) {
-    ctx.fillRect(cx - 16 * s, torsoY + 4 * s + sc * 5 * s, 24 * s, 2 * s);
-  }
 
   // F. Foreground Articulated Wing
   ctx.save();
   ctx.translate(cx + 6 * s, cy - 8 * s);
   ctx.rotate(0.15 + wingFlap * 0.02);
-  // Wing bone struts
   ctx.fillStyle = '#180709';
   ctx.beginPath();
   ctx.moveTo(0, 0);
@@ -1335,7 +1446,7 @@ function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.closePath();
   ctx.fill();
 
-  // Tattered Crimson Webbing Membrane
+  // Webbing Membrane
   ctx.fillStyle = '#991b1b';
   ctx.beginPath();
   ctx.moveTo(0, 0);
@@ -1350,14 +1461,16 @@ function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.stroke();
   ctx.restore();
 
-  // G. Horned Draconic Head & Fiery Maw
-  const headY = cy - 30 * s + breathe;
+  // G. Horned Draconic Head & Jaws
+  let headY = cy - 30 * s + breathe;
+  if (isBreath) headY -= 6 * s; // Rears head back
+
   ctx.fillStyle = '#1c080b';
   ctx.fillRect(cx - 16 * s, headY, 32 * s, 18 * s);
   ctx.fillStyle = '#3b0d12';
   ctx.fillRect(cx - 14 * s, headY + 2 * s, 28 * s, 14 * s);
 
-  // Backward Sweeping Obsidian Horns
+  // Horns
   ctx.fillStyle = '#0f0204';
   ctx.beginPath();
   ctx.moveTo(cx - 16 * s, headY);
@@ -1373,38 +1486,102 @@ function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.closePath();
   ctx.fill();
 
-  // Burning Golden Reptile Eyes
+  // Eyes
   ctx.fillStyle = '#fde047';
   ctx.fillRect(cx - 10 * s, headY + 4 * s, 6 * s, 3 * s);
   ctx.fillRect(cx + 4 * s, headY + 4 * s, 6 * s, 3 * s);
-  ctx.fillStyle = '#000000'; // Slit pupil
+  ctx.fillStyle = '#000000';
   ctx.fillRect(cx - 7 * s, headY + 4 * s, 2 * s, 3 * s);
   ctx.fillRect(cx + 7 * s, headY + 4 * s, 2 * s, 3 * s);
 
-  // Jaws & Razor Fangs
+  // Maw & Fangs
+  const mouthOpen = isBreath ? 14 * s : (isRoaring ? 9 * s : 5 * s);
   ctx.fillStyle = '#0f0204';
-  ctx.fillRect(cx - 12 * s, headY + 12 * s, 24 * s, isRoaring ? 9 * s : 5 * s);
+  ctx.fillRect(cx - 12 * s, headY + 12 * s, 24 * s, mouthOpen);
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(cx - 10 * s, headY + 12 * s, 2 * s, 3 * s);
   ctx.fillRect(cx - 4 * s, headY + 12 * s, 2 * s, 3 * s);
   ctx.fillRect(cx + 2 * s, headY + 12 * s, 2 * s, 3 * s);
   ctx.fillRect(cx + 8 * s, headY + 12 * s, 2 * s, 3 * s);
 
-  // Breathing Fire / Roaring Inferno Stream
-  if (isRoaring || Math.sin(time * 3) > 0.4) {
+  // H. Distinct Animations:
+  // 1. Inferno Flamethrower Breath (Full torrent)
+  if (isBreath && p >= 0.25 && p <= 0.85) {
     ctx.save();
-    ctx.shadowColor = '#ff6d00';
-    ctx.shadowBlur = 18;
+    ctx.shadowColor = '#f97316';
+    ctx.shadowBlur = 24;
+
+    // Outer flame cone
     ctx.fillStyle = '#ef4444';
     ctx.beginPath();
-    ctx.moveTo(cx - 6 * s, headY + 14 * s);
-    ctx.lineTo(cx - 24 * s, headY + 32 * s);
-    ctx.lineTo(cx + 24 * s, headY + 32 * s);
-    ctx.lineTo(cx + 6 * s, headY + 14 * s);
+    ctx.moveTo(cx + 10 * s, headY + 14 * s);
+    ctx.lineTo(cx + 120 * s, headY - 10 * s);
+    ctx.lineTo(cx + 130 * s, headY + 48 * s);
     ctx.closePath();
     ctx.fill();
+
+    // Inner fiery core
     ctx.fillStyle = '#fbbf24';
-    ctx.fillRect(cx - 4 * s, headY + 15 * s, 8 * s, 10 * s);
+    ctx.beginPath();
+    ctx.moveTo(cx + 12 * s, headY + 15 * s);
+    ctx.lineTo(cx + 95 * s, headY + 2 * s);
+    ctx.lineTo(cx + 105 * s, headY + 36 * s);
+    ctx.closePath();
+    ctx.fill();
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(cx + 12 * s, headY + 16 * s, 25 * s, 10 * s);
+
+    // Flying fire spark particles
+    for (let f = 0; f < 8; f++) {
+      const fx = cx + (25 + f * 12) * s;
+      const fy = headY + (10 + Math.sin(time * 8 + f) * 16) * s;
+      ctx.fillStyle = '#fde047';
+      ctx.fillRect(fx, fy, 4 * s, 4 * s);
+    }
+    ctx.restore();
+  }
+
+  // 2. Magma Meteor Rain
+  if (isMeteor && p >= 0.3 && p <= 0.85) {
+    ctx.save();
+    [-25, 5, 35].forEach((mX, idx) => {
+      const dropP = Math.min(1, Math.max(0, (p - 0.3) / 0.5));
+      const mY = -20 * s + dropP * (cy + 45 * s);
+      // Meteor boulder
+      ctx.shadowColor = '#ea580c';
+      ctx.shadowBlur = 18;
+      ctx.fillStyle = '#1c080b';
+      ctx.beginPath();
+      ctx.arc(cx + mX * s, mY, 7 * s, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#f97316';
+      ctx.fillRect(cx + mX * s - 4 * s, mY - 4 * s, 8 * s, 8 * s);
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(cx + mX * s - 2 * s, mY - 2 * s, 4 * s, 4 * s);
+
+      // Tail
+      ctx.strokeStyle = 'rgba(239, 68, 68, 0.7)';
+      ctx.lineWidth = 3 * s;
+      ctx.beginPath();
+      ctx.moveTo(cx + mX * s, mY);
+      ctx.lineTo(cx + (mX - 10) * s, mY - 20 * s);
+      ctx.stroke();
+    });
+    ctx.restore();
+  }
+
+  // 3. Wing Buffet Gale Arcs
+  if (isBuffet && p >= 0.2 && p <= 0.8) {
+    ctx.save();
+    ctx.strokeStyle = 'rgba(251, 191, 36, 0.8)';
+    ctx.lineWidth = 3 * s;
+    for (let w = 1; w <= 3; w++) {
+      const gX = cx + (w * 24 - 10) * s;
+      ctx.beginPath();
+      ctx.arc(gX, cy - 5 * s, 28 * s, -0.4 * Math.PI, 0.4 * Math.PI);
+      ctx.stroke();
+    }
     ctx.restore();
   }
 }
@@ -1412,24 +1589,28 @@ function drawDragonProcedural(ctx, cx, cy, s, time, isRoaring) {
 // -----------------------------------------------------------------------------
 // 4. SKELETON KING (Stage 10 - Monarch of the Crypt)
 // -----------------------------------------------------------------------------
-function drawSkeletonKingProcedural(ctx, cx, cy, s, time, isRoaring) {
+function drawSkeletonKingProcedural(ctx, cx, cy, s, time, isRoaring, action = 'idle', p = 0) {
+  const isCleave = action === 'cleave';
+  const isSummon = action === 'summon';
+  const isWrath = action === 'wrath' || isRoaring;
+
   const rattle = Math.sin(time * 3) * 1.5 * s;
   const floatMist = Math.sin(time * 2) * 3 * s;
+  const crownHover = Math.sin(time * 2.5) * 2.5 * s;
 
-  // A. Crypt Flagstones & Ethereal Mist
+  // A. Crypt Flagstones & Ground Mist
   ctx.save();
-  ctx.fillStyle = 'rgba(15, 23, 42, 0.7)';
+  ctx.fillStyle = 'rgba(15, 23, 42, 0.75)';
   ctx.beginPath();
-  ctx.ellipse(cx, cy + 30 * s, 38 * s, 8 * s, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, cy + 30 * s, 42 * s, 8 * s, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Swirling tomb amber ground mist
   ctx.fillStyle = 'rgba(245, 158, 11, 0.18)';
   ctx.beginPath();
-  ctx.ellipse(cx + floatMist, cy + 28 * s, 42 * s, 6 * s, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx + floatMist, cy + 28 * s, 44 * s, 6 * s, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Fallen ancient skull relic on floor
+  // Fallen skull relic
   ctx.fillStyle = '#cbd5e1';
   ctx.fillRect(cx - 30 * s, cy + 24 * s, 6 * s, 5 * s);
   ctx.fillStyle = '#0f172a';
@@ -1452,35 +1633,34 @@ function drawSkeletonKingProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.closePath();
   ctx.fill();
 
-  // Golden Ermine Border Trim on Mantle
   ctx.strokeStyle = '#f59e0b';
   ctx.lineWidth = 1.5 * s;
   ctx.stroke();
 
-  // C. Weathered Bone Legs & Clavicle
+  // C. Weathered Bone Legs
   ctx.fillStyle = '#e2e8f0';
   ctx.fillRect(cx - 8 * s, cy + 14 * s, 4 * s, 16 * s);
   ctx.fillRect(cx + 4 * s, cy + 14 * s, 4 * s, 16 * s);
   ctx.fillStyle = '#64748b';
-  ctx.fillRect(cx - 8 * s, cy + 20 * s, 4 * s, 2 * s); // Knee
+  ctx.fillRect(cx - 8 * s, cy + 20 * s, 4 * s, 2 * s);
   ctx.fillRect(cx + 4 * s, cy + 20 * s, 4 * s, 2 * s);
 
-  // D. Intricate Skeletal Ribcage & Necromantic Soul Flame
+  // D. Skeletal Ribcage & Soul Flame Heart
   const spineY = cy - 8 * s;
-  ctx.fillStyle = '#94a3b8'; // Vertebrae
+  ctx.fillStyle = '#94a3b8';
   ctx.fillRect(cx - 2 * s, spineY, 4 * s, 22 * s);
 
-  // Pulsing Amber Soul Heart inside the ribs
+  // Amber Heart Core
   ctx.save();
   ctx.shadowColor = '#f59e0b';
-  ctx.shadowBlur = 14 * (isRoaring ? 1.6 : 1);
+  ctx.shadowBlur = (isWrath ? 24 : 14);
   ctx.fillStyle = '#fbbf24';
   ctx.fillRect(cx - 4 * s + rattle * 0.3, spineY + 4 * s, 8 * s, 8 * s);
   ctx.fillStyle = '#fef08a';
   ctx.fillRect(cx - 2 * s + rattle * 0.3, spineY + 6 * s, 4 * s, 4 * s);
   ctx.restore();
 
-  // Sculpted Bone Ribs
+  // Ribs
   ctx.fillStyle = '#f8fafc';
   for (let r = 0; r < 4; r++) {
     const ry = spineY + r * 4.5 * s;
@@ -1494,30 +1674,46 @@ function drawSkeletonKingProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillStyle = '#dc2626';
   ctx.fillRect(cx - 3 * s, spineY - 1 * s, 6 * s, 5 * s);
 
-  // E. Royal Crypt Greatsword (Resting into stone floor)
+  // E. Royal Crypt Greatsword
   ctx.save();
-  const swordX = cx + 16 * s + rattle * 0.5;
-  const swordY = cy + 2 * s;
-  ctx.translate(swordX, swordY);
+  let swordAngle = 0;
+  let swordTransX = cx + 16 * s;
+  let swordTransY = cy + 2 * s;
+
+  if (isCleave) {
+    if (p < 0.4) {
+      // Windup overhead
+      swordTransX = cx;
+      swordTransY = cy - 22 * s;
+      swordAngle = -2.1;
+    } else if (p < 0.75) {
+      // Smashed down
+      swordTransX = cx + 6 * s;
+      swordTransY = cy + 18 * s;
+      swordAngle = 0.8;
+    }
+  }
+
+  ctx.translate(swordTransX, swordTransY);
+  ctx.rotate(swordAngle);
   ctx.fillStyle = '#cbd5e1';
   ctx.fillRect(0, -22 * s, 5 * s, 42 * s);
-  ctx.fillStyle = '#fbbf24'; // Glowing Necromantic Runes
+  ctx.fillStyle = '#fbbf24';
   ctx.fillRect(1.5 * s, -18 * s, 2 * s, 32 * s);
-  // Crossguard
   ctx.fillStyle = '#d97706';
   ctx.fillRect(-6 * s, -22 * s, 17 * s, 3.5 * s);
-  ctx.fillStyle = '#f8fafc'; // Skull Pommel
+  ctx.fillStyle = '#f8fafc';
   ctx.fillRect(0, -28 * s, 5 * s, 5 * s);
   ctx.restore();
 
-  // F. Weathered Ivory Monarch Skull
+  // F. Weathered Ivory Skull & Crown
   const headY = cy - 28 * s;
   ctx.fillStyle = '#f8fafc';
   ctx.fillRect(cx - 12 * s, headY, 24 * s, 18 * s);
-  ctx.fillStyle = '#cbd5e1'; // Cranial shading
+  ctx.fillStyle = '#cbd5e1';
   ctx.fillRect(cx - 10 * s, headY + 1 * s, 20 * s, 4 * s);
 
-  // Hollow Eye Sockets with Ethereal Spectral Flames
+  // Eye Sockets
   ctx.fillStyle = '#020617';
   ctx.fillRect(cx - 9 * s, headY + 5 * s, 6 * s, 6 * s);
   ctx.fillRect(cx + 3 * s, headY + 5 * s, 6 * s, 6 * s);
@@ -1525,77 +1721,167 @@ function drawSkeletonKingProcedural(ctx, cx, cy, s, time, isRoaring) {
   // Burning Amber Eye Wisps
   ctx.save();
   ctx.shadowColor = '#fbbf24';
-  ctx.shadowBlur = 12;
+  ctx.shadowBlur = 14;
   ctx.fillStyle = '#fde047';
   ctx.fillRect(cx - 7 * s, headY + 6 * s, 3 * s, 4 * s);
   ctx.fillRect(cx + 5 * s, headY + 6 * s, 3 * s, 4 * s);
-  if (isRoaring) {
-    ctx.fillRect(cx - 8 * s, headY + 3 * s, 2 * s, 2 * s);
-    ctx.fillRect(cx + 7 * s, headY + 3 * s, 2 * s, 2 * s);
+  if (isWrath) {
+    ctx.fillRect(cx - 8 * s, headY + 3 * s, 3 * s, 3 * s);
+    ctx.fillRect(cx + 7 * s, headY + 3 * s, 3 * s, 3 * s);
   }
   ctx.restore();
 
-  // Grinning Jaw with Inlaid Gold Molar
+  // Jaw
+  const jawDrop = isWrath ? Math.sin(time * 18) * 3 * s + 3 * s : 0;
   ctx.fillStyle = '#0f172a';
-  ctx.fillRect(cx - 8 * s, headY + 12 * s, 16 * s, 4 * s);
+  ctx.fillRect(cx - 8 * s, headY + 12 * s + jawDrop, 16 * s, 4 * s);
   ctx.fillStyle = '#f8fafc';
   for (let t = -7; t <= 5; t += 3) {
-    ctx.fillRect(cx + t * s, headY + 12 * s, 2 * s, 2 * s);
+    ctx.fillRect(cx + t * s, headY + 12 * s + jawDrop, 2 * s, 2 * s);
   }
-  ctx.fillStyle = '#fbbf24'; // Gold tooth
-  ctx.fillRect(cx - 1 * s, headY + 12 * s, 2 * s, 2 * s);
+  ctx.fillStyle = '#fbbf24';
+  ctx.fillRect(cx - 1 * s, headY + 12 * s + jawDrop, 2 * s, 2 * s);
 
-  // G. 5-Pointed Ornate Gold Monarch Crown
+  // 5-Pointed Ornate Gold Monarch Crown
+  ctx.save();
+  if (isWrath) {
+    ctx.shadowColor = '#fbbf24';
+    ctx.shadowBlur = 25;
+  }
   ctx.fillStyle = '#f59e0b';
-  ctx.fillRect(cx - 13 * s, headY - 8 * s, 26 * s, 8 * s);
-  // Crown points
-  ctx.fillRect(cx - 13 * s, headY - 14 * s, 5 * s, 6 * s);
-  ctx.fillRect(cx - 5 * s, headY - 17 * s, 4 * s, 9 * s);
-  ctx.fillRect(cx + 2 * s, headY - 17 * s, 4 * s, 9 * s);
-  ctx.fillRect(cx + 8 * s, headY - 14 * s, 5 * s, 6 * s);
+  ctx.fillRect(cx - 13 * s, headY - 8 * s + crownHover, 26 * s, 8 * s);
+  ctx.fillRect(cx - 13 * s, headY - 14 * s + crownHover, 5 * s, 6 * s);
+  ctx.fillRect(cx - 5 * s, headY - 17 * s + crownHover, 4 * s, 9 * s);
+  ctx.fillRect(cx + 2 * s, headY - 17 * s + crownHover, 4 * s, 9 * s);
+  ctx.fillRect(cx + 8 * s, headY - 14 * s + crownHover, 5 * s, 6 * s);
 
-  // Inlaid Royal Rubies
   ctx.fillStyle = '#dc2626';
-  ctx.fillRect(cx - 11 * s, headY - 6 * s, 3 * s, 4 * s);
-  ctx.fillRect(cx - 2 * s, headY - 7 * s, 4 * s, 5 * s);
-  ctx.fillRect(cx + 8 * s, headY - 6 * s, 3 * s, 4 * s);
+  ctx.fillRect(cx - 11 * s, headY - 6 * s + crownHover, 3 * s, 4 * s);
+  ctx.fillRect(cx - 2 * s, headY - 7 * s + crownHover, 4 * s, 5 * s);
+  ctx.fillRect(cx + 8 * s, headY - 6 * s + crownHover, 3 * s, 4 * s);
+  ctx.restore();
+
+  // G. Distinct Combat Animations:
+  // 1. Necrotic Cleave Arc
+  if (isCleave && p >= 0.4 && p <= 0.8) {
+    ctx.save();
+    ctx.shadowColor = '#fbbf24';
+    ctx.shadowBlur = 22;
+    ctx.strokeStyle = '#f59e0b';
+    ctx.lineWidth = 6 * s;
+    ctx.beginPath();
+    ctx.arc(cx + 12 * s, cy + 18 * s, 52 * s, -0.6 * Math.PI, 0.4 * Math.PI);
+    ctx.stroke();
+
+    ctx.strokeStyle = '#fef08a';
+    ctx.lineWidth = 2.5 * s;
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  // 2. Summon Archer Phantoms
+  if (isSummon && p >= 0.25 && p <= 0.85) {
+    [-42, 42].forEach((arcX) => {
+      ctx.save();
+      // Summoning circle
+      ctx.strokeStyle = '#f59e0b';
+      ctx.lineWidth = 1.5 * s;
+      ctx.beginPath();
+      ctx.ellipse(cx + arcX * s, cy + 28 * s, 16 * s, 5 * s, 0, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Spectral Archer
+      ctx.globalAlpha = 0.75;
+      ctx.fillStyle = '#fef08a';
+      ctx.fillRect(cx + arcX * s - 4 * s, cy + 6 * s, 8 * s, 18 * s);
+      ctx.fillRect(cx + arcX * s - 3 * s, cy, 6 * s, 6 * s); // head
+      // Bow
+      ctx.strokeStyle = '#fbbf24';
+      ctx.lineWidth = 2 * s;
+      ctx.beginPath();
+      ctx.arc(cx + arcX * s + 6 * s, cy + 12 * s, 9 * s, -0.4 * Math.PI, 0.4 * Math.PI);
+      ctx.stroke();
+      ctx.restore();
+    });
+  }
+
+  // 3. Monarch Wrath Orbiting Daggers
+  if (isWrath) {
+    ctx.save();
+    for (let d = 0; d < 4; d++) {
+      const dAngle = time * 5 + (d * Math.PI) / 2;
+      const dx = cx + Math.cos(dAngle) * 36 * s;
+      const dy = cy - 8 * s + Math.sin(dAngle) * 20 * s;
+      ctx.fillStyle = '#fde047';
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 10;
+      ctx.fillRect(dx - 2 * s, dy - 6 * s, 4 * s, 12 * s);
+    }
+    ctx.restore();
+  }
 }
 
 // -----------------------------------------------------------------------------
 // 5. SLIME KING (Stage 5 - Gelatinous Throne Monarch)
 // -----------------------------------------------------------------------------
-function drawSlimeKingProcedural(ctx, cx, cy, s, time, isRoaring) {
-  const wobbleSpeed = isRoaring ? 6 : 3.5;
-  const wobbleX = Math.sin(time * wobbleSpeed) * (isRoaring ? 8 : 4.5) * s;
-  const wobbleY = Math.cos(time * wobbleSpeed) * (isRoaring ? 7 : 3.5) * s;
-  const crownLag = Math.sin(time * wobbleSpeed - 0.4) * 3 * s;
+function drawSlimeKingProcedural(ctx, cx, cy, s, time, isRoaring, action = 'idle', p = 0) {
+  const isSlam = action === 'slam';
+  const isMitosis = action === 'mitosis';
+  const isTantrum = action === 'tantrum' || isRoaring;
 
-  // A. Viscous Purple Ground Puddle & Ripples
+  const wobbleSpeed = isTantrum ? 24 : (isRoaring ? 6 : 3.5);
+  let wobbleX = Math.sin(time * wobbleSpeed) * (isTantrum ? 9 : 4.5) * s;
+  let wobbleY = Math.cos(time * wobbleSpeed) * (isTantrum ? 8 : 3.5) * s;
+  const crownLag = Math.sin(time * wobbleSpeed - 0.4) * (isTantrum ? 8 : 3) * s;
+
+  let bodyScaleY = 1;
+  let bodyScaleX = 1;
+  let bodyYOffset = 0;
+
+  if (isSlam) {
+    if (p < 0.28) {
+      // Squash before jump
+      bodyScaleY = 0.35;
+      bodyScaleX = 1.45;
+      bodyYOffset = 14 * s;
+    } else if (p < 0.55) {
+      // Leap high in the air off-screen
+      const jumpP = (p - 0.28) / 0.27;
+      bodyYOffset = -Math.sin(jumpP * Math.PI) * 90 * s;
+      bodyScaleY = 1.4;
+      bodyScaleX = 0.75;
+    } else if (p < 0.8) {
+      // Slam down
+      bodyScaleY = 0.45;
+      bodyScaleX = 1.4;
+      bodyYOffset = 12 * s;
+    }
+  }
+
+  // A. Purple Ground Puddle
   ctx.save();
-  ctx.fillStyle = 'rgba(112, 26, 117, 0.4)';
+  ctx.fillStyle = 'rgba(112, 26, 117, 0.45)';
   ctx.beginPath();
-  ctx.ellipse(cx, cy + 22 * s, 36 * s + wobbleX, 9 * s - wobbleY * 0.3, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx, cy + 22 * s, 38 * s + wobbleX, 9 * s - wobbleY * 0.3, 0, 0, Math.PI * 2);
   ctx.fill();
 
-  // Droplet splatters on floor
+  // Droplet splatters
   ctx.fillStyle = '#9333ea';
   ctx.beginPath();
   ctx.arc(cx - 34 * s, cy + 22 * s, 3 * s, 0, Math.PI * 2);
   ctx.arc(cx + 36 * s, cy + 21 * s, 4 * s, 0, Math.PI * 2);
-  ctx.arc(cx - 22 * s, cy + 26 * s, 2 * s, 0, Math.PI * 2);
-  ctx.arc(cx + 24 * s, cy + 26 * s, 3 * s, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 
-  // B. Translucent Gelatinous Outer Body
+  // B. Translucent Gelatinous Body
   ctx.save();
   ctx.shadowColor = '#c084fc';
-  ctx.shadowBlur = 16 * (isRoaring ? 1.5 : 1);
+  ctx.shadowBlur = 18;
   ctx.fillStyle = '#9333ea';
 
-  const rx = 32 * s + wobbleX;
-  const ry = 26 * s - wobbleY;
-  const bodyY = cy + wobbleY * 0.5;
+  const rx = (32 * s + wobbleX) * bodyScaleX;
+  const ry = (26 * s - wobbleY) * bodyScaleY;
+  const bodyY = cy + wobbleY * 0.5 + bodyYOffset;
 
   ctx.beginPath();
   ctx.moveTo(cx - rx * 1.05, bodyY + ry * 0.85);
@@ -1606,28 +1892,26 @@ function drawSlimeKingProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fill();
   ctx.restore();
 
-  // C. Inner Curiosities Suspended in Gelatin (Skull, Coins, Nucleus)
-  // 1. Pulsing Nucleus Orb
+  // C. Inner Suspended Curiosities
+  // Nucleus
   ctx.save();
   ctx.fillStyle = '#c084fc';
   ctx.beginPath();
-  ctx.ellipse(cx - 2 * s, bodyY + 4 * s, 14 * s, 11 * s, 0, 0, Math.PI * 2);
+  ctx.ellipse(cx - 2 * s, bodyY + 4 * s, 14 * s * bodyScaleX, 11 * s * bodyScaleY, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.fillStyle = '#f3e8ff';
   ctx.beginPath();
   ctx.arc(cx - 2 * s, bodyY + 4 * s, 5 * s, 0, Math.PI * 2);
   ctx.fill();
 
-  // 2. Trapped Swallowed Gold Coins
+  // Gold coins
   ctx.fillStyle = '#f59e0b';
   ctx.beginPath();
   ctx.ellipse(cx - 16 * s, bodyY + 8 * s, 5 * s, 4 * s, 0.4, 0, Math.PI * 2);
   ctx.ellipse(cx + 14 * s, bodyY + 11 * s, 4 * s, 3.5 * s, -0.3, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = '#fde68a';
-  ctx.fillRect(cx - 17 * s, bodyY + 7 * s, 2 * s, 2 * s);
 
-  // 3. Trapped Adventurer Ivory Skull
+  // Adventurer skull
   ctx.fillStyle = '#f1f5f9';
   ctx.fillRect(cx + 8 * s, bodyY - 4 * s, 7 * s, 6 * s);
   ctx.fillStyle = '#475569';
@@ -1635,73 +1919,94 @@ function drawSlimeKingProcedural(ctx, cx, cy, s, time, isRoaring) {
   ctx.fillRect(cx + 12 * s, bodyY - 2 * s, 2 * s, 2 * s);
   ctx.restore();
 
-  // D. 3D Glossy Specular Highlights & Internal Bubbles
+  // D. Glossy Specular Highlights
   ctx.fillStyle = 'rgba(255, 255, 255, 0.55)';
   ctx.beginPath();
   ctx.ellipse(cx + rx * 0.35, bodyY - ry * 0.65, rx * 0.35, ry * 0.2, 0.2, 0, Math.PI * 2);
   ctx.fill();
 
-  // Bubbles
-  ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-  ctx.beginPath();
-  ctx.arc(cx - rx * 0.45, bodyY - ry * 0.3, 2.5 * s, 0, Math.PI * 2);
-  ctx.arc(cx + rx * 0.55, bodyY - ry * 0.1, 2 * s, 0, Math.PI * 2);
-  ctx.arc(cx - rx * 0.6, bodyY + ry * 0.3, 3 * s, 0, Math.PI * 2);
-  ctx.fill();
-
-  // E. Expressive Monarch Slime Face
+  // E. Face
   const eyeY = bodyY - ry * 0.2;
   const eyeSize = 6 * s;
-  // White eyeball bases
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(cx - 13 * s, eyeY, eyeSize, eyeSize + 2 * s);
   ctx.fillRect(cx + 7 * s, eyeY, eyeSize, eyeSize + 2 * s);
-  // Dark Purple pupils
   ctx.fillStyle = '#2e1065';
   ctx.fillRect(cx - 10 * s, eyeY + 2 * s, 3.5 * s, 4 * s);
   ctx.fillRect(cx + 9 * s, eyeY + 2 * s, 3.5 * s, 4 * s);
-  // Eye glints
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(cx - 11 * s, eyeY + 1 * s, 2 * s, 2 * s);
   ctx.fillRect(cx + 8 * s, eyeY + 1 * s, 2 * s, 2 * s);
 
-  // Smirking Monarch Mouth
-  ctx.fillStyle = '#3b0764';
-  ctx.beginPath();
-  ctx.moveTo(cx - 6 * s, eyeY + 11 * s);
-  ctx.quadraticCurveTo(cx, eyeY + 14 * s, cx + 6 * s, eyeY + 10 * s);
-  ctx.lineWidth = 2 * s;
-  ctx.stroke();
-
-  // F. 5-Pointed Ornate Gold Slime Crown (Wobbling with inertia lag)
+  // F. Slime Crown
   const crownY = bodyY - ry - 10 * s;
   ctx.save();
   ctx.translate(cx + crownLag * 0.5, crownY);
   ctx.rotate(crownLag * 0.04);
-
-  // Red velvet inner cap
   ctx.fillStyle = '#991b1b';
   ctx.fillRect(-12 * s, -4 * s, 24 * s, 10 * s);
-
-  // Solid gold crown rim
   ctx.fillStyle = '#f59e0b';
   ctx.fillRect(-14 * s, 0, 28 * s, 7 * s);
-
-  // 5 Crown Points
   ctx.fillRect(-14 * s, -7 * s, 5 * s, 7 * s);
   ctx.fillRect(-6 * s, -11 * s, 4 * s, 11 * s);
-  ctx.fillRect(-1 * s, -13 * s, 4 * s, 13 * s); // Highest center point
+  ctx.fillRect(-1 * s, -13 * s, 4 * s, 13 * s);
   ctx.fillRect(4 * s, -11 * s, 4 * s, 11 * s);
   ctx.fillRect(9 * s, -7 * s, 5 * s, 7 * s);
-
-  // Polished gold highlights
-  ctx.fillStyle = '#fef08a';
-  ctx.fillRect(-13 * s, 1 * s, 26 * s, 2 * s);
-
-  // Central gleaming ruby
   ctx.fillStyle = '#ef4444';
   ctx.fillRect(-2 * s, 1 * s, 4 * s, 4 * s);
-  ctx.fillStyle = '#fecaca';
-  ctx.fillRect(-1 * s, 1.5 * s, 1.5 * s, 1.5 * s);
   ctx.restore();
+
+  // G. Distinct Animations:
+  // 1. Slime Slam Splatter Waves
+  if (isSlam && p >= 0.55 && p <= 0.85) {
+    ctx.save();
+    ctx.fillStyle = '#c084fc';
+    ctx.shadowColor = '#a855f7';
+    ctx.shadowBlur = 15;
+    for (let sp = 0; sp < 10; sp++) {
+      const splatX = cx + (Math.sin(sp * 1.5) * 48) * s;
+      const splatY = cy + 24 * s - Math.abs(Math.cos(sp * 2)) * 26 * s;
+      ctx.beginPath();
+      ctx.arc(splatX, splatY, 4 * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
+
+  // 2. Mitosis Mini Slimes
+  if (isMitosis && p >= 0.25 && p <= 0.85) {
+    [-40, 40].forEach((mX) => {
+      const hopY = Math.abs(Math.sin(time * 8)) * 10 * s;
+      ctx.save();
+      ctx.fillStyle = '#a855f7';
+      ctx.beginPath();
+      ctx.ellipse(cx + mX * s, cy + 22 * s - hopY, 12 * s, 10 * s, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // Mini eyes
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(cx + mX * s - 4 * s, cy + 18 * s - hopY, 2 * s, 3 * s);
+      ctx.fillRect(cx + mX * s + 2 * s, cy + 18 * s - hopY, 2 * s, 3 * s);
+      // Mini crown
+      ctx.fillStyle = '#fbbf24';
+      ctx.fillRect(cx + mX * s - 5 * s, cy + 10 * s - hopY, 10 * s, 3 * s);
+      ctx.restore();
+    });
+  }
+
+  // 3. Tantrum Coin Shower
+  if (isTantrum) {
+    ctx.save();
+    for (let c = 0; c < 5; c++) {
+      const cAngle = time * 6 + c * 1.2;
+      const cX = cx + Math.cos(cAngle) * 35 * s;
+      const cY = bodyY + Math.sin(cAngle) * 22 * s;
+      ctx.fillStyle = '#fde047';
+      ctx.shadowColor = '#f59e0b';
+      ctx.shadowBlur = 8;
+      ctx.beginPath();
+      ctx.arc(cX, cY, 3.5 * s, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
 }

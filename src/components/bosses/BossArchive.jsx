@@ -2,24 +2,30 @@ import React, { useState } from 'react';
 import { BOSSES_DATA } from '../../data/bossesData';
 import { PixelCard } from '../ui/PixelCard';
 import { PixelBadge } from '../ui/PixelBadge';
-import { PixelButton } from '../ui/PixelButton';
 import { PixelBossRenderer } from './PixelBossRenderer';
-import { playUiClick, playUiHover, playBossRoar } from '../../utils/audioSynth';
+import { playUiClick, playUiHover } from '../../utils/audioSynth';
 
 export function BossArchive() {
   const [selectedBossId, setSelectedBossId] = useState('warden');
   const [isScreenShaking, setIsScreenShaking] = useState(false);
+  const [activeAction, setActiveAction] = useState('idle');
 
   const boss = BOSSES_DATA.find((b) => b.id === selectedBossId) || BOSSES_DATA[0];
 
   const handleSelectBoss = (id) => {
     playUiClick();
     setSelectedBossId(id);
+    setActiveAction('idle');
   };
 
   const handleRoar = () => {
     setIsScreenShaking(true);
-    setTimeout(() => setIsScreenShaking(false), 350);
+    setTimeout(() => setIsScreenShaking(false), 380);
+  };
+
+  const handleTriggerAction = (actionId) => {
+    playUiClick();
+    setActiveAction(actionId);
   };
 
   return (
@@ -37,7 +43,7 @@ export function BossArchive() {
         </h2>
 
         <p className="font-outfit text-sm sm:text-base text-[#94a3b8] max-w-xl">
-          Brutal encounter mechanics, predictive projectile telegraphs, and unforgiving damage. Study their attack phases or perish in the catacombs.
+          Brutal encounter mechanics, predictive projectile telegraphs, and unforgiving damage. Study their unique combat animation phases or perish in the catacombs.
         </p>
       </div>
 
@@ -90,17 +96,55 @@ export function BossArchive() {
                 </span>
               </div>
 
-              {/* Procedural Animated Boss Sprite Canvas */}
-              <div className="py-2">
+              {/* Procedural Animated Boss Sprite Canvas with Dynamic Phase Support */}
+              <div className="py-2 w-full flex justify-center">
                 <PixelBossRenderer
                   bossId={boss.id}
-                  scale={2.6}
+                  scale={2.5}
                   onRoar={handleRoar}
+                  activeAction={activeAction}
+                  onActionComplete={() => setActiveAction('idle')}
+                  actions={boss.actions || []}
                 />
               </div>
 
+              {/* Interactive Combat Action Selector Buttons */}
+              <div className="w-full mt-2 pt-3 border-t border-[#1e293b]">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-pixel text-[8px] text-[#38bdf8] uppercase tracking-wider flex items-center gap-1.5">
+                    <span>⚔️</span> SIGNATURE ATTACKS & ANIMATIONS
+                  </span>
+                  <span className="font-pixel text-[7.5px] text-[#94a3b8]">
+                    {activeAction === 'idle' ? 'CLICK TO TEST' : 'ATTACKING...'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-1.5">
+                  {(boss.actions || []).map((action) => {
+                    const isCurrent = activeAction === action.id;
+                    return (
+                      <button
+                        key={action.id}
+                        type="button"
+                        onClick={() => handleTriggerAction(action.id)}
+                        onMouseEnter={playUiHover}
+                        className={`px-2 py-2 font-pixel text-[7.5px] tracking-wider border transition-all flex flex-col items-center justify-center gap-1 text-center cursor-pointer ${
+                          isCurrent
+                            ? 'bg-[#182338] text-[#fde047] border-[#fbbf24] shadow-[0_0_12px_rgba(251,191,36,0.35)] scale-[1.02]'
+                            : 'bg-[#111622] text-[#cbd5e1] border-[#2c394b] hover:border-[#38bdf8] hover:text-[#f8fafc] hover:bg-[#161f30]'
+                        }`}
+                        title={action.desc}
+                      >
+                        <span className="text-sm">{action.icon}</span>
+                        <span className="truncate w-full leading-tight">{action.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
               {/* HP Bar */}
-              <div className="w-full space-y-1.5 mt-3 pt-3 border-t border-[#1e293b]">
+              <div className="w-full space-y-1.5 mt-4 pt-3 border-t border-[#1e293b]">
                 <div className="flex justify-between items-center font-pixel text-[9px]">
                   <span className="text-[#cbd5e1]">MAX HEALTH</span>
                   <span className="text-[#ef4444] font-bold">{boss.hp.toLocaleString()} HP</span>
@@ -141,27 +185,41 @@ export function BossArchive() {
                   <span>⚔️</span> COMBAT MECHANICS & TELEGRAPHS
                 </h4>
                 <div className="space-y-2.5">
-                  {boss.mechanics.map((m, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3 bg-[#0a0e17] border border-[#2c394b] hover:border-[#38bdf8] transition-colors"
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base">{m.icon}</span>
-                          <span className="font-pixel text-[10px] text-[#f8fafc]">
-                            {m.name}
-                          </span>
+                  {boss.mechanics.map((m, idx) => {
+                    const matchingAction = (boss.actions || [])[idx];
+                    return (
+                      <div
+                        key={idx}
+                        onClick={() => {
+                          if (matchingAction) handleTriggerAction(matchingAction.id);
+                        }}
+                        className="p-3 bg-[#0a0e17] border border-[#2c394b] hover:border-[#38bdf8] transition-colors cursor-pointer group"
+                        title={matchingAction ? `Click to preview ${matchingAction.name} animation!` : undefined}
+                      >
+                        <div className="flex items-center justify-between mb-1">
+                          <div className="flex items-center gap-2">
+                            <span className="text-base group-hover:scale-110 transition-transform">{m.icon}</span>
+                            <span className="font-pixel text-[10px] text-[#f8fafc] group-hover:text-[#38bdf8] transition-colors">
+                              {m.name}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {matchingAction && (
+                              <span className="font-pixel text-[7.5px] text-[#f59e0b] opacity-80 group-hover:opacity-100">
+                                [PREVIEW ⚡]
+                              </span>
+                            )}
+                            <PixelBadge variant="mana" size="xs">
+                              {m.type}
+                            </PixelBadge>
+                          </div>
                         </div>
-                        <PixelBadge variant="mana" size="xs">
-                          {m.type}
-                        </PixelBadge>
+                        <p className="font-outfit text-xs text-[#94a3b8] leading-relaxed">
+                          {m.desc}
+                        </p>
                       </div>
-                      <p className="font-outfit text-xs text-[#94a3b8] leading-relaxed">
-                        {m.desc}
-                      </p>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
 
